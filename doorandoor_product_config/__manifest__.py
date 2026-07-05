@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Product Config",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.0.1",
     "category": "Sales",
     "summary": "Precio adicional por variante aplicado automaticamente en factura",
     "description": """
@@ -92,6 +92,12 @@ Control de versiones
 - `18.0.1.0.0`: version inicial del modulo. Se agrega precio adicional
   por variante y aplicacion automatica en `account.move.line` usando el
   precio base del producto plantilla.
+
+- `18.0.1.0.1`: se agrega selector de variantes con icono en las lineas
+  de factura y un acceso rapido en el producto para gestionar precios de
+  variantes. Esta version permite abrir un formulario emergente desde la
+  linea de factura, escoger la variante final y aplicar automaticamente
+  el precio configurado.
     """,
     "author": "Hanoi Calvo Fernandez (doorandoor)",
     "website": "https://doorandoor.com",
@@ -100,8 +106,10 @@ Control de versiones
         "product",
     ],
     "data": [
+        "security/ir.model.access.csv",
         "views/product_views.xml",
         "views/account_move_views.xml",
+        "views/ddpc_variant_selector_views.xml",
     ],
     "installable": True,
     "application": False,

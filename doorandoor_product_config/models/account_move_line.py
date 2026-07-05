@@ -60,6 +60,33 @@ class AccountMoveLine(models.Model):
                 continue
             line.price_unit = line._ddpc_get_base_price() + line.product_id.ddpc_variant_extra_price
 
+    def action_open_ddpc_variant_selector(self):
+        self.ensure_one()
+        if not self.move_id or self.move_id.move_type not in ("out_invoice", "out_refund"):
+            return False
+
+        product_template = self.product_id.product_tmpl_id
+        if not product_template:
+            product_template = self.env["product.template"].search([], limit=1)
+        if not product_template:
+            return False
+
+        wizard = self.env["ddpc.variant.selector"].create(
+            {
+                "move_line_id": self.id,
+                "product_template_id": product_template.id,
+                "variant_id": self.product_id.id or product_template.product_variant_id.id,
+            }
+        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Configure Variant",
+            "res_model": "ddpc.variant.selector",
+            "view_mode": "form",
+            "res_id": wizard.id,
+            "target": "new",
+        }
+
     @api.onchange("product_id")
     def _onchange_product_id_ddpc_variant_price(self):
         self._ddpc_apply_variant_price()

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_ddpc_variant_selector_form" model="ir.ui.view">
+            <field name="name">ddpc.variant.selector.form</field>
+            <field name="model">ddpc.variant.selector</field>
+            <field name="arch" type="xml">
+                <form string="Configure Variant">
+                    <sheet>
+                        <group>
+                            <field name="move_line_id" invisible="1"/>
+                            <field name="product_template_id"/>
+                            <field name="variant_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                        <group string="Pricing">
+                            <field name="variant_extra_price" readonly="1"/>
+                            <field name="configured_price" readonly="1"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="action_apply_variant" string="Apply" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

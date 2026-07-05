@@ -15,6 +15,12 @@ class TestVariantPriceInvoice(TransactionCase):
                 "attribute_id": cls.attribute.id,
             }
         )
+        cls.attribute_value_small = cls.env["product.attribute.value"].create(
+            {
+                "name": "Pequena",
+                "attribute_id": cls.attribute.id,
+            }
+        )
         cls.product_template = cls.env["product.template"].create(
             {
                 "name": "Producto Configurable DDPC",
@@ -26,13 +32,16 @@ class TestVariantPriceInvoice(TransactionCase):
                         0,
                         {
                             "attribute_id": cls.attribute.id,
-                            "value_ids": [(6, 0, [cls.attribute_value.id])],
+                            "value_ids": [(6, 0, [cls.attribute_value.id, cls.attribute_value_small.id])],
                         },
                     )
                 ],
             }
         )
-        cls.variant = cls.product_template.product_variant_ids[:1]
+        cls.variant = cls.product_template.product_variant_ids.filtered(
+            lambda product: cls.attribute_value in product.product_template_attribute_value_ids.product_attribute_value_id
+        )[:1]
+        cls.variant_small = (cls.product_template.product_variant_ids - cls.variant)[:1]
 
     def test_invoice_line_uses_base_price_plus_variant_extra(self):
         self.variant.ddpc_variant_extra_price = 25.0
@@ -86,3 +95,29 @@ class TestVariantPriceInvoice(TransactionCase):
 
         self.assertEqual(line.price_unit, 100.0)
         self.assertEqual(line.ddpc_variant_extra_price, 0.0)
+
+    def test_variant_selector_applies_variant_and_price_on_invoice_line(self):
+        self.variant_small.ddpc_variant_extra_price = 15.0
+        move = self.env["account.move"].create(
+            {
+                "move_type": "out_invoice",
+                "partner_id": self.partner.id,
+                "invoice_date": fields.Date.today(),
+            }
+        )
+        line = self.env["account.move.line"].create(
+            {
+                "move_id": move.id,
+                "name": "Linea configurable",
+                "quantity": 1.0,
+            }
+        )
+
+        wizard_action = line.action_open_ddpc_variant_selector()
+        wizard = self.env["ddpc.variant.selector"].browse(wizard_action["res_id"])
+        wizard.product_template_id = self.product_template
+        wizard.variant_id = self.variant_small
+        wizard.action_apply_variant()
+
+        self.assertEqual(line.product_id, self.variant_small)
+        self.assertEqual(line.price_unit, 115.0)
