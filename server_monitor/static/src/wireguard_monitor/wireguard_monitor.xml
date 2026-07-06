@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="server_monitor.WireGuardMonitor">
+        <div class="o_wireguard_monitor">
+            <t t-if="state.error">
+                <div class="o_wireguard_monitor_alert">
+                    <span t-esc="state.error.message"/>
+                </div>
+            </t>
+
+            <div class="o_wireguard_monitor_header">
+                <div>
+                    <div class="o_wireguard_monitor_title">WireGuard Monitor</div>
+                    <div class="o_wireguard_monitor_meta">
+                        <span>Status: <strong t-esc="state.service_status"/></span>
+                        <span>Updated: <strong t-esc="state.lastUpdated || '--'"/></span>
+                        <span>Command: <strong t-esc="state.command || '--'"/></span>
+                    </div>
+                </div>
+            </div>
+
+            <t t-if="state.warning">
+                <div class="o_wireguard_monitor_warning" t-esc="state.warning"/>
+            </t>
+
+            <div class="o_wireguard_monitor_cards">
+                <div class="o_wireguard_monitor_card">
+                    <div class="o_wireguard_monitor_card_title">Summary</div>
+                    <div class="o_wireguard_monitor_kv"><span>Interfaces</span><span t-esc="state.summary.interfaces"/></div>
+                    <div class="o_wireguard_monitor_kv"><span>Peers</span><span t-esc="state.summary.peers"/></div>
+                    <div class="o_wireguard_monitor_kv"><span>Active peers</span><span t-esc="state.summary.active_peers"/></div>
+                    <div class="o_wireguard_monitor_kv"><span>Total RX</span><span t-esc="formatBytes(state.summary.rx_bytes)"/></div>
+                    <div class="o_wireguard_monitor_kv"><span>Total TX</span><span t-esc="formatBytes(state.summary.tx_bytes)"/></div>
+                </div>
+            </div>
+
+            <div class="o_wireguard_monitor_tables">
+                <div class="o_wireguard_monitor_card o_wireguard_monitor_card--wide">
+                    <div class="o_wireguard_monitor_card_title">Interfaces</div>
+                    <t t-if="!state.interfaces.length">
+                        <div class="o_wireguard_monitor_empty">No interfaces reported.</div>
+                    </t>
+                    <t t-if="state.interfaces.length">
+                        <table class="o_wireguard_monitor_table">
+                            <thead>
+                                <tr>
+                                    <th>Interface</th>
+                                    <th>Listen Port</th>
+                                    <th>Peers</th>
+                                    <th>Active</th>
+                                    <th>RX</th>
+                                    <th>TX</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.interfaces" t-as="iface" t-key="iface.name">
+                                    <tr>
+                                        <td t-esc="iface.name"/>
+                                        <td t-esc="iface.listen_port || '--'"/>
+                                        <td t-esc="iface.peer_count"/>
+                                        <td t-esc="iface.active_peer_count"/>
+                                        <td t-esc="formatBytes(iface.rx_bytes)"/>
+                                        <td t-esc="formatBytes(iface.tx_bytes)"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+
+                <div class="o_wireguard_monitor_card o_wireguard_monitor_card--wide">
+                    <div class="o_wireguard_monitor_card_title">Peers</div>
+                    <t t-if="!state.peers.length">
+                        <div class="o_wireguard_monitor_empty">No peers reported.</div>
+                    </t>
+                    <t t-if="state.peers.length">
+                        <table class="o_wireguard_monitor_table">
+                            <thead>
+                                <tr>
+                                    <th>Interface</th>
+                                    <th>Endpoint</th>
+                                    <th>Allowed IPs</th>
+                                    <th>Handshake</th>
+                                    <th>RX</th>
+                                    <th>TX</th>
+                                    <th>Keepalive</th>
+                                    <th>Active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.peers" t-as="peer" t-key="peer.interface + '-' + (peer.public_key || peer.endpoint || '')">
+                                    <tr>
+                                        <td t-esc="peer.interface"/>
+                                        <td t-esc="peer.endpoint || '--'"/>
+                                        <td t-esc="peer.allowed_ips || '--'"/>
+                                        <td t-esc="formatTimestamp(peer.latest_handshake)"/>
+                                        <td t-esc="formatBytes(peer.rx_bytes)"/>
+                                        <td t-esc="formatBytes(peer.tx_bytes)"/>
+                                        <td t-esc="peer.persistent_keepalive || '--'"/>
+                                        <td t-esc="formatBoolean(peer.active)"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

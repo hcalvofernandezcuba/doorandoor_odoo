@@ -20,6 +20,11 @@
         <field name="tag">server_monitor.odoo_log</field>
     </record>
 
+    <record id="action_server_monitor_wireguard" model="ir.actions.client">
+        <field name="name">WireGuard Monitor</field>
+        <field name="tag">server_monitor.wireguard</field>
+    </record>
+
     <menuitem
         id="menu_server_monitor_root"
         name="Monitoring"
@@ -50,6 +55,15 @@
         name="Odoo"
         parent="menu_server_monitor_root"
         sequence="3"
+        groups="server_monitor.group_server_monitor_user"
+    />
+
+    <menuitem
+        id="menu_server_monitor_wireguard"
+        name="WireGuard"
+        parent="menu_server_monitor_root"
+        action="action_server_monitor_wireguard"
+        sequence="4"
         groups="server_monitor.group_server_monitor_user"
     />
 

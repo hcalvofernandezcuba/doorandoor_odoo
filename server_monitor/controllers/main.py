@@ -35,6 +35,10 @@ DEFAULT_ODOO_ERROR_WINDOW_MINUTES = 60
 DEFAULT_ODOO_CRON_RUNNING_SECONDS = 300
 DEFAULT_ODOO_LOG_LINES = 200
 SAMPLE_TTL_SECONDS = 1.0
+WIREGUARD_JSON_PATH = os.environ.get(
+    "SERVER_MONITOR_WIREGUARD_JSON_PATH",
+    "/mnt/wireguard/wireguard_status.json",
+)
 
 _CACHE = {"timestamp": 0.0, "payload": None}
 _USER_NET_STATE = {}
@@ -42,6 +46,7 @@ _USER_DISK_STATE = {}
 _PROCESS_CACHE = {"timestamp": 0.0, "payload": None}
 _GPU_CACHE = {"timestamp": 0.0, "payload": None}
 _PG_CACHE = {"timestamp": 0.0, "payload": None}
+_WG_CACHE = {"timestamp": 0.0, "payload": None}
 
 
 def _parse_int(value, default):
@@ -851,6 +856,180 @@ class ServerMonitorBase:
             },
             "logs": self._get_log_stats(config, log_lines, log_search),
         }
+
+    def _get_wireguard_payload(self, config=None):
+        now = time.time()
+        cached = _WG_CACHE.get("payload")
+        if cached and (now - _WG_CACHE.get("timestamp", 0.0)) < SAMPLE_TTL_SECONDS:
+            return cached
+
+        payload = {
+            "timestamp": now,
+            "available": False,
+            "service_status": "unknown",
+            "command": shutil.which("wg"),
+            "interfaces": [],
+            "peers": [],
+            "summary": {
+                "interfaces": 0,
+                "peers": 0,
+                "active_peers": 0,
+                "rx_bytes": 0,
+                "tx_bytes": 0,
+            },
+            "warning": None,
+        }
+
+        if not payload["command"]:
+            fallback_payload = self._get_wireguard_json_payload(now)
+            if fallback_payload:
+                _WG_CACHE["timestamp"] = now
+                _WG_CACHE["payload"] = fallback_payload
+                return fallback_payload
+            payload["warning"] = "WireGuard command `wg` is not available in this environment."
+            _WG_CACHE["timestamp"] = now
+            _WG_CACHE["payload"] = payload
+            return payload
+
+        interfaces_result = self._run_command(
+            [payload["command"], "show", "interfaces"], timeout=1.5
+        )
+        if interfaces_result.get("returncode") != 0:
+            fallback_payload = self._get_wireguard_json_payload(now)
+            if fallback_payload:
+                _WG_CACHE["timestamp"] = now
+                _WG_CACHE["payload"] = fallback_payload
+                return fallback_payload
+            payload["warning"] = interfaces_result.get("stderr") or "Unable to query WireGuard interfaces."
+            _WG_CACHE["timestamp"] = now
+            _WG_CACHE["payload"] = payload
+            return payload
+
+        interface_names = [
+            name.strip() for name in (interfaces_result.get("stdout") or "").split()
+            if name.strip()
+        ]
+        payload["available"] = True
+        payload["service_status"] = "running" if interface_names else "idle"
+
+        total_rx = 0
+        total_tx = 0
+        peers = []
+        interfaces = []
+
+        for interface in interface_names:
+            dump_result = self._run_command(
+                [payload["command"], "show", interface, "dump"], timeout=2.0
+            )
+            interface_payload = {
+                "name": interface,
+                "listen_port": None,
+                "fwmark": None,
+                "peer_count": 0,
+                "active_peer_count": 0,
+                "rx_bytes": 0,
+                "tx_bytes": 0,
+                "public_key": None,
+            }
+            if dump_result.get("returncode") != 0:
+                interface_payload["error"] = dump_result.get("stderr") or "Unable to read interface dump."
+                interfaces.append(interface_payload)
+                continue
+
+            lines = [line for line in (dump_result.get("stdout") or "").splitlines() if line.strip()]
+            if not lines:
+                interfaces.append(interface_payload)
+                continue
+
+            first = lines[0].split("\t")
+            if len(first) >= 4:
+                interface_payload["public_key"] = first[0] or None
+                interface_payload["listen_port"] = self._parse_int_safe(first[2])
+                interface_payload["fwmark"] = first[3] or None
+
+            for row in lines[1:]:
+                cols = row.split("\t")
+                if len(cols) < 8:
+                    continue
+                latest_handshake = self._parse_int_safe(cols[5]) or 0
+                rx_bytes = self._parse_int_safe(cols[6]) or 0
+                tx_bytes = self._parse_int_safe(cols[7]) or 0
+                is_active = latest_handshake > 0 and (now - latest_handshake) <= 180
+                peer = {
+                    "interface": interface,
+                    "public_key": cols[0] or None,
+                    "preshared_key": bool(cols[1] and cols[1] != "(none)"),
+                    "endpoint": cols[2] or None,
+                    "allowed_ips": cols[3] or "",
+                    "latest_handshake": latest_handshake or None,
+                    "rx_bytes": rx_bytes,
+                    "tx_bytes": tx_bytes,
+                    "persistent_keepalive": self._parse_int_safe(cols[4]),
+                    "active": is_active,
+                }
+                peers.append(peer)
+                interface_payload["peer_count"] += 1
+                interface_payload["active_peer_count"] += 1 if is_active else 0
+                interface_payload["rx_bytes"] += rx_bytes
+                interface_payload["tx_bytes"] += tx_bytes
+
+            interfaces.append(interface_payload)
+            total_rx += interface_payload["rx_bytes"]
+            total_tx += interface_payload["tx_bytes"]
+
+        payload["interfaces"] = interfaces
+        payload["peers"] = peers
+        payload["summary"] = {
+            "interfaces": len(interfaces),
+            "peers": len(peers),
+            "active_peers": len([peer for peer in peers if peer["active"]]),
+            "rx_bytes": total_rx,
+            "tx_bytes": total_tx,
+        }
+
+        _WG_CACHE["timestamp"] = now
+        _WG_CACHE["payload"] = payload
+        return payload
+
+    def _get_wireguard_json_payload(self, now=None):
+        json_path = WIREGUARD_JSON_PATH
+        if not json_path or not os.path.isfile(json_path):
+            return None
+        try:
+            with open(json_path, "r", encoding="utf-8") as fh:
+                payload = json.load(fh)
+        except Exception:
+            return None
+        payload.setdefault("timestamp", now or time.time())
+        payload.setdefault("source", "host-json")
+        return payload
+
+    def _run_command(self, command, timeout=1.5):
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=timeout,
+            )
+        except Exception as exc:
+            return {
+                "returncode": 1,
+                "stdout": "",
+                "stderr": str(exc),
+            }
+        return {
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr.strip(),
+        }
+
+    def _parse_int_safe(self, value):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
 
     def _model_exists(self, model_name):
         try:

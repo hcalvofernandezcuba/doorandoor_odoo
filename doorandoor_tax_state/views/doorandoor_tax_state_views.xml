@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_doorandoor_tax_state_rate_tree" model="ir.ui.view">
+        <field name="name">doorandoor.tax.state.rate.tree</field>
+        <field name="model">doorandoor.tax.state.rate</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="state_id"/>
+                <field name="county_name"/>
+                <field name="rate"/>
+                <field name="effective_date"/>
+                <field name="active"/>
+                <field name="source_url"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_doorandoor_tax_state_rate_form" model="ir.ui.view">
+        <field name="name">doorandoor.tax.state.rate.form</field>
+        <field name="model">doorandoor.tax.state.rate</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="state_id"/>
+                            <field name="county_name"/>
+                            <field name="rate"/>
+                            <field name="effective_date"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                            <field name="source_url"/>
+                            <field name="source_note"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_doorandoor_tax_state_rate" model="ir.actions.act_window">
+        <field name="name">US State Rates</field>
+        <field name="res_model">doorandoor.tax.state.rate</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_doorandoor_tax_state_rule_tree" model="ir.ui.view">
+        <field name="name">doorandoor.tax.state.rule.tree</field>
+        <field name="model">doorandoor.tax.state.rule</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="company_id"/>
+                <field name="state_id"/>
+                <field name="county_name"/>
+                <field name="sale_tax_id"/>
+                <field name="active"/>
+                <field name="note"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_doorandoor_tax_state_rule_form" model="ir.ui.view">
+        <field name="name">doorandoor.tax.state.rule.form</field>
+        <field name="model">doorandoor.tax.state.rule</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="state_id"/>
+                            <field name="county_name"/>
+                            <field name="sale_tax_id"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_doorandoor_tax_state_rule" model="ir.actions.act_window">
+        <field name="name">State Tax Rules</field>
+        <field name="res_model">doorandoor.tax.state.rule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_doorandoor_tax_state_rate"
+        name="US State Rates"
+        parent="account.menu_finance_configuration"
+        action="action_doorandoor_tax_state_rate"
+        sequence="94"
+        groups="account.group_account_manager"
+    />
+
+    <menuitem
+        id="menu_doorandoor_tax_state_rule"
+        name="State Tax Rules"
+        parent="account.menu_finance_configuration"
+        action="action_doorandoor_tax_state_rule"
+        sequence="95"
+        groups="account.group_account_manager"
+    />
+
+    <record id="view_doorandoor_tax_state_generate_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.tax.state.generate.wizard.form</field>
+        <field name="model">doorandoor.tax.state.generate.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate State Taxes">
+                <group>
+                    <field name="company_ids" widget="many2many_tags"/>
+                    <field name="only_company_state"/>
+                    <field name="create_missing_taxes"/>
+                    <field name="overwrite_existing_rules"/>
+                </group>
+                <footer>
+                    <button name="action_generate" string="Generate" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_doorandoor_tax_state_generate_wizard" model="ir.actions.act_window">
+        <field name="name">Generate State Taxes</field>
+        <field name="res_model">doorandoor.tax.state.generate.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_company_form_doorandoor_tax_state" model="ir.ui.view">
+        <field name="name">res.company.form.doorandoor.tax.state</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="State Taxes" groups="account.group_account_manager">
+                    <group>
+                        <group>
+                            <field name="ddts_state_id"/>
+                            <field name="ddts_county_name"/>
+                            <field name="ddts_default_sale_tax_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <button
+                        name="%(action_doorandoor_tax_state_generate_wizard)d"
+                        string="Generate Taxes From State Table"
+                        type="action"
+                        class="oe_highlight"
+                        context="{'default_company_ids': [id], 'default_only_company_state': True}"
+                    />
+                    <field name="ddts_tax_rule_ids" context="{'default_company_id': id}">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="state_id"/>
+                            <field name="county_name"/>
+                            <field name="sale_tax_id"/>
+                            <field name="active"/>
+                            <field name="note"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_res_config_settings_doorandoor_tax_state" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.doorandoor.tax.state</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="State Taxes" name="doorandoor_tax_state" groups="account.group_account_manager">
+                    <block title="USA State Taxes">
+                        <setting string="Company Tax State">
+                            <field name="ddts_company_tax_state_id"/>
+                        </setting>
+                        <setting string="Company Tax County">
+                            <field name="ddts_company_tax_county_name"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sale_order_form_doorandoor_tax_state" model="ir.ui.view">
+        <field name="name">sale.order.form.doorandoor.tax.state</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="ddts_tax_state_id" readonly="1" optional="hide"/>
+                <field name="ddts_tax_rule_id" readonly="1" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_form_doorandoor_tax_state" model="ir.ui.view">
+        <field name="name">account.move.form.doorandoor.tax.state</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="ddts_tax_state_id" readonly="1" optional="hide"/>
+                <field name="ddts_tax_rule_id" readonly="1" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <template id="report_invoice_document_total_tax_label" inherit_id="doorandoor_sales_new.document_tax_totals_invoice_only">
+        <xpath expr="//tr[hasclass('o_taxes')]/td[1]" position="replace">
+            <td>Total Tax</td>
+        </xpath>
+        <xpath expr="//tr[hasclass('o_taxes')]/td[2]" position="replace">
+            <td class="text-end o_price_total"/>
+        </xpath>
+    </template>
+</odoo>
