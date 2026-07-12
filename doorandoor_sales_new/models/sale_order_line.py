@@ -78,7 +78,11 @@ class SaleOrderLine(models.Model):
             if warehouse and warehouse.lot_stock_id:
                 product_ctx = product_ctx.with_context(location=warehouse.lot_stock_id.id)
 
-            available_qty = product_ctx.qty_available - line._ddsn_get_reserved_qty_for_display(warehouse=warehouse)
+            available_qty = (
+                product_ctx.qty_available
+                - line._ddsn_get_committed_qty_for_display(warehouse=warehouse)
+                - line._ddsn_get_reserved_qty_for_display(warehouse=warehouse)
+            )
             uom_name = product.uom_id.display_name or product.uom_id.name
 
             line.ddsn_available_qty = available_qty
@@ -122,6 +126,7 @@ class SaleOrderLine(models.Model):
 
             qty = (
                 product.with_company(self.order_id.company_id).with_context(location=location.id).qty_available
+                - self._ddsn_get_committed_qty_for_display(warehouse=warehouse)
                 - self._ddsn_get_reserved_qty_for_display(warehouse=warehouse)
             )
             if qty > 0:
@@ -167,6 +172,7 @@ class SaleOrderLine(models.Model):
 
             qty = (
                 product.with_company(self.order_id.company_id).with_context(location=location.id).qty_available
+                - self._ddsn_get_committed_qty_for_display(warehouse=warehouse)
                 - self._ddsn_get_reserved_qty_for_display(warehouse=warehouse)
             )
             warehouse_label = warehouse.code or warehouse.name
@@ -195,12 +201,32 @@ class SaleOrderLine(models.Model):
 
             qty = (
                 product.with_company(self.order_id.company_id).with_context(location=location.id).qty_available
+                - self._ddsn_get_committed_qty_for_display(warehouse=warehouse)
                 - self._ddsn_get_reserved_qty_for_display(warehouse=warehouse)
             )
             warehouse_label = warehouse.code or warehouse.name
             lines.append(f"{warehouse_label}: {qty:.2f}")
 
         return "\n".join(lines) or False
+
+    def _ddsn_get_committed_qty_for_display(self, warehouse=False):
+        self.ensure_one()
+        product = self.product_id
+        order = self.order_id
+        if not product or not order:
+            return 0.0
+
+        committed_moves = self.env["account.move"].search(
+            [
+                ("move_type", "=", "out_invoice"),
+                ("state", "=", "posted"),
+                ("company_id", "=", order.company_id.id),
+            ]
+        )
+        committed_qty = 0.0
+        for committed_move in committed_moves:
+            committed_qty += committed_move._ddsn_get_committed_qty_for_product(product, warehouse=warehouse)
+        return committed_qty
 
     def _ddsn_get_reserved_qty_for_display(self, warehouse=False):
         self.ensure_one()

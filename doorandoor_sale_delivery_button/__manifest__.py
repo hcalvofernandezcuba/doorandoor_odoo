@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'DoorAndDoor - Botón de Entrega desde Ventas',
-    'version': '18.0.1.0.1',
+    'version': '18.0.1.0.2',
     'category': 'Sales/Inventory',
     'summary': 'Permite al gestor de ventas navegar directamente al picking de entrega desde el pedido de venta confirmado',
     'description': """
@@ -33,6 +33,7 @@ Características:
 * Soporte para entregas parciales (múltiples pickings)
 * Determinación automática del almacén según compañía activa
 * Filtro de productos stockeables al crear picking
+* Bloqueo visual y funcional del botón de entrega hasta pago total de la factura vinculada
 
 Autor: DoorAndDoor Team
     """,

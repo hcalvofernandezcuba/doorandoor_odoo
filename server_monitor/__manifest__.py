@@ -1,6 +1,6 @@
 {
     "name": "Server Monitor",
-    "version": "18.0.1.0.2",
+    "version": "18.0.1.0.3",
     "summary": "Real-time server metrics dashboard",
     "author": "Hoang Minh Hieu",
     "support": "hieuhoangminh1996@gmail.com",
@@ -9,6 +9,7 @@
     "external_dependencies": {"python": ["psutil"]},
     "data": [
         "security/server_monitor_security.xml",
+        "security/ir.model.access.csv",
         "views/server_monitor_views.xml",
     ],
     "assets": {

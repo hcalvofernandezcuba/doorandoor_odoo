@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Tax State",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.0.1",
     "category": "Accounting",
     "summary": "State-based sales tax mapping by company for multi-company flows",
     "description": """
@@ -31,6 +31,15 @@ Esta primera version no intenta resolver todavia fiscalidad avanzada de
 USA como condados, ciudades, exenciones o destino del cliente.
 Su objetivo es dejar una base limpia, consistente y compatible con la
 contabilidad multicompañia de Odoo.
+
+Control de versiones
+--------------------
+
+- `18.0.1.0.0`
+  Version inicial del modulo con mapeo de impuesto de venta por estado y compania.
+
+- `18.0.1.0.1`
+  Se alinea la herencia del reporte de factura para conservar el bloque consolidado `Total de impuestos` definido por DoorAndDoor.
     """,
     "author": "Hanoi Calvo Fernandez (doorandoor)",
     "website": "https://doorandoor.com",

@@ -25,6 +25,12 @@
         <field name="tag">server_monitor.wireguard</field>
     </record>
 
+    <record id="action_server_monitor_wireguard_peer" model="ir.actions.act_window">
+        <field name="name">WireGuard Peers</field>
+        <field name="res_model">server.monitor.wireguard.peer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
     <menuitem
         id="menu_server_monitor_root"
         name="Monitoring"
@@ -68,6 +74,15 @@
     />
 
     <menuitem
+        id="menu_server_monitor_wireguard_peer"
+        name="Peer Names"
+        parent="menu_server_monitor_root"
+        action="action_server_monitor_wireguard_peer"
+        sequence="5"
+        groups="base.group_system"
+    />
+
+    <menuitem
         id="menu_server_monitor_odoo_dashboard"
         name="Dashboard"
         parent="menu_server_monitor_odoo"
@@ -84,4 +99,40 @@
         sequence="2"
         groups="server_monitor.group_server_monitor_user"
     />
+
+    <record id="view_server_monitor_wireguard_peer_list" model="ir.ui.view">
+        <field name="name">server.monitor.wireguard.peer.list</field>
+        <field name="model">server.monitor.wireguard.peer</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="allowed_ip"/>
+                <field name="public_key"/>
+                <field name="note"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_server_monitor_wireguard_peer_form" model="ir.ui.view">
+        <field name="name">server.monitor.wireguard.peer.form</field>
+        <field name="model">server.monitor.wireguard.peer</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="allowed_ip"/>
+                            <field name="public_key"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
 </odoo>

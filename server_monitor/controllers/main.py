@@ -978,11 +978,13 @@ class ServerMonitorBase:
             total_tx += interface_payload["tx_bytes"]
 
         payload["interfaces"] = interfaces
-        payload["peers"] = peers
+        payload["peers"] = self._enrich_wireguard_peers(peers)
         payload["summary"] = {
             "interfaces": len(interfaces),
-            "peers": len(peers),
-            "active_peers": len([peer for peer in peers if peer["active"]]),
+            "peers": len(payload["peers"]),
+            "active_peers": len(
+                [peer for peer in payload["peers"] if peer["active"]]
+            ),
             "rx_bytes": total_rx,
             "tx_bytes": total_tx,
         }
@@ -1002,7 +1004,37 @@ class ServerMonitorBase:
             return None
         payload.setdefault("timestamp", now or time.time())
         payload.setdefault("source", "host-json")
+        payload["peers"] = self._enrich_wireguard_peers(payload.get("peers", []))
         return payload
+
+    def _enrich_wireguard_peers(self, peers):
+        if not peers or "server.monitor.wireguard.peer" not in request.env.registry:
+            return peers
+        peer_model = request.env["server.monitor.wireguard.peer"].sudo()
+        mappings = peer_model.search([("active", "=", True)])
+        by_key = {
+            (mapping.public_key or "").strip(): mapping
+            for mapping in mappings
+            if mapping.public_key
+        }
+        by_ip = {
+            (mapping.allowed_ip or "").strip(): mapping
+            for mapping in mappings
+            if mapping.allowed_ip
+        }
+        result = []
+        for peer in peers:
+            mapping = None
+            public_key = (peer.get("public_key") or "").strip()
+            allowed_ips = (peer.get("allowed_ips") or "").strip()
+            if public_key:
+                mapping = by_key.get(public_key)
+            if not mapping and allowed_ips:
+                mapping = by_ip.get(allowed_ips)
+            row = dict(peer)
+            row["peer_name"] = mapping.name if mapping else ""
+            result.append(row)
+        return result
 
     def _run_command(self, command, timeout=1.5):
         try:

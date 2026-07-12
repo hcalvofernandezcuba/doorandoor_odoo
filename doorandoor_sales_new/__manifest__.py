@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New",
-    "version": "18.0.1.0.34",
+    "version": "18.0.1.0.52",
     "category": "Sales",
     "summary": "Invoice-driven sales, payment release, delivery and production orchestration",
     "description": """
@@ -91,6 +91,57 @@ Historial resumido
 
 - 18.0.1.0.34
   La reserva temporal se traslada al documento de prefactura basado en `account.move` borrador, y el reporte impreso muestra el titulo `Prefactura`.
+
+- 18.0.1.0.35
+  El stock visible en facturacion y ventas descuenta como comprometidas las cantidades de facturas confirmadas, sin esperar al pago. La reserva temporal de prefactura por 24 horas se mantiene solo para documentos en borrador.
+
+- 18.0.1.0.36
+  La vista formulario de factura reemplaza el widget dinamico de impuestos por un resumen fijo con las etiquetas `Subtotal`, `Total Pimpuestos` y `Total`, eliminando el texto variable del porcentaje como `15%`.
+
+- 18.0.1.0.37
+  El documento comercial de cliente en `draft` se presenta funcionalmente como `Prefactura`, conservando la reserva temporal de stock por 24 horas. Al confirmar, el mismo documento pasa a verse como `Factura`.
+
+- 18.0.1.0.38
+  La `Prefactura` en `draft` agrega botones propios de `Imprimir` y `Enviar` en el encabezado, reutilizando las mismas acciones del documento final para permitir compartirla antes de confirmar.
+
+- 18.0.1.0.39
+  Se corrige el layout visual del bloque de totales en la vista de factura para evitar superposiciones entre etiquetas e importes en `Subtotal`, `Total Pimpuestos` y `Total`.
+
+- 18.0.1.0.40
+  Las cotizaciones creadas desde Ventas quedan sin numero y fuera de la lista estandar hasta pulsar `Validar cotizacion`. En ese momento se asigna la secuencia `sale.order` y la cotizacion pasa a registrarse en el listado.
+
+- 18.0.1.0.41
+  Se corrige la herencia XML de la vista de cotizaciones para evitar el error de actualizacion del modulo y permitir cargar el flujo de `Validar cotizacion`.
+
+- 18.0.1.0.42
+  Se elimina la personalizacion fragil del titulo en la vista de cotizaciones y se conserva el cambio funcional de `Validar cotizacion` con una herencia XML compatible con esta base.
+
+- 18.0.1.0.43
+  Se refuerza el ocultamiento de cotizaciones no validadas en la lista de `Cotizaciones` mediante contexto y filtro en modelo, evitando que registros con nombre `New` aparezcan antes de `Validar cotizacion`.
+
+- 18.0.1.0.44
+  Se corrige la compatibilidad del override `_search` en `sale.order` para evitar el error RPC al abrir las vistas de cotizaciones en esta base de Odoo 18.
+
+- 18.0.1.0.45
+  Se ajustan las acciones reales de menu de `Cotizaciones` para ocultar tambien las cotizaciones no validadas en la vista usada por onboarding y por equipos de ventas, evitando que aparezcan registros `New`.
+
+- 18.0.1.0.46
+  Se corrige el filtro de listas de `Cotizaciones` para no vaciar el menu: se ocultan solo las cotizaciones no validadas con nombre `New`, mientras se mantienen visibles las cotizaciones historicas numeradas y las ordenes ya creadas.
+
+- 18.0.1.0.47
+  El ocultamiento de cotizaciones `New` se mueve desde dominios de accion a un filtro de busqueda por campo auxiliar visible en lista, evitando errores de acceso durante la edicion del formulario y manteniendo ocultos solo los borradores no validados.
+
+- 18.0.1.0.48
+  Se reemplaza el filtro por busqueda de `Cotizaciones` por un dominio directo sobre el campo almacenado `ddsn_quote_list_visible`, asegurando que los registros `New` no aparezcan en la lista mientras los documentos numerados siguen visibles.
+
+- 18.0.1.0.49
+  Se implementa la base tecnica del flujo `Cotizacion -> Prefactura -> Factura`: validar cotizacion crea prefactura reservada por 24 horas, confirmar prefactura publica factura y confirma la venta, se agrega renovacion manual de reserva y se enlazan cotizacion, prefactura y factura final.
+
+- 18.0.1.0.50
+  Se corrige `action_post()` en prefacturas para esta base de Odoo 18, usando el recordset original en lugar del valor devuelto por `super()`, evitando el error `'bool' object has no attribute 'mapped'` al confirmar la prefactura.
+
+- 18.0.1.0.52
+  Se unifica la etiqueta visual de impuestos en ventas y facturacion usando el texto fijo `Total de Impuestos`, eliminando tanto la leyenda variable por porcentaje en cotizaciones como el texto incorrecto `Total Pimpuestos` en la factura.
 
 Autor
 -----

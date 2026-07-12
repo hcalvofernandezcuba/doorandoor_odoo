@@ -29,6 +29,17 @@ class SaleOrder(models.Model):
         help='Pickings de entrega vinculados a este pedido de venta'
     )
 
+    dddb_delivery_enabled = fields.Boolean(
+        string='Delivery Enabled',
+        compute='_compute_dddb_delivery_controls',
+        help='Indica si la entrega puede gestionarse segun el pago total de la factura vinculada.'
+    )
+
+    dddb_delivery_block_reason = fields.Char(
+        string='Delivery Block Reason',
+        compute='_compute_dddb_delivery_controls',
+    )
+
     # -------------------------------------------------------------------------
     # MÉTODOS COMPUTE
     # -------------------------------------------------------------------------
@@ -38,6 +49,40 @@ class SaleOrder(models.Model):
         """Calcula la cantidad de entregas relacionadas a la venta."""
         for order in self:
             order.delivery_count = len(order.delivery_ids)
+
+    def _compute_dddb_delivery_controls(self):
+        AccountMove = self.env['account.move']
+        has_sale_order_link = 'sale_order_id' in AccountMove._fields
+        for order in self:
+            enabled = order.state in ('sale', 'done')
+            reason = False
+            if enabled and has_sale_order_link:
+                invoice = AccountMove.search([
+                    ('sale_order_id', '=', order.id),
+                    ('move_type', '=', 'out_invoice'),
+                    ('state', '=', 'posted'),
+                ], order='invoice_date desc, id desc', limit=1)
+                if invoice:
+                    enabled = order._dddb_is_invoice_fully_paid(invoice)
+                    if not enabled:
+                        reason = _(
+                            'La entrega solo puede gestionarse cuando la factura vinculada este totalmente pagada.'
+                        )
+            order.dddb_delivery_enabled = enabled
+            order.dddb_delivery_block_reason = reason
+
+    def _dddb_is_invoice_fully_paid(self, invoice):
+        self.ensure_one()
+        currency = invoice.currency_id
+        total_amount = abs(invoice.amount_total)
+        residual_amount = abs(invoice.amount_residual)
+        if not total_amount or currency.is_zero(total_amount):
+            return True
+        if currency.is_zero(residual_amount):
+            return True
+        if hasattr(invoice, '_ddsn_is_fully_paid'):
+            return invoice._ddsn_is_fully_paid()
+        return False
 
     # -------------------------------------------------------------------------
     # MÉTODOS DE ACCIÓN
@@ -65,6 +110,11 @@ class SaleOrder(models.Model):
                 'Solo se pueden gestionar entregas de pedidos de venta confirmados. '
                 'El estado actual es: %s'
             ) % self.state)
+
+        if not self.dddb_delivery_enabled:
+            raise UserError(self.dddb_delivery_block_reason or _(
+                'La entrega permanece bloqueada hasta que la factura vinculada este totalmente pagada.'
+            ))
 
         # Buscar pickings relacionados
         Picking = self.env['stock.picking']

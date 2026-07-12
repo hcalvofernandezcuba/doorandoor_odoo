@@ -7,6 +7,16 @@ class AccountMove(models.Model):
     _name = "account.move"
     _inherit = ["account.move", "doorandoor.document.barcode.mixin"]
 
+    ddsn_document_stage = fields.Selection(
+        selection=[
+            ("preinvoice", "Prefactura"),
+            ("invoice", "Factura"),
+            ("cancelled", "Cancelada"),
+        ],
+        string="Document Stage",
+        compute="_compute_ddsn_document_stage",
+    )
+
     release_state = fields.Selection(
         selection=[
             ("not_ready", "Not Ready"),
@@ -175,6 +185,18 @@ class AccountMove(models.Model):
             move.payment_release_log_count = len(move.payment_release_log_ids)
             move.pickup_order_count = len(move.pickup_order_ids)
 
+    @api.depends("state", "move_type")
+    def _compute_ddsn_document_stage(self):
+        for move in self:
+            if move.move_type not in ("out_invoice", "out_refund"):
+                move.ddsn_document_stage = False
+            elif move.state == "cancel":
+                move.ddsn_document_stage = "cancelled"
+            elif move.state == "posted":
+                move.ddsn_document_stage = "invoice"
+            else:
+                move.ddsn_document_stage = "preinvoice"
+
     @api.depends("state", "move_type", "ddsn_reservation_expires_at")
     def _compute_ddsn_reservation_status(self):
         now = fields.Datetime.now()
@@ -274,11 +296,35 @@ class AccountMove(models.Model):
         self._ddsn_sync_release_from_payments()
         return True
 
+    def action_ddsn_renew_preinvoice_reservation(self):
+        for move in self:
+            if move.move_type != "out_invoice" or move.state != "draft":
+                continue
+            if move.sale_order_id and move.partner_id.commercial_partner_id != move.sale_order_id.partner_id.commercial_partner_id:
+                continue
+            move.ddsn_reservation_expires_at = fields.Datetime.now() + timedelta(
+                hours=move._ddsn_get_reservation_window_hours()
+            )
+        return True
+
     def action_post(self):
         self.filtered("ddsn_reservation_expires_at").write({"ddsn_reservation_expires_at": False})
-        moves = super().action_post()
+        moves = self
+        result = super().action_post()
+        sale_orders_to_confirm = moves.mapped("sale_order_id").filtered(lambda order: order.state in ("draft", "sent"))
+        if sale_orders_to_confirm:
+            sale_orders_to_confirm.with_context(ddsn_finalize_from_preinvoice=True).action_confirm()
+            sale_orders_to_confirm.write({"ddsn_flow_stage": "invoiced"})
         self._ddsn_create_sale_orders_and_fulfillment()
-        return moves
+        for move in moves.filtered("sale_order_id"):
+            move.sale_order_id.write(
+                {
+                    "ddsn_preinvoice_move_id": False,
+                    "ddsn_invoice_move_id": move.id,
+                    "ddsn_flow_stage": "invoiced",
+                }
+            )
+        return result
 
     def _ddsn_get_reservation_window_hours(self):
         param_value = self.env["ir.config_parameter"].sudo().get_param(
@@ -295,6 +341,30 @@ class AccountMove(models.Model):
         self._compute_ddsn_reservation_status()
         return self.ddsn_reservation_active
 
+    def _ddsn_get_committed_qty_for_product(self, product, warehouse=False):
+        self.ensure_one()
+        if not product or self.move_type != "out_invoice" or self.state != "posted":
+            return 0.0
+
+        committed_qty = 0.0
+        for invoice_line in self.invoice_line_ids.filtered(
+            lambda line: line.product_id == product and line.display_type in (False, "product")
+        ):
+            pending_qty = invoice_line.quantity
+            if invoice_line.fulfillment_line_id:
+                pending_qty = max(
+                    invoice_line.fulfillment_line_id.qty_invoiced - invoice_line.fulfillment_line_id.qty_delivered,
+                    0.0,
+                )
+            if pending_qty <= 0:
+                continue
+
+            reservation_warehouse = self.sale_order_id.warehouse_id
+            if warehouse and reservation_warehouse and reservation_warehouse != warehouse:
+                continue
+            committed_qty += pending_qty
+        return committed_qty
+
     @api.model
     def _ddsn_release_expired_preinvoice_reservations(self):
         now = fields.Datetime.now()
@@ -307,6 +377,13 @@ class AccountMove(models.Model):
             ]
         )
         expired_moves.write({"ddsn_reservation_expires_at": False})
+        for move in expired_moves.filtered("sale_order_id"):
+            move.sale_order_id.write(
+                {
+                    "ddsn_flow_stage": "quotation",
+                    "ddsn_preinvoice_move_id": False,
+                }
+            )
         return len(expired_moves)
 
     def _ddsn_create_sale_orders_and_fulfillment(self):
@@ -319,6 +396,7 @@ class AccountMove(models.Model):
             if not product_lines:
                 continue
             if move.sale_order_id:
+                move._ddsn_link_invoice_lines_to_sale_order_lines(product_lines)
                 move._ddsn_sync_existing_fulfillment_lines(product_lines)
                 continue
 
@@ -349,7 +427,9 @@ class AccountMove(models.Model):
 
     def _ddsn_create_sale_order_from_invoice(self, product_lines):
         self.ensure_one()
-        sale_order = self.env["sale.order"].create(self._ddsn_prepare_sale_order_vals())
+        sale_order = self.env["sale.order"].with_context(ddsn_assign_number_immediately=True).create(
+            self._ddsn_prepare_sale_order_vals()
+        )
         sale_lines = self.env["sale.order.line"]
 
         for invoice_line in product_lines:
@@ -486,6 +566,25 @@ class AccountMove(models.Model):
             )
             invoice_line.fulfillment_line_id = fulfillment_line.id
         self._ddsn_sync_release_from_payments()
+
+    def _ddsn_link_invoice_lines_to_sale_order_lines(self, product_lines):
+        self.ensure_one()
+        sale_order = self.sale_order_id
+        if not sale_order:
+            return
+
+        used_sale_lines = self.invoice_line_ids.mapped("generated_sale_line_id")
+        for invoice_line in product_lines.filtered(lambda line: not line.generated_sale_line_id):
+            candidate_line = sale_order.order_line.filtered(
+                lambda sale_line: sale_line.product_id == invoice_line.product_id and sale_line not in used_sale_lines
+            )[:1]
+            if not candidate_line:
+                candidate_line = sale_order.order_line.filtered(
+                    lambda sale_line: sale_line.product_id == invoice_line.product_id
+                )[:1]
+            if candidate_line:
+                invoice_line.generated_sale_line_id = candidate_line.id
+                used_sale_lines |= candidate_line
 
     def _ddsn_sync_release_from_payments(self):
         for move in self:

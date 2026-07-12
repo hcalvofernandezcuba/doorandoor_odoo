@@ -22,9 +22,24 @@
                             type="object"
                             class="oe_stat_button"
                             icon="fa-truck"
-                            invisible="state not in ('sale', 'done')"
+                            invisible="state not in ('sale', 'done') or not dddb_delivery_enabled"
                             groups="stock.group_stock_user">
                         <field name="delivery_count" widget="statinfo" string="Entregas"/>
+                    </button>
+                    <button
+                            string="Entregas"
+                            class="oe_stat_button"
+                            icon="fa-truck"
+                            invisible="state not in ('sale', 'done') or dddb_delivery_enabled"
+                            groups="stock.group_stock_user"
+                            help="Disponible solo cuando la factura vinculada este totalmente pagada."
+                            disabled="1">
+                        <div class="o_stat_info">
+                            <span class="o_stat_text">Entregas</span>
+                            <span class="o_stat_value">
+                                <field name="delivery_count"/>
+                            </span>
+                        </div>
                     </button>
                 </xpath>
             </field>
@@ -44,9 +59,17 @@
                             string="Entregar"
                             class="btn-primary"
                             icon="fa-truck"
-                            invisible="state != 'sale'"
+                            invisible="state != 'sale' or not dddb_delivery_enabled"
                             groups="stock.group_stock_user"
                             help="Navegar al picking de entrega. Si no existe, se creará uno nuevo en el almacén de la compañía."/>
+                    <button
+                            string="Entregar"
+                            class="btn-secondary"
+                            icon="fa-truck"
+                            invisible="state != 'sale' or dddb_delivery_enabled"
+                            groups="stock.group_stock_user"
+                            help="Disponible solo cuando la factura vinculada este totalmente pagada."
+                            disabled="1"/>
                 </xpath>
             </field>
         </record>

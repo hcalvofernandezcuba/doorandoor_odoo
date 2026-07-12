@@ -167,7 +167,7 @@ class TestInvoiceToSaleOrder(TransactionCase):
         self.assertIn(warehouse.code or warehouse.name, invoice_line.ddsn_warehouse_stock_display)
         self.assertIn(warehouse.code or warehouse.name, invoice_line.ddsn_warehouse_stock_text)
 
-    def test_invoice_line_shows_net_stock_after_previous_paid_commitment(self):
+    def test_invoice_line_shows_net_stock_after_previous_posted_commitment(self):
         warehouse = self.env["stock.warehouse"].search(
             [("company_id", "=", self.env.company.id)],
             limit=1,
@@ -179,16 +179,14 @@ class TestInvoiceToSaleOrder(TransactionCase):
         )
 
         previous_move = self._create_stock_invoice()
-        previous_move.payment_release_policy = "prorated"
         previous_move.action_post()
-        previous_move._ddsn_apply_release_for_amount(previous_move.amount_total / 2)
 
         new_move = self._create_stock_invoice()
         invoice_line = new_move.invoice_line_ids.filtered(lambda line: line.product_id == self.stock_product)
 
-        self.assertEqual(invoice_line.ddsn_available_qty, 5.0)
-        self.assertIn("5.00", invoice_line.ddsn_stock_display)
-        self.assertIn("5.00", invoice_line.ddsn_warehouse_stock_display)
+        self.assertEqual(invoice_line.ddsn_available_qty, 4.0)
+        self.assertIn("4.00", invoice_line.ddsn_stock_display)
+        self.assertIn("4.00", invoice_line.ddsn_warehouse_stock_display)
 
     def test_invoice_line_shows_net_stock_after_active_quote_reservation(self):
         warehouse = self.env["stock.warehouse"].search(

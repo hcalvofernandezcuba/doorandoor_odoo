@@ -105,25 +105,17 @@ class AccountMoveLine(models.Model):
         if not product or not move:
             return 0.0
 
-        domain = [
-            ("move_id.state", "=", "posted"),
-            ("product_id", "=", product.id),
-            ("move_id.company_id", "=", move.company_id.id),
-            ("qty_released", ">", 0.0),
-        ]
-        if move.id:
-            domain.append(("move_id", "!=", move.id))
-
-        fulfillment_lines = self.env["doorandoor.fulfillment.line"].search(domain)
         committed_qty = 0.0
-        for fulfillment_line in fulfillment_lines:
-            pending_qty = max(fulfillment_line.qty_released - fulfillment_line.qty_delivered, 0.0)
-            if pending_qty <= 0:
-                continue
-
-            if warehouse and fulfillment_line.move_id.sale_order_id.warehouse_id and fulfillment_line.move_id.sale_order_id.warehouse_id != warehouse:
-                continue
-            committed_qty += pending_qty
+        committed_moves = self.env["account.move"].search(
+            [
+                ("move_type", "=", "out_invoice"),
+                ("state", "=", "posted"),
+                ("company_id", "=", move.company_id.id),
+                ("id", "!=", move.id or 0),
+            ]
+        )
+        for committed_move in committed_moves:
+            committed_qty += committed_move._ddsn_get_committed_qty_for_product(product, warehouse=warehouse)
         return committed_qty
 
     def _ddsn_get_quote_reserved_qty_for_display(self, warehouse=False):

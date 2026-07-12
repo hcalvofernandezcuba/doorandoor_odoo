@@ -80,6 +80,7 @@
                                     <th>Interface</th>
                                     <th>Endpoint</th>
                                     <th>Allowed IPs</th>
+                                    <th>Name</th>
                                     <th>Handshake</th>
                                     <th>RX</th>
                                     <th>TX</th>
@@ -93,6 +94,7 @@
                                         <td t-esc="peer.interface"/>
                                         <td t-esc="peer.endpoint || '--'"/>
                                         <td t-esc="peer.allowed_ips || '--'"/>
+                                        <td t-esc="peer.peer_name || '--'"/>
                                         <td t-esc="formatTimestamp(peer.latest_handshake)"/>
                                         <td t-esc="formatBytes(peer.rx_bytes)"/>
                                         <td t-esc="formatBytes(peer.tx_bytes)"/>

@@ -67,6 +67,85 @@ class TestSaleOrderCommercialFeatures(TransactionCase):
         self.assertIn(self.warehouse.code or self.warehouse.name, line.ddsn_warehouse_stock_display)
         self.assertIn(self.warehouse.code or self.warehouse.name, line.ddsn_warehouse_stock_html)
 
+    def test_sale_order_starts_unregistered_without_sequence(self):
+        sale_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "warehouse_id": self.warehouse.id,
+            }
+        )
+
+        self.assertFalse(sale_order.ddsn_quote_registered)
+        self.assertEqual(sale_order.name, "New")
+
+    def test_register_quote_assigns_sequence(self):
+        sale_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "warehouse_id": self.warehouse.id,
+            }
+        )
+
+        sale_order.action_ddsn_register_quote()
+
+        self.assertTrue(sale_order.ddsn_quote_registered)
+        self.assertNotEqual(sale_order.name, "New")
+
+    def test_validate_quote_creates_preinvoice(self):
+        sale_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "warehouse_id": self.warehouse.id,
+                "order_line": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": self.product.id,
+                            "name": self.product.display_name,
+                            "product_uom_qty": 2.0,
+                            "price_unit": 50.0,
+                        },
+                    )
+                ],
+            }
+        )
+
+        sale_order.action_ddsn_register_quote()
+
+        self.assertTrue(sale_order.ddsn_preinvoice_move_id)
+        self.assertEqual(sale_order.ddsn_flow_stage, "preinvoice")
+        self.assertEqual(sale_order.ddsn_preinvoice_move_id.state, "draft")
+        self.assertEqual(sale_order.ddsn_preinvoice_move_id.sale_order_id, sale_order)
+
+    def test_posting_preinvoice_confirms_sale_order(self):
+        sale_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "warehouse_id": self.warehouse.id,
+                "order_line": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": self.product.id,
+                            "name": self.product.display_name,
+                            "product_uom_qty": 1.0,
+                            "price_unit": 50.0,
+                        },
+                    )
+                ],
+            }
+        )
+
+        sale_order.action_ddsn_register_quote()
+        preinvoice = sale_order.ddsn_preinvoice_move_id
+        preinvoice.action_post()
+
+        self.assertEqual(sale_order.state, "sale")
+        self.assertEqual(sale_order.ddsn_flow_stage, "invoiced")
+        self.assertEqual(sale_order.ddsn_invoice_move_id, preinvoice)
+
     def test_sale_order_line_shows_net_stock_after_active_preinvoice_reservation(self):
         self.env["stock.quant"]._update_available_quantity(
             self.product,
@@ -91,6 +170,51 @@ class TestSaleOrderCommercialFeatures(TransactionCase):
                 ],
             }
         )
+        visible_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "warehouse_id": self.warehouse.id,
+            }
+        )
+        visible_line = self.env["sale.order.line"].create(
+            {
+                "order_id": visible_order.id,
+                "product_id": self.product.id,
+                "name": self.product.display_name,
+                "product_uom_qty": 1.0,
+                "price_unit": 50.0,
+            }
+        )
+
+        self.assertEqual(visible_line.ddsn_available_qty, 5.0)
+        self.assertIn("5.00", visible_line.ddsn_stock_display)
+
+    def test_sale_order_line_shows_net_stock_after_posted_invoice_commitment(self):
+        self.env["stock.quant"]._update_available_quantity(
+            self.product,
+            self.warehouse.lot_stock_id,
+            8.0,
+        )
+        committed_move = self.env["account.move"].create(
+            {
+                "move_type": "out_invoice",
+                "partner_id": self.partner.id,
+                "invoice_line_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": self.product.id,
+                            "name": self.product.display_name,
+                            "quantity": 3.0,
+                            "price_unit": 50.0,
+                        },
+                    )
+                ],
+            }
+        )
+        committed_move.action_post()
+
         visible_order = self.env["sale.order"].create(
             {
                 "partner_id": self.partner.id,

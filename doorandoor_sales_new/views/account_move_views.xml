@@ -70,10 +70,36 @@
 
                 <xpath expr="//header" position="inside">
                     <button
+                        name="action_print_pdf"
+                        type="object"
+                        string="Imprimir"
+                        invisible="state != 'draft' or move_type not in ('out_invoice', 'out_refund')"/>
+                    <button
+                        name="action_invoice_sent"
+                        type="object"
+                        string="Enviar"
+                        invisible="state != 'draft' or move_type not in ('out_invoice', 'out_refund')"/>
+                    <button
+                        name="action_ddsn_renew_preinvoice_reservation"
+                        type="object"
+                        string="Renovar reserva"
+                        invisible="state != 'draft' or move_type not in ('out_invoice', 'out_refund') or ddsn_reservation_status != 'expired'"/>
+                    <field
+                        name="ddsn_document_stage"
+                        widget="statusbar"
+                        statusbar_visible="preinvoice,invoice,cancelled"
+                        invisible="move_type not in ('out_invoice', 'out_refund')"/>
+                    <button
                         name="action_create_pickup_orders"
                         type="object"
                         string="Create Pickup Order"
                         invisible="move_type not in ('out_invoice', 'out_refund')"/>
+                </xpath>
+
+                <xpath expr="//h1/span[@invisible='name or name_placeholder or quick_edit_mode']" position="replace">
+                    <span invisible="name or name_placeholder or quick_edit_mode or move_type not in ('out_invoice', 'out_refund') or state != 'draft'">Prefactura</span>
+                    <span invisible="name or name_placeholder or quick_edit_mode or move_type not in ('out_invoice', 'out_refund') or state != 'posted'">Factura</span>
+                    <span invisible="name or name_placeholder or quick_edit_mode or move_type in ('out_invoice', 'out_refund')">Borrador</span>
                 </xpath>
 
                 <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='quantity']" position="after">
@@ -90,10 +116,32 @@
                     </group>
                 </xpath>
 
+                <xpath expr="//field[@name='tax_totals']" position="replace">
+                    <div class="oe_subtotal_footer oe_right" colspan="2">
+                        <table class="oe_subtotal_footer_table w-100">
+                            <tr>
+                                <td class="text-end"><label for="amount_untaxed" string="Subtotal"/></td>
+                                <td class="text-end ps-2"><field name="amount_untaxed" nolabel="1" readonly="1"/></td>
+                            </tr>
+                            <tr>
+                                <td class="text-end"><label for="amount_tax" string="Total de Impuestos"/></td>
+                                <td class="text-end ps-2"><field name="amount_tax" nolabel="1" readonly="1"/></td>
+                            </tr>
+                            <tr>
+                                <td class="text-end oe_subtotal_footer_separator"><label for="amount_total" string="Total"/></td>
+                                <td class="text-end ps-2 oe_subtotal_footer_separator">
+                                    <field name="amount_total" nolabel="1" readonly="1" class="fw-bold"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </xpath>
+
                 <xpath expr="//notebook" position="inside">
                     <page string="Fulfillment Setup" invisible="move_type not in ('out_invoice', 'out_refund')">
                         <group string="DoorAndDoor Fulfillment">
                             <group>
+                                <field name="sale_order_id" readonly="1"/>
                                 <field name="release_state"/>
                                 <field name="payment_release_policy"/>
                                 <field name="fulfillment_route_policy"/>

@@ -1,6 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <record id="view_order_form_inherit_ddsn_quote_registration" model="ir.ui.view">
+            <field name="name">sale.order.form.ddsn.quote.registration</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="priority">110</field>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <button
+                        name="action_ddsn_register_quote"
+                        type="object"
+                        string="Validar cotización"
+                        class="btn-primary"
+                        invisible="state not in ('draft', 'sent') or ddsn_quote_registered"/>
+                    <button
+                        name="action_view_ddsn_preinvoice"
+                        type="object"
+                        string="Abrir prefactura"
+                        invisible="not ddsn_preinvoice_move_id"/>
+                    <field name="ddsn_quote_registered" invisible="1"/>
+                    <field name="ddsn_preinvoice_move_id" invisible="1"/>
+                </xpath>
+
+                <xpath expr="//h1/field[@name='name']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
+
+                <xpath expr="//header/field[@name='state']" position="before">
+                    <field
+                        name="ddsn_flow_stage"
+                        widget="statusbar"
+                        statusbar_visible="quotation,preinvoice,invoiced"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="sale.action_quotations" model="ir.actions.act_window">
+            <field name="domain">[('ddsn_quote_list_visible', '=', True)]</field>
+            <field name="context">{'search_default_my_quotation': 1}</field>
+        </record>
+
+        <record id="sale.action_quotations_with_onboarding" model="ir.actions.act_window">
+            <field name="domain">[('ddsn_quote_list_visible', '=', True)]</field>
+            <field name="context">{'search_default_my_quotation': 1}</field>
+        </record>
+
+        <record id="sale.action_quotations_salesteams" model="ir.actions.act_window">
+            <field name="domain">[('ddsn_quote_list_visible', '=', True)]</field>
+            <field name="context">{
+                'search_default_team_id': [active_id],
+                'default_team_id': active_id,
+                'show_address': 1,
+            }</field>
+        </record>
+
         <record id="view_order_form_inherit_ddsn_stock_visibility" model="ir.ui.view">
             <field name="name">sale.order.form.ddsn.stock.visibility</field>
             <field name="model">sale.order</field>
@@ -19,6 +73,26 @@
                         <field name="ddsn_stock_display" readonly="1"/>
                         <field name="ddsn_warehouse_stock_text" readonly="1" widget="text"/>
                     </group>
+                </xpath>
+                <xpath expr="//field[@name='tax_totals']" position="replace">
+                    <div class="oe_subtotal_footer oe_right" colspan="2">
+                        <table class="oe_subtotal_footer_table w-100">
+                            <tr>
+                                <td class="text-end"><label for="amount_untaxed" string="Subtotal"/></td>
+                                <td class="text-end ps-2"><field name="amount_untaxed" nolabel="1" readonly="1"/></td>
+                            </tr>
+                            <tr>
+                                <td class="text-end"><label for="amount_tax" string="Total de Impuestos"/></td>
+                                <td class="text-end ps-2"><field name="amount_tax" nolabel="1" readonly="1"/></td>
+                            </tr>
+                            <tr>
+                                <td class="text-end oe_subtotal_footer_separator"><label for="amount_total" string="Total"/></td>
+                                <td class="text-end ps-2 oe_subtotal_footer_separator">
+                                    <field name="amount_total" nolabel="1" readonly="1" class="fw-bold"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
                 </xpath>
             </field>
         </record>

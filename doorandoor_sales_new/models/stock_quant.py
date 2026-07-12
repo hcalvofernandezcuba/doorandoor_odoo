@@ -42,7 +42,7 @@ class StockQuant(models.Model):
                 raise UserError(
                     _(
                         "No puedes ajustar manualmente el stock de %(product)s por debajo de %(locked_qty)s %(uom)s. "
-                        "Esa cantidad ya esta comprometida por facturas pagadas o parcialmente pagadas y debe conciliarse "
+                        "Esa cantidad ya esta comprometida por facturas confirmadas y debe conciliarse "
                         "mediante el flujo logistico, no con un ajuste manual."
                     )
                     % {
@@ -63,7 +63,7 @@ class StockQuant(models.Model):
             ]
         )
         for line in fulfillment_lines:
-            pending_locked_qty = max(line.qty_released - line.qty_delivered, 0.0)
+            pending_locked_qty = max(line.qty_invoiced - line.qty_delivered, 0.0)
             if pending_locked_qty <= 0:
                 continue
             key = (line.move_id.company_id.id, line.product_id.id)
