@@ -1,277 +1,142 @@
-# DoorAndDoor Sales New - Explicacion del flujo base factura -> venta -> fulfillment
+# DoorAndDoor Sales New - Explicacion del flujo actual ventas -> cotizacion -> prefactura -> factura
 
-## Objetivo de esta explicacion
+## Objetivo
 
-Este documento explica de forma informativa como funciona la parte base del proyecto que conecta:
+Este documento explica el flujo comercial actual tal como debe entenderse hoy en el proyecto.
 
-- factura
-- venta
-- fulfillment (cumplimiento)
+Ya no se debe presentar como un proceso que nace en factura. El punto de arranque del usuario es `Ventas`.
 
-La idea es que sirva como apoyo para presentaciones, capacitacion y estudio interno del modulo.
+## Secuencia general
 
-## Idea principal del flujo
+El flujo vigente es este:
 
-El flujo base `factura -> venta -> fulfillment` es la columna vertebral del modulo.
+1. `Cotizacion`
+2. `Validar cotizacion`
+3. `Prefactura`
+4. `Confirmar prefactura`
+5. `Factura confirmada`
+6. `Pago`
+7. `Fabricacion, despacho, entrega o recogida`
 
-La logica principal es que la factura de cliente deja de ser solo un documento contable y pasa a convertirse en el punto de arranque del seguimiento comercial y operativo.
+## Paso 1 - Cotizacion
 
-Antes:
+La cotizacion vive en `sale.order`.
 
-- la factura cumplia una funcion contable
-- el seguimiento posterior dependia de otros pasos manuales
+En esta etapa:
 
-Ahora:
+- el vendedor selecciona cliente y productos
+- revisa stock visible
+- revisa precios y condiciones
+- el documento aun no debe comportarse como registro comercial definitivo
 
-- la factura publicada genera un pedido de venta interno
-- ese pedido queda ligado a la factura
-- se crean lineas de seguimiento de cumplimiento
-- desde ahi se puede continuar con liberacion por pago, despacho, fabricacion y entrega
+Regla acordada:
 
-## Que ocurre cuando se publica una factura
+- la cotizacion solo toma numero al validarla
 
-Cuando se publica una factura de cliente `out_invoice`, el modulo actua sobre ese momento.
+## Paso 2 - Validar cotizacion
 
-En [account_move.py](/home/hanoi/Documentos/doorandoor/odoo/addons/doorandoor_sales_new/models/account_move.py), el metodo `action_post()` llama a:
+La accion `Validar cotizacion` hace tres cosas clave:
 
-- `_ddsn_create_sale_orders_and_fulfillment()`
+- asigna el numero `SO`
+- registra la cotizacion
+- crea la `Prefactura`
 
-Esa funcion hace lo siguiente:
+Con esto el proceso comercial deja de quedarse en una simple propuesta y pasa a un documento que aparta inventario temporalmente.
 
-1. Verifica que el documento sea una factura de cliente.
-2. Verifica que la factura este publicada.
-3. Toma las lineas de producto validas de la factura.
-4. Si aun no existe pedido generado, crea un `sale.order`.
-5. Crea lineas de venta relacionadas con las lineas facturadas.
-6. Crea lineas de `fulfillment` para llevar el seguimiento operativo.
+## Paso 3 - Prefactura
 
-## Como se forma el flujo
+La prefactura se implementa sobre `account.move` en estado `draft`.
 
-## Paso 1 - La factura es el origen
+Su funcion es:
 
-La factura es el documento maestro.
+- reservar stock por 24 horas
+- permitir impresion y envio al cliente
+- mantener una vista de documento previa a la factura final
 
-Desde ella nace el flujo posterior.
+Comportamiento esperado:
 
-La factura conserva la referencia principal del proceso y sirve como punto de entrada para consultar:
+- la prefactura toma la referencia de la `SO`
+- puede abrirse desde la venta
+- muestra las acciones necesarias para trabajo comercial
 
-- el pedido generado
-- las lineas de cumplimiento
-- los despachos
-- las ordenes de fabricacion
-- los registros de liberacion
-- las ordenes de recogida
+## Paso 4 - Reserva temporal de 24 horas
 
-## Paso 2 - Se crea un pedido de venta interno
+Mientras la prefactura este vigente:
 
-El sistema crea un `sale.order` asociado a la factura.
+- el stock visible debe descontar esa reserva
+- se reduce el riesgo de doble venta
 
-Ese pedido no nace desde el proceso comercial habitual de una cotizacion, sino como representacion comercial interna de lo que ya fue facturado.
+Si la reserva vence:
 
-El enlace queda guardado en la factura mediante el campo:
+- la prefactura se considera vencida
+- el flujo vuelve a cotizacion
+- el inventario reservado se libera
 
-- `sale_order_id`
+Renovacion:
 
-Esto permite que desde la propia factura se pueda abrir el pedido generado y usarlo como parte de la trazabilidad.
+- existe renovacion manual
+- solo procede para el mismo cliente
 
-## Paso 3 - Se crean lineas de venta
+## Paso 5 - Confirmar prefactura
 
-Por cada linea de producto de la factura, el sistema crea una linea de venta en el `sale.order`.
+Al confirmar la prefactura:
 
-La informacion base que se traslada incluye:
+- se publica la factura automaticamente
+- la venta relacionada queda confirmada
+- la reserva temporal pasa a compromiso firme
 
-- producto
-- descripcion
-- cantidad
-- unidad de medida
-- precio unitario
-- descuento
-- impuestos
+Aqui se cierra la parte comercial previa y se abre la parte formal contable y operativa.
 
-De esta forma, el pedido refleja comercialmente lo que la factura contiene.
+## Paso 6 - Factura confirmada
 
-## Paso 4 - Se crean lineas de fulfillment
+La factura confirmada es el documento formal del proceso.
 
-Ademas del pedido de venta, el sistema crea registros en `doorandoor.fulfillment.line`.
+Desde ella se puede navegar a:
 
-Ese modelo esta definido en [fulfillment_line.py](/home/hanoi/Documentos/doorandoor/odoo/addons/doorandoor_sales_new/models/fulfillment_line.py).
+- `Sale Order`
+- `Fulfillment`
+- `Dispatches`
+- `Manufacturing`
+- `Releases`
+- `Pickup Orders`
 
-Estas lineas son el verdadero centro del seguimiento operativo.
+La factura tambien refleja mejor el stock comprometido real y mantiene el resumen fiscal con la etiqueta fija `Total de Impuestos`.
 
-Cada `fulfillment_line` representa una linea facturada que luego necesita control sobre:
+## Paso 7 - Pago y operacion
 
-- cantidad facturada
-- cantidad liberada por pago
-- cantidad enviada a stock
-- cantidad enviada a fabricacion
-- cantidad entregada
-- cantidad pendiente
-- documentos relacionados
-- estado operativo
+La politica vigente del proyecto es:
 
-## Como queda enlazada la informacion
+- `Fabricacion` con pago parcial
+- `Despacho` con pago total
+- `Entrega` con pago total
 
-La fortaleza del flujo esta en que todo queda conectado.
+Por eso, aunque la orden o la factura ya existan:
 
-Una linea de factura puede quedar enlazada con:
+- los botones de entrega pueden seguir visibles
+- no deben quedar activos sin pago total
 
-- su linea de venta generada
-- su linea de fulfillment
+## Relacion con fulfillment
 
-La factura queda enlazada con:
+`Fulfillment` sigue siendo la capa de seguimiento operativo por linea.
 
-- su `sale.order`
-- sus `fulfillment_line_ids`
+Su papel en el flujo actual es:
 
-Cada `fulfillment_line` queda enlazada con:
+- mantener trazabilidad entre venta, prefactura y factura
+- controlar cantidades comprometidas
+- sostener liberacion, despacho, fabricacion y entrega
+- servir de base para ordenes de recogida
 
-- la factura
-- la linea de factura
-- el pedido de venta
-- la linea de venta
-- el picking, si existe
-- la orden de fabricacion, si existe
+## Lectura funcional rapida
 
-Eso permite una trazabilidad completa sin rehacer la informacion varias veces.
+La forma simple de explicarlo es esta:
 
-## Que significa esto funcionalmente
+- ventas inicia el proceso
+- cotizacion prepara la propuesta
+- validacion crea prefactura
+- prefactura reserva por 24 horas
+- confirmacion publica factura
+- pago define que operacion puede ejecutarse
 
-En la practica, este flujo resuelve un problema importante:
+## Conclusion
 
-la informacion ya no se rompe entre contabilidad, ventas y operacion.
-
-Ahora el sistema deja preparado un camino continuo:
-
-- la factura origina el seguimiento
-- la venta interna refleja lo vendido
-- el fulfillment controla lo que falta por liberar, fabricar, despachar o entregar
-
-## Como explicarlo de forma sencilla
-
-Una forma simple de explicarlo es esta:
-
-"Antes, la factura cerraba contabilidad. Ahora, ademas de eso, abre el seguimiento del negocio. Al publicarla, el sistema crea el pedido interno y las lineas de cumplimiento para que desde ese momento podamos controlar pago, despacho, fabricacion y entrega desde una misma trazabilidad."
-
-## Por que `fulfillment` es tan importante
-
-El pedido de venta ayuda a representar comercialmente la operacion.
-
-Pero el `fulfillment` es el que realmente sirve para seguir la ejecucion.
-
-Es como una capa de control interno por linea.
-
-Gracias a esa capa, el sistema puede saber:
-
-- cuanto de la linea ya fue autorizado por pago
-- cuanto ya fue enviado a almacen
-- cuanto fue mandado a fabricar
-- cuanto ya se entrego
-- que estado tiene esa linea dentro del proceso
-
-## Beneficios del flujo base
-
-### 1. Evita trabajo manual repetido
-
-No hace falta volver a crear a mano un pedido interno despues de facturar.
-
-### 2. Centraliza la trazabilidad
-
-Desde la factura se puede seguir el resto del ciclo.
-
-### 3. Prepara el sistema para automatizaciones posteriores
-
-Sin esta base no seria posible sostener bien:
-
-- liberacion por pago
-- creacion automatica de picking
-- creacion automatica de MRP
-- ordenes de recogida
-
-### 4. Reduce inconsistencias
-
-Como la informacion nace conectada, se reducen errores entre documentos.
-
-## Que pasa si hace falta resincronizar
-
-El flujo fue pensado para soportar resincronizacion.
-
-Existe una accion llamada:
-
-- `Sync Fulfillment`
-
-Esa accion vuelve a ejecutar la logica y ayuda a completar lo que falte sin duplicar lo que ya existe.
-
-Esto es util, por ejemplo, para:
-
-- facturas anteriores a una actualizacion
-- casos donde se necesita reconstruir enlaces
-- validaciones funcionales despues de cambios
-
-## Relacion con el stock visible en factura
-
-Una vez creada la base `factura -> venta -> fulfillment`, esa misma estructura se usa para mostrar mejor la disponibilidad comercial en las lineas de factura.
-
-Eso significa que la columna de stock visible no debe interpretarse como simple existencia fisica bruta.
-
-Ahora se usa tambien para descontar cantidades que ya quedaron comprometidas por pagos anteriores y siguen pendientes de entrega.
-
-## Que significa esto para el usuario
-
-Cuando una factura nueva se esta preparando, el usuario ve una cifra mas realista de lo que aun puede comprometer comercialmente.
-
-En la practica:
-
-- si hay stock fisico pero parte ya fue liberada por otra factura
-- esa parte ya no debe verse como totalmente libre
-
-De esa manera, la base de `fulfillment` no solo sirve para seguimiento interno, sino tambien para mejorar decisiones operativas y comerciales en pantalla.
-
-## Que rol cumple cada pieza
-
-### Factura
-
-- documento maestro
-- origen del proceso
-- punto principal de consulta
-
-### Sale Order
-
-- representacion comercial interna
-- reflejo de lo facturado
-- apoyo a trazabilidad comercial
-
-### Fulfillment Line
-
-- control operativo por linea
-- base para liberacion, despacho, fabricacion y entrega
-- pieza central del seguimiento
-
-## Como presentarlo en una reunion
-
-Si necesitas explicarlo con lenguaje ejecutivo, puedes usar este guion:
-
-"El cambio principal de esta parte del proyecto es que la factura pasa a ser el origen del flujo. Al publicarla, el sistema crea automaticamente un pedido de venta interno y lineas de fulfillment. El pedido refleja comercialmente lo facturado, mientras que el fulfillment permite controlar el avance operativo por cada producto. Con eso logramos trazabilidad desde factura hasta entrega."
-
-## Como presentarlo en una capacitacion
-
-Si necesitas explicarlo de forma mas didactica a usuarios:
-
-1. Crear una factura de cliente.
-2. Publicarla.
-3. Mostrar que aparece un `sale.order` generado.
-4. Mostrar la pestana o lista de `Fulfillment`.
-5. Explicar que cada linea de fulfillment es una linea bajo seguimiento.
-6. Explicar que desde ahi despues se controlan pago, despacho, fabricacion y entrega.
-
-## Conclusión
-
-El flujo base `factura -> venta -> fulfillment` no es un detalle tecnico aislado.
-
-Es la base que hace posible el resto del proyecto.
-
-Gracias a este flujo:
-
-- la factura ya no termina el proceso
-- la venta interna nace automaticamente
-- el cumplimiento queda trazado por linea
-- el sistema queda listo para coordinar mejor ventas, administracion, almacen y produccion
+El cambio clave del proyecto es que el proceso comercial ya no depende de comenzar en facturacion. Ahora nace en `Ventas`, y desde ahi enlaza todos los documentos y vistas necesarias hasta la operacion final.

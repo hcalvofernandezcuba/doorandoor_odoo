@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New",
-    "version": "18.0.1.0.52",
+    "version": "18.0.1.0.53",
     "category": "Sales",
     "summary": "Invoice-driven sales, payment release, delivery and production orchestration",
     "description": """
@@ -140,8 +140,14 @@ Historial resumido
 - 18.0.1.0.50
   Se corrige `action_post()` en prefacturas para esta base de Odoo 18, usando el recordset original en lugar del valor devuelto por `super()`, evitando el error `'bool' object has no attribute 'mapped'` al confirmar la prefactura.
 
+- 18.0.1.0.51
+  Se ajusta el control del boton de entregas desde ventas para que solo se habilite con pago total de la factura vinculada, manteniendolo visible pero inactivo mientras no se cumpla esa regla.
+
 - 18.0.1.0.52
   Se unifica la etiqueta visual de impuestos en ventas y facturacion usando el texto fijo `Total de Impuestos`, eliminando tanto la leyenda variable por porcentaje en cotizaciones como el texto incorrecto `Total Pimpuestos` en la factura.
+
+- 18.0.1.0.53
+  Se actualiza la documentacion funcional y publicada en website para reflejar el flujo actual iniciado en `Ventas`, incluyendo `Cotizacion -> Prefactura -> Factura`, reglas de reserva de 24 horas y navegacion operativa desde ventas.
 
 Autor
 -----
