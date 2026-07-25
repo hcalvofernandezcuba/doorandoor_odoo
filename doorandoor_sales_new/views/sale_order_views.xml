@@ -61,6 +61,19 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="priority">100</field>
             <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_shipping_id']" position="attributes">
+                    <attribute name="domain">['|', ('id', '=', partner_id), '&amp;', ('parent_id', '=', partner_id), ('type', '=', 'delivery')]</attribute>
+                    <attribute name="context">{'default_type': 'delivery', 'default_parent_id': partner_id, 'default_company_id': company_id, 'show_vat': True, 'form_view_ref': 'base.view_partner_address_form'}</attribute>
+                    <attribute name="options">{'always_reload': True}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                    <field
+                        name="ddsn_shipping_address_summary"
+                        widget="text"
+                        readonly="1"
+                        nolabel="1"
+                        placeholder="La direccion de entrega seleccionada se mostrara aqui."/>
+                </xpath>
                 <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_qty']" position="after">
                     <field name="ddsn_stock_display" string="Stock" readonly="1"/>
                     <field name="ddsn_warehouse_stock_display" string="Warehouses" readonly="1"/>

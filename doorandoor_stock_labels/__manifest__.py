@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Stock Labels",
-    "version": "18.0.1.0.33",
+    "version": "18.0.1.0.40",
     "category": "Inventory",
-    "summary": "18.0.1.0.33 - Preserva lotes en recibir con hanger y bloquea seriales",
+    "summary": "18.0.1.0.40 - Corrige layout del label de factura y fabricacion en Odoo CE 18",
     "description": """
 DoorAndDoor Stock Labels
 ========================
@@ -62,6 +62,34 @@ Historial resumido
 - 18.0.1.0.33
   Ajusta `Recibir con hanger` para preservar el lote ya registrado en productos con tracking por lote y bloquear con mensaje claro los productos con tracking por serie hasta que se registren sus seriales reales.
 
+- 18.0.1.0.34
+  Agrega un flujo independiente de `Labels de productos` desde la vista de producto.
+  Incorpora un wizard con almacen seleccionable, campos propios de label en el producto y un reporte dedicado cuyo barcode usa el nuevo `Codigo de producto`.
+
+- 18.0.1.0.35
+  Corrige la insercion del boton `Labels de productos` en la vista real de `product.template` usada por Odoo CE 18.
+  Se actualiza tambien el `summary` para mantener visible en el manifest el avance actual del modulo.
+
+- 18.0.1.0.36
+  Refuerza la visibilidad del acceso a `Labels de productos` agregando tambien un boton directo en el encabezado del formulario de producto.
+  Esto evita depender solo del layout de botones estadisticos de la vista en Odoo CE 18.
+
+- 18.0.1.0.37
+  Reubica el boton `Labels de productos` junto al boton estandar `Imprimir etiquetas` en la vista de producto.
+  Se mantiene ademas el acceso tipo stat para no perder redundancia funcional en Odoo CE 18.
+
+- 18.0.1.0.38
+  Agrega el permiso de acceso faltante para `ddsl.product.label.wizard`.
+  Esto permite abrir el asistente de `Labels de productos` desde la vista de producto sin error de acceso.
+
+- 18.0.1.0.39
+  Agrega una primera version del flujo comun de `Labels de factura` y `Labels de fabricacion`.
+  Se incorporan botones en `Factura` y `MO`, un wizard comun y un reporte PDF compartido que muestra documento, cliente, datos del producto, usuario que preparo el documento y usuario que lanza el label.
+
+- 18.0.1.0.40
+  Simplifica el layout del label de `Factura / Fabricacion` para evitar salidas en blanco por maquetacion inestable.
+  El reporte usa una composicion mas lineal y robusta para su primera validacion en PDF dentro de Odoo CE 18.
+
     """,
     "author": "Hanoi Calvo Fernandez for Doorandoor",
     "website": "https://gestion.doorandoor.com",
@@ -74,9 +102,15 @@ Historial resumido
         "security/ir.model.access.csv",
         "wizard/stock_serial_wizard_views.xml",
         "wizard/stock_label_wizard_views.xml",
+        "wizard/product_label_wizard_views.xml",
+        "wizard/document_label_wizard_views.xml",
         "wizard/stock_receipt_scan_wizard_views.xml",
         "views/product_views.xml",
+        "views/account_move_views.xml",
+        "views/mrp_production_views.xml",
         "views/stock_picking_views.xml",
+        "report/document_label_report.xml",
+        "report/product_label_report.xml",
         "report/stock_label_report.xml",
     ],
     "installable": True,

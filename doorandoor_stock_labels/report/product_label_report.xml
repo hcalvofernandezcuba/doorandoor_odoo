@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="product_labels_report">
+            <t t-call="web.html_container">
+                <div style="padding:8mm;font-size:0;">
+                    <t t-foreach="labels" t-as="label">
+                        <div style="display:inline-block;vertical-align:top;width:88mm;height:128mm;margin:0 4mm 8mm 0;padding:0;box-sizing:border-box;page-break-inside:avoid;">
+                            <div style="border:1px solid #d9d9d9;height:100%;padding:6mm 7mm;box-sizing:border-box;background:#fff;">
+                                <div style="text-align:center;font-size:16px;font-weight:700;letter-spacing:0.5px;">DOORANDOOR</div>
+                                <div style="text-align:center;font-size:9px;margin-top:1mm;">WWW.DOORANDOOR.COM</div>
+
+                                <div style="margin-top:10mm;font-size:12px;line-height:1.45;">
+                                    <div><strong>PRODUCT:</strong> <t t-esc="label.get('product_name')"/></div>
+                                    <div><strong>WAREHOUSE:</strong> <t t-esc="label.get('warehouse_name')"/></div>
+                                    <div t-if="label.get('label_model')"><strong>MODEL:</strong> <t t-esc="label.get('label_model')"/></div>
+                                    <div t-if="label.get('label_design')"><strong>DESIGN:</strong> <t t-esc="label.get('label_design')"/></div>
+                                    <div t-if="label.get('label_size')"><strong>SIZE:</strong> <t t-esc="label.get('label_size')"/></div>
+                                    <div t-if="label.get('label_swing')"><strong>SWING:</strong> <t t-esc="label.get('label_swing')"/></div>
+                                    <div t-if="label.get('label_hinge')"><strong>HINGE:</strong> <t t-esc="label.get('label_hinge')"/></div>
+                                </div>
+
+                                <div style="position:absolute;left:0;right:0;bottom:18mm;text-align:center;">
+                                    <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')" style="max-width:72mm;width:auto;height:16mm;display:inline-block;"/>
+                                    <div style="font-size:9px;margin-top:1mm;letter-spacing:0.3px;">
+                                        <t t-esc="label.get('product_code')"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </template>
+
+        <record id="action_report_ddsl_product_labels" model="ir.actions.report">
+            <field name="name">Product Labels</field>
+            <field name="model">ddsl.product.label.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">doorandoor_stock_labels.product_labels_report</field>
+            <field name="report_file">doorandoor_stock_labels.product_labels_report</field>
+            <field name="print_report_name">'Product Labels - %s' % (object.product_tmpl_id.display_name or 'Product')</field>
+        </record>
+    </data>
+</odoo>

@@ -98,6 +98,10 @@ class AccountMove(models.Model):
         string="Preinvoice Reservation Status",
         compute="_compute_ddsn_reservation_status",
     )
+    ddsn_shipping_address_summary = fields.Text(
+        string="Delivery Address Summary",
+        compute="_compute_ddsn_shipping_address_summary",
+    )
 
     payment_release_policy = fields.Selection(
         selection=[
@@ -213,6 +217,36 @@ class AccountMove(models.Model):
             else:
                 move.ddsn_reservation_active = False
                 move.ddsn_reservation_status = "released"
+
+    @api.depends(
+        "partner_shipping_id",
+        "partner_shipping_id.name",
+        "partner_shipping_id.street",
+        "partner_shipping_id.street2",
+        "partner_shipping_id.city",
+        "partner_shipping_id.state_id",
+        "partner_shipping_id.zip",
+        "partner_shipping_id.country_id",
+        "partner_shipping_id.phone",
+        "partner_shipping_id.mobile",
+    )
+    def _compute_ddsn_shipping_address_summary(self):
+        for move in self:
+            partner = move.partner_shipping_id
+            if not partner:
+                move.ddsn_shipping_address_summary = False
+                continue
+            parts = [
+                partner.name,
+                partner.street,
+                partner.street2,
+                partner.city,
+                partner.state_id.name,
+                partner.zip,
+                partner.country_id.name,
+                partner.phone or partner.mobile,
+            ]
+            move.ddsn_shipping_address_summary = "\n".join(part for part in parts if part)
 
     @api.model_create_multi
     def create(self, vals_list):

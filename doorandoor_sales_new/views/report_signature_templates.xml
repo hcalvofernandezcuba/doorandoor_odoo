@@ -4,6 +4,64 @@
         <template id="report_invoice_document_hide_line_taxes" inherit_id="account.report_invoice_document">
             <xpath expr="//th[@name='th_taxes']" position="replace"/>
             <xpath expr="//td[@name='td_taxes']" position="replace"/>
+            <xpath expr="//p[@name='payment_communication']" position="replace"/>
+            <xpath expr="//div[@name='shipping_address_block']" position="attributes">
+                <attribute name="style">font-size: 9px; line-height: 1.1;</attribute>
+            </xpath>
+            <xpath expr="//div[@name='address_not_same_as_shipping']" position="attributes">
+                <attribute name="style">font-size: 9px; line-height: 1.1;</attribute>
+            </xpath>
+            <xpath expr="//div[@name='address_same_as_shipping']" position="attributes">
+                <attribute name="style">font-size: 9px; line-height: 1.1;</attribute>
+            </xpath>
+            <xpath expr="//div[@name='no_shipping']" position="attributes">
+                <attribute name="style">font-size: 9px; line-height: 1.1;</attribute>
+            </xpath>
+            <xpath expr="//address[@class='mb-0']" position="attributes">
+                <attribute name="style">font-size: 9px; line-height: 1.1;</attribute>
+            </xpath>
+            <xpath expr="//div[@id='partner_vat_address_not_same_as_shipping']" position="attributes">
+                <attribute name="style">font-size: 9px; line-height: 1.1;</attribute>
+            </xpath>
+            <xpath expr="//div[@id='partner_vat_address_same_as_shipping']" position="attributes">
+                <attribute name="style">font-size: 9px; line-height: 1.1;</attribute>
+            </xpath>
+            <xpath expr="//div[@id='partner_vat_no_shipping']" position="attributes">
+                <attribute name="style">font-size: 9px; line-height: 1.1;</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('page')]" position="attributes">
+                <attribute name="style">font-size: 11px; line-height: 1.15;</attribute>
+            </xpath>
+            <xpath expr="//div[@id='informations']" position="attributes">
+                <attribute name="class">row mb-2</attribute>
+            </xpath>
+            <xpath expr="//table[@name='invoice_line_table']" position="attributes">
+                <attribute name="style">font-size: 14px; line-height: 1.2; margin-top: 2px;</attribute>
+            </xpath>
+            <xpath expr="//table[@name='invoice_line_table']/thead/tr" position="attributes">
+                <attribute name="style">border-bottom: 1px solid #ddd;</attribute>
+            </xpath>
+            <xpath expr="//table[@name='invoice_line_table']/tbody" position="attributes">
+                <attribute name="style">line-height: 1.15;</attribute>
+            </xpath>
+            <xpath expr="//td[@name='account_invoice_line_name']" position="attributes">
+                <attribute name="style">padding-top: 4px; padding-bottom: 4px;</attribute>
+            </xpath>
+            <xpath expr="//td[@name='td_quantity']" position="attributes">
+                <attribute name="style">padding-top: 4px; padding-bottom: 4px;</attribute>
+            </xpath>
+            <xpath expr="//td[@name='td_price_unit']" position="attributes">
+                <attribute name="style">padding-top: 4px; padding-bottom: 4px;</attribute>
+            </xpath>
+            <xpath expr="//td[@name='td_subtotal']" position="attributes">
+                <attribute name="style">padding-top: 4px; padding-bottom: 4px;</attribute>
+            </xpath>
+            <xpath expr="//div[@id='right-elements']" position="attributes">
+                <attribute name="class">col-4 mt-2 ms-3 d-inline-block float-end</attribute>
+            </xpath>
+            <xpath expr="//div[@id='payment_term']" position="attributes">
+                <attribute name="class">clearfix mt-1</attribute>
+            </xpath>
             <xpath expr="//t[@t-if='o.tax_totals' and @t-call='account.document_tax_totals']" position="replace">
                 <t t-if="o.tax_totals" t-call="doorandoor_sales_new.document_tax_totals_invoice_only">
                     <t t-set="tax_totals" t-value="o.tax_totals"/>
@@ -61,46 +119,46 @@
                 <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">Prefactura</span>
             </xpath>
             <xpath expr="//div[hasclass('page')]" position="inside">
-                <div class="mt-5 pt-4">
-                    <div class="row mb-4 align-items-start">
+                <div class="mt-2 pt-1">
+                    <div class="row mb-2 align-items-start">
                         <div class="col-8">
                             <div>
                                 <strong>Codigo de documento</strong>
                             </div>
-                            <div class="mt-2">
-                                <img t-att-src="o._ddsn_get_barcode_img_src()" alt="Invoice Barcode" style="max-width: 320px; max-height: 90px;"/>
+                            <div class="mt-1">
+                                <img t-att-src="o._ddsn_get_barcode_img_src()" alt="Invoice Barcode" style="max-width: 250px; max-height: 55px;"/>
                             </div>
                         </div>
                         <div class="col-4 text-end">
                             <div>
                                 <strong>Escanear para abrir</strong>
                             </div>
-                            <div class="mt-2">
-                                <img t-att-src="o._ddsn_get_document_qr_img_src()" alt="Invoice QR" style="width: 110px; height: 110px;"/>
+                            <div class="mt-1">
+                                <img t-att-src="o._ddsn_get_document_qr_img_src()" alt="Invoice QR" style="width: 72px; height: 72px;"/>
                             </div>
                         </div>
                     </div>
                     <t t-set="invoice_pickings" t-value="o.fulfillment_line_ids.mapped('picking_id')"/>
                     <t t-if="invoice_pickings">
-                        <div class="mb-3">
+                        <div class="mb-1" style="font-size: 10px;">
                             <strong>Dispatch Order</strong>:
                             <span t-esc="', '.join(invoice_pickings.mapped('name'))"/>
                         </div>
                     </t>
                     <div class="row">
                         <div class="col-6">
-                            <div style="margin-top: 30px;">
+                            <div style="margin-top: 12px; font-size: 10px;">
                                 <strong>Invoiced by</strong>
                             </div>
-                            <div style="border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; min-height: 22px;">
+                            <div style="border-top: 1px solid #000; margin-top: 18px; padding-top: 3px; min-height: 14px; font-size: 10px;">
                                 <span t-esc="(o.invoice_user_id or o.create_uid).name"/>
                             </div>
                         </div>
                         <div class="col-6 text-end">
-                            <div style="margin-top: 30px;">
+                            <div style="margin-top: 12px; font-size: 10px;">
                                 <strong>Received by</strong>
                             </div>
-                            <div style="border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; min-height: 22px;">
+                            <div style="border-top: 1px solid #000; margin-top: 18px; padding-top: 3px; min-height: 14px; font-size: 10px;">
                                 &amp;nbsp;
                             </div>
                         </div>

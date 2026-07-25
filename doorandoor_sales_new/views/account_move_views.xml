@@ -102,6 +102,16 @@
                     <span invisible="name or name_placeholder or quick_edit_mode or move_type in ('out_invoice', 'out_refund')">Borrador</span>
                 </xpath>
 
+                <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                    <field
+                        name="ddsn_shipping_address_summary"
+                        widget="text"
+                        readonly="1"
+                        nolabel="1"
+                        placeholder="La direccion de entrega seleccionada se mostrara aqui."
+                        invisible="move_type not in ('out_invoice', 'out_refund')"/>
+                </xpath>
+
                 <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='quantity']" position="after">
                     <field name="ddsn_stock_display" string="Stock" readonly="1" optional="show"/>
                     <field name="ddsn_warehouse_stock_html" string="Warehouses" widget="html" readonly="1" optional="show"/>

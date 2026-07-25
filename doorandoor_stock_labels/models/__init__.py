@@ -5,3 +5,7 @@ from . import stock_move_line
 from . import stock_picking
 from . import stock_label_report
 from . import stock_receipt_scan_wizard
+from . import product_label_report
+from . import account_move
+from . import mrp_production
+from . import document_label_report

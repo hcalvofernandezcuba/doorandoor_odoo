@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_ddsl_document_label_wizard_form" model="ir.ui.view">
+            <field name="name">ddsl.document.label.wizard.form</field>
+            <field name="model">ddsl.document.label.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Labels de factura / fabricacion">
+                    <group>
+                        <field name="move_id" invisible="not move_id"/>
+                        <field name="production_id" invisible="not production_id"/>
+                        <field name="quantity"/>
+                    </group>
+                    <footer>
+                        <button name="action_print_labels" type="object" string="Print" class="btn-primary"/>
+                        <button string="Cancel" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

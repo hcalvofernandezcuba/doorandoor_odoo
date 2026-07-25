@@ -6,10 +6,35 @@
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_open_label_layout']" position="after">
+                    <button
+                        name="action_open_ddsl_product_label_wizard"
+                        type="object"
+                        string="Labels de productos"
+                        class="btn-secondary"/>
+                </xpath>
+                <xpath expr="//button[@name='action_open_documents']" position="before">
+                    <button
+                        name="action_open_ddsl_product_label_wizard"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-tag">
+                        <div class="o_stat_info">
+                            <span class="o_stat_text">Labels</span>
+                            <span class="o_stat_text">de productos</span>
+                        </div>
+                    </button>
+                </xpath>
                 <xpath expr="//field[@name='barcode']" position="after">
                     <field name="tracking"/>
                     <field name="ddsl_print_label_on_receipt"/>
                     <field name="ddsl_label_use_barcode"/>
+                    <field name="ddsl_product_label_code"/>
+                    <field name="ddsl_label_model"/>
+                    <field name="ddsl_label_design"/>
+                    <field name="ddsl_label_size"/>
+                    <field name="ddsl_label_swing"/>
+                    <field name="ddsl_label_hinge"/>
                 </xpath>
             </field>
         </record>

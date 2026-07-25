@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New",
-    "version": "18.0.1.0.54",
+    "version": "18.0.1.0.62",
     "category": "Sales",
     "summary": "Invoice-driven sales, payment release, delivery and production orchestration",
     "description": """
@@ -151,6 +151,38 @@ Historial resumido
 
 - 18.0.1.0.54
   Se corrige la generacion de barcode y QR en reportes PDF operativos usando URLs absolutas basadas en `web.base.url`, restaurando su visualizacion en `Orden de Recogida` y reportes de entrega.
+
+- 18.0.1.0.55
+  La direccion de entrega en `Ventas` se ajusta para Odoo CE 18 permitiendo seleccionar direcciones ya registradas del cliente o crear una nueva direccion tipo `delivery` desde la propia orden de venta.
+  La nueva direccion queda asociada al cliente para reutilizarla en ventas futuras.
+
+- 18.0.1.0.56
+  El selector de direccion de entrega en `Ventas` se afina para trabajar como lista de direcciones tipo `delivery` del cliente, manteniendo como opcion la direccion principal del cliente.
+  Al cambiar el cliente, la venta toma automaticamente la primera direccion de entrega registrada o la direccion principal si no existen direcciones adicionales.
+
+- 18.0.1.0.57
+  La orden de venta muestra debajo del selector un resumen visible de la direccion de entrega elegida.
+  Esto permite validar de inmediato la direccion seleccionada sin necesidad de abrir la ficha completa del contacto.
+
+- 18.0.1.0.58
+  El mismo resumen visible de direccion de entrega se extiende a las vistas de `Prefactura` y `Factura`.
+  Asi el usuario puede confirmar rapidamente la direccion seleccionada tambien en facturacion sin abrir el detalle del contacto.
+
+- 18.0.1.0.59
+  La factura impresa en Odoo CE 18 deja vacio el bloque estandar de `Payment Communication` y cuenta bancaria.
+  En esta instancia esos datos dejan de mostrarse en el documento PDF de factura.
+
+- 18.0.1.0.60
+  El reporte impreso de factura se compacta reduciendo tamano general, espaciados, barcode, QR, firmas y bloque inferior.
+  El objetivo es permitir que facturas con mas lineas de producto entren con mayor facilidad en una sola hoja dentro de Odoo CE 18.
+
+- 18.0.1.0.61
+  Se ajusta una variante visual de la factura reduciendo 2 puntos el bloque de direcciones del cliente y envio.
+  Al mismo tiempo se devuelve presencia al cuadro de productos aumentando 2 puntos su tamano visual para evaluar mejor el equilibrio del diseno.
+
+- 18.0.1.0.62
+  Se empareja el tamano del bloque de datos del cliente con el de direccion de envio.
+  Tambien se incrementa nuevamente el tamano visual de la tabla de productos para priorizar su lectura en la factura impresa.
 
 Autor
 -----

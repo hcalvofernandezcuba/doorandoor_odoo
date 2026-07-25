@@ -39,11 +39,45 @@ class SaleOrder(models.Model):
         copy=False,
         readonly=True,
     )
+    ddsn_shipping_address_summary = fields.Text(
+        string="Delivery Address Summary",
+        compute="_compute_ddsn_shipping_address_summary",
+    )
 
     @api.depends("ddsn_quote_registered", "name")
     def _compute_ddsn_quote_list_visible(self):
         for order in self:
             order.ddsn_quote_list_visible = bool(order.ddsn_quote_registered or ((order.name or "") != "New"))
+
+    @api.depends(
+        "partner_shipping_id",
+        "partner_shipping_id.name",
+        "partner_shipping_id.street",
+        "partner_shipping_id.street2",
+        "partner_shipping_id.city",
+        "partner_shipping_id.state_id",
+        "partner_shipping_id.zip",
+        "partner_shipping_id.country_id",
+        "partner_shipping_id.phone",
+        "partner_shipping_id.mobile",
+    )
+    def _compute_ddsn_shipping_address_summary(self):
+        for order in self:
+            partner = order.partner_shipping_id
+            if not partner:
+                order.ddsn_shipping_address_summary = False
+                continue
+            parts = [
+                partner.name,
+                partner.street,
+                partner.street2,
+                partner.city,
+                partner.state_id.name,
+                partner.zip,
+                partner.country_id.name,
+                partner.phone or partner.mobile,
+            ]
+            order.ddsn_shipping_address_summary = "\n".join(part for part in parts if part)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -95,6 +129,15 @@ class SaleOrder(models.Model):
             if not order.name or order.name == "New":
                 order.name = self.env["ir.sequence"].next_by_code("sale.order") or "New"
             order.ddsn_quote_registered = True
+
+    @api.onchange("partner_id")
+    def _onchange_partner_id_ddsn_delivery_address(self):
+        for order in self.filtered("partner_id"):
+            commercial_partner = order.partner_id.commercial_partner_id
+            available_addresses = commercial_partner.child_ids.filtered(lambda child: child.type == "delivery")
+            if order.partner_shipping_id in available_addresses:
+                continue
+            order.partner_shipping_id = available_addresses[:1] or order.partner_id
 
     def _ddsn_create_preinvoice(self):
         self.ensure_one()

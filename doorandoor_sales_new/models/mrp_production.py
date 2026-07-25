@@ -17,4 +17,3 @@ class MrpProduction(models.Model):
             )
             for fulfillment_line in fulfillment_lines:
                 fulfillment_line.move_id._ddsn_sync_finished_mrp_to_outgoing_picking(fulfillment_line)
-
