@@ -1,0 +1,7 @@
+from . import barcode_utils
+from . import product_template
+from . import product_product
+from . import stock_move_line
+from . import stock_picking
+from . import stock_label_report
+from . import stock_receipt_scan_wizard

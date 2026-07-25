@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="purchase_order_form_inherit_ddpfw" model="ir.ui.view">
+            <field name="name">purchase.order.form.ddpfw</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button
+                        name="action_open_ddpfw_serial_wizard"
+                        type="object"
+                        string="Registrar lotes/seriales"
+                        class="oe_stat_button"
+                        icon="fa-tags"
+                        invisible="not ddpfw_receipt_picking_id"/>
+                    <button
+                        name="action_open_ddpfw_label_wizard"
+                        type="object"
+                        string="Imprimir labels"
+                        class="oe_stat_button"
+                        icon="fa-print"
+                        invisible="not ddpfw_receipt_picking_id"/>
+                </xpath>
+                <xpath expr="//button[@name='button_confirm']" position="attributes">
+                    <attribute name="class" add="btn-success" separator=" "/>
+                </xpath>
+                <xpath expr="//field[@name='picking_type_id']" position="after">
+                    <field name="ddpfw_enforced_warehouse_id" invisible="1"/>
+                    <field name="ddpfw_receipt_picking_id" invisible="1"/>
+                </xpath>
+                <xpath expr="//field[@name='picking_type_id']" position="attributes">
+                    <attribute name="readonly">ddpfw_enforced_warehouse_id</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

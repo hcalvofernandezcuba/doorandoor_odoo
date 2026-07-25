@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form_inherit_ddpfw" model="ir.ui.view">
+            <field name="name">res.config.settings.form.ddpfw</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="inside">
+                    <app string="Purchases" name="doorandoor_purchase_fixed_warehouse">
+                        <block title="Purchase Warehouse Control">
+                            <setting string="Mandatory Purchase Warehouse">
+                                <field name="ddpfw_purchase_warehouse_id"/>
+                            </setting>
+                        </block>
+                    </app>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

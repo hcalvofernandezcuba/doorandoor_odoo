@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New",
-    "version": "18.0.1.0.53",
+    "version": "18.0.1.0.54",
     "category": "Sales",
     "summary": "Invoice-driven sales, payment release, delivery and production orchestration",
     "description": """
@@ -148,6 +148,9 @@ Historial resumido
 
 - 18.0.1.0.53
   Se actualiza la documentacion funcional y publicada en website para reflejar el flujo actual iniciado en `Ventas`, incluyendo `Cotizacion -> Prefactura -> Factura`, reglas de reserva de 24 horas y navegacion operativa desde ventas.
+
+- 18.0.1.0.54
+  Se corrige la generacion de barcode y QR en reportes PDF operativos usando URLs absolutas basadas en `web.base.url`, restaurando su visualizacion en `Orden de Recogida` y reportes de entrega.
 
 Autor
 -----

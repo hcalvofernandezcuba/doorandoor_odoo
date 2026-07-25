@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_stock_move_line_receipt_report_list_ddpfw" model="ir.ui.view">
+            <field name="name">stock.move.line.receipt.report.list.ddpfw</field>
+            <field name="model">stock.move.line</field>
+            <field name="arch" type="xml">
+                <list string="Recepciones por almacen" create="0" edit="0" delete="0" default_order="date desc, id desc">
+                    <field name="date"/>
+                    <field name="ddpfw_warehouse_id"/>
+                    <field name="product_id"/>
+                    <field name="quantity" string="Cantidad recibida" sum="Cantidad recibida"/>
+                    <field name="product_uom_id" string="UoM"/>
+                    <field name="ddpfw_partner_id" optional="show"/>
+                    <field name="picking_id" optional="show"/>
+                    <field name="ddpfw_reference" optional="show"/>
+                    <field name="ddpfw_origin" optional="show"/>
+                    <field name="lot_id" optional="show"/>
+                    <field name="company_id" optional="hide"/>
+                    <field name="ddpfw_state"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_stock_move_line_receipt_report_search_ddpfw" model="ir.ui.view">
+            <field name="name">stock.move.line.receipt.report.search.ddpfw</field>
+            <field name="model">stock.move.line</field>
+            <field name="arch" type="xml">
+                <search string="Recepciones por almacen">
+                    <field name="ddpfw_warehouse_id"/>
+                    <field name="product_id"/>
+                    <field name="ddpfw_partner_id"/>
+                    <field name="picking_id"/>
+                    <field name="ddpfw_origin"/>
+                    <filter name="filter_done" string="Recepciones validadas" domain="[('ddpfw_state', '=', 'done')]"/>
+                    <filter name="filter_waiting" string="Recepciones en proceso" domain="[('ddpfw_state', 'in', ['assigned', 'partially_available', 'confirmed', 'waiting'])]"/>
+                    <filter name="filter_today" string="Hoy" domain="[('date', '&gt;=', context_today().strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_warehouse" string="Almacen" context="{'group_by': 'ddpfw_warehouse_id'}"/>
+                        <filter name="group_date" string="Dia" context="{'group_by': 'date:day'}"/>
+                        <filter name="group_product" string="Producto" context="{'group_by': 'product_id'}"/>
+                        <filter name="group_partner" string="Proveedor" context="{'group_by': 'ddpfw_partner_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_stock_move_line_receipt_report_pivot_ddpfw" model="ir.ui.view">
+            <field name="name">stock.move.line.receipt.report.pivot.ddpfw</field>
+            <field name="model">stock.move.line</field>
+            <field name="arch" type="xml">
+                <pivot string="Recepciones por almacen" disable_linking="0">
+                    <field name="ddpfw_warehouse_id" type="row"/>
+                    <field name="date" interval="day" type="col"/>
+                    <field name="product_id" type="row"/>
+                    <field name="quantity" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="action_stock_move_line_receipt_report_ddpfw" model="ir.actions.act_window">
+            <field name="name">Recepciones por almacen</field>
+            <field name="res_model">stock.move.line</field>
+            <field name="view_mode">list,pivot</field>
+            <field name="view_id" ref="view_stock_move_line_receipt_report_list_ddpfw"/>
+            <field name="search_view_id" ref="view_stock_move_line_receipt_report_search_ddpfw"/>
+            <field name="domain">[('picking_id.picking_type_id.code', '=', 'incoming'), ('ddpfw_warehouse_id', '!=', False), ('ddpfw_state', '=', 'done')]</field>
+            <field name="context">{'search_default_filter_done': 1, 'search_default_group_warehouse': 1, 'search_default_group_date': 1}</field>
+            <field name="groups_id" eval="[(4, ref('stock.group_stock_manager')), (4, ref('base.group_system'))]"/>
+            <field name="help" type="html">
+                <p>Reporte de recepciones validadas por almacen, por dia, con el detalle de productos y cantidades recibidas.</p>
+            </field>
+        </record>
+
+        <menuitem
+            id="menu_stock_move_line_receipt_report_ddpfw"
+            name="Recepciones por almacen"
+            parent="stock.menu_stock_root"
+            action="action_stock_move_line_receipt_report_ddpfw"
+            sequence="95"
+            groups="stock.group_stock_manager,base.group_system"/>
+    </data>
+</odoo>

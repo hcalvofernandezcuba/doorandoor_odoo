@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddsl_stock_label_wizard_user,access.ddsl.stock.label.wizard.user,model_ddsl_stock_label_wizard,stock.group_stock_user,1,1,1,1
+access_ddsl_stock_serial_wizard_user,access.ddsl.stock.serial.wizard.user,model_ddsl_stock_serial_wizard,stock.group_stock_user,1,1,1,1
+access_ddsl_stock_serial_wizard_line_user,access.ddsl.stock.serial.wizard.line.user,model_ddsl_stock_serial_wizard_line,stock.group_stock_user,1,1,1,1
+access_ddsl_stock_receipt_scan_wizard_user,access.ddsl.stock.receipt.scan.wizard.user,model_ddsl_stock_receipt_scan_wizard,stock.group_stock_user,1,1,1,1
+access_ddsl_stock_receipt_scan_wizard_line_user,access.ddsl.stock.receipt.scan.wizard.line.user,model_ddsl_stock_receipt_scan_wizard_line,stock.group_stock_user,1,1,1,1

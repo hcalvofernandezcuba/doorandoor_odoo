@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_ddsl_stock_serial_wizard_form" model="ir.ui.view">
+            <field name="name">ddsl.stock.serial.wizard.form</field>
+            <field name="model">ddsl.stock.serial.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Register Receipt Lots / Serials">
+                    <group>
+                        <field name="picking_id"/>
+                    </group>
+                    <div class="o_form_label">
+                        Enter the real tracking value for each tracked product.
+                        Serial-tracked products require one value per unit. Lot-tracked products require one lot value for the full quantity line.
+                        You can also click Auto Generate Serials to use receipt date + consecutive format for serial products.
+                    </div>
+                    <field name="line_ids">
+                        <list editable="bottom" create="0" delete="0">
+                            <field name="move_id" column_invisible="1" force_save="1"/>
+                            <field name="product_id" force_save="1"/>
+                            <field name="tracking_type" force_save="1"/>
+                            <field name="sequence" force_save="1"/>
+                            <field name="qty" force_save="1"/>
+                            <field name="tracking_number" force_save="1"/>
+                        </list>
+                    </field>
+                    <footer>
+                        <button name="action_auto_generate_serials" type="object" string="Auto Generate Serials" class="btn-secondary"/>
+                        <button name="action_apply_serials" type="object" string="Save Lots / Serials" class="btn-primary"/>
+                        <button string="Cancel" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

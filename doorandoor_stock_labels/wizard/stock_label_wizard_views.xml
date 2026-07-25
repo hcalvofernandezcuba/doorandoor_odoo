@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_ddsl_stock_label_wizard_form" model="ir.ui.view">
+            <field name="name">ddsl.stock.label.wizard.form</field>
+            <field name="model">ddsl.stock.label.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Print Receipt Labels">
+                    <group>
+                        <field name="picking_id"/>
+                        <field name="print_mode"/>
+                        <field name="only_flagged_products"/>
+                        <field name="include_untracked_qty" invisible="print_mode == 'product_code'"/>
+                    </group>
+                    <footer>
+                        <button name="action_print_labels" type="object" string="Print" class="btn-primary"/>
+                        <button string="Cancel" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

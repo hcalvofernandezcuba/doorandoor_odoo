@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_picking_form_inherit_ddsl" model="ir.ui.view">
+            <field name="name">stock.picking.form.ddsl.labels</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <button
+                        name="action_open_ddsl_receipt_scan_wizard"
+                        type="object"
+                        string="Recibir con hanger"
+                        class="btn-primary"
+                        invisible="picking_type_code != 'incoming'"/>
+                    <button
+                        name="action_open_ddsl_serial_wizard"
+                        type="object"
+                        string="Register Lots / Serials"
+                        class="btn-secondary"
+                        invisible="picking_type_code != 'incoming'"/>
+                    <button
+                        name="action_open_ddsl_label_wizard"
+                        type="object"
+                        string="Print Labels"
+                        class="btn-secondary"
+                        invisible="picking_type_code != 'incoming'"/>
+                </xpath>
+                <xpath expr="//page[@name='operations']" position="inside">
+                    <div
+                        class="alert alert-info"
+                        role="alert"
+                        invisible="picking_type_code != 'incoming' or state not in ('assigned', 'confirmed', 'waiting')">
+                        <strong>Flujo recomendado:</strong>
+                        Para productos con seguimiento por serie o lote, registre primero los seriales reales en las operaciones detalladas. Luego imprima las etiquetas y finalmente valide la recepción.
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

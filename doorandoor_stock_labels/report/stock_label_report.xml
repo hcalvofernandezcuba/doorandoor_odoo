@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="stock_labels_report">
+            <t t-call="web.html_container">
+                <div style="padding:10mm 10mm 10mm 10mm;font-size:0;">
+                        <t t-foreach="labels" t-as="label">
+                            <div style="display:inline-block;vertical-align:top;width:90mm;height:66mm;margin:0 6mm 10mm 0;padding:0;box-sizing:border-box;page-break-inside:avoid;">
+                                <div style="border:1px solid #d9d9d9;height:100%;padding:4mm;box-sizing:border-box;background:#fff;">
+                                    <div style="display:table;width:100%;height:100%;">
+                                        <div style="display:table-row;">
+                                            <div style="display:table-cell;vertical-align:top;padding-right:4mm;">
+                                        <div>
+                                            <div style="font-size:13px;font-weight:700;line-height:1.2;word-break:break-word;">
+                                                <t t-esc="label.get('product_name')"/>
+                                            </div>
+                                            <div t-if="label.get('default_code')" style="margin-top:3px;font-size:10px;">
+                                                Ref: <t t-esc="label.get('default_code')"/>
+                                            </div>
+                                            <div t-if="label.get('lot_name')" style="margin-top:2px;font-size:10px;">
+                                                Serie: <t t-esc="label.get('lot_name')"/>
+                                            </div>
+                                        </div>
+                                                <div style="margin-top:6mm;text-align:center;">
+                                                    <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')" style="max-width:100%;width:auto;height:14mm;display:inline-block;"/>
+                                                </div>
+                                            </div>
+                                            <div style="display:table-cell;vertical-align:bottom;width:24mm;text-align:center;">
+                                                <img t-if="label.get('mobile_qr_src')" t-att-src="label.get('mobile_qr_src')" style="width:21mm;height:21mm;display:inline-block;"/>
+                                                <div style="font-size:8px;word-break:break-word;line-height:1.1;margin-top:3mm;">
+                                                    <t t-esc="label.get('label_reference')"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                </div>
+            </t>
+        </template>
+
+        <record id="action_report_ddsl_stock_labels" model="ir.actions.report">
+            <field name="name">Stock Labels</field>
+            <field name="model">ddsl.stock.label.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">doorandoor_stock_labels.stock_labels_report</field>
+            <field name="report_file">doorandoor_stock_labels.stock_labels_report</field>
+            <field name="print_report_name">'Stock Labels - %s' % (data.get('picking_name') or 'Picking')</field>
+        </record>
+    </data>
+</odoo>
