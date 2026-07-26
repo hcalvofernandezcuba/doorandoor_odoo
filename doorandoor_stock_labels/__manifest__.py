@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Stock Labels",
-    "version": "18.0.1.0.40",
+    "version": "18.0.1.0.43",
     "category": "Inventory",
-    "summary": "18.0.1.0.40 - Corrige layout del label de factura y fabricacion en Odoo CE 18",
+    "summary": "18.0.1.0.43 - Corrige filtro de lineas de factura para labels documentales",
     "description": """
 DoorAndDoor Stock Labels
 ========================
@@ -89,6 +89,18 @@ Historial resumido
 - 18.0.1.0.40
   Simplifica el layout del label de `Factura / Fabricacion` para evitar salidas en blanco por maquetacion inestable.
   El reporte usa una composicion mas lineal y robusta para su primera validacion en PDF dentro de Odoo CE 18.
+
+- 18.0.1.0.41
+  Reestructura el reporte de `Labels de factura / fabricacion` usando una pagina QWeb por etiqueta.
+  Esto busca evitar PDFs en blanco cuando el reporte se ejecuta desde wizard en Odoo CE 18.
+
+- 18.0.1.0.42
+  Reemplaza el renderer del label documental por el mismo patron visual estable usado en labels funcionales del modulo.
+  Ademas bloquea el wizard con mensaje claro si una factura no genera payloads, evitando PDFs vacios silenciosos.
+
+- 18.0.1.0.43
+  Corrige la deteccion de lineas validas en `Labels de factura` para esta base Odoo CE 18.
+  Ahora el wizard incluye lineas con `display_type = product`, evitando que facturas validas queden sin payloads y muestren error falso.
 
     """,
     "author": "Hanoi Calvo Fernandez for Doorandoor",

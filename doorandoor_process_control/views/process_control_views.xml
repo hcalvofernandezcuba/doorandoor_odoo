@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_doorandoor_process_flow_search" model="ir.ui.view">
+            <field name="name">doorandoor.process.flow.search</field>
+            <field name="model">doorandoor.process.flow</field>
+            <field name="arch" type="xml">
+                <search string="Search Process Flows">
+                    <field name="name" string="Proceso"/>
+                    <field name="partner_id" string="Cliente"/>
+                    <field name="sale_order_id" string="Venta"/>
+                    <field name="account_move_id" string="Factura"/>
+                    <field name="mrp_production_id" string="MO"/>
+                    <field name="stock_picking_id" string="Picking"/>
+                    <field name="state" string="Estado"/>
+                    <field name="user_id" string="Responsable"/>
+                    <filter string="Iniciado" name="state_iniciado" domain="[('state', '=', 'iniciado')]"/>
+                    <filter string="En proceso" name="state_en_proceso" domain="[('state', '=', 'en_proceso')]"/>
+                    <filter string="Entregado" name="state_entregado" domain="[('state', '=', 'entregado')]"/>
+                    <filter string="En ruta" name="state_en_ruta" domain="[('state', '=', 'en_ruta')]"/>
+                    <filter string="Cerrado" name="state_cerrado" domain="[('state', '=', 'cerrado')]"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Cliente" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                        <filter string="Responsable" name="group_user" context="{'group_by': 'user_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_doorandoor_process_flow_tree" model="ir.ui.view">
+            <field name="name">doorandoor.process.flow.tree</field>
+            <field name="model">doorandoor.process.flow</field>
+            <field name="arch" type="xml">
+                <list string="Process Flows" default_order="write_date desc">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="sale_order_id"/>
+                    <field name="account_move_id"/>
+                    <field name="mrp_production_id"/>
+                    <field name="stock_picking_id"/>
+                    <field name="state"/>
+                    <field name="semaphor_label" string="Status"/>
+                    <field name="user_id"/>
+                    <field name="last_state_change_at"/>
+                    <field name="time_in_current_state_hours"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_doorandoor_process_flow_kanban" model="ir.ui.view">
+            <field name="name">doorandoor.process.flow.kanban</field>
+            <field name="model">doorandoor.process.flow</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state" class="o_kanban_small_column">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="state"/>
+                    <field name="user_id"/>
+                    <field name="current_document_name"/>
+                    <field name="semaphor_label"/>
+                    <field name="semaphor_color"/>
+                    <field name="time_in_current_state_hours"/>
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_card oe_kanban_global_click" t-attf-style="border-left: 6px solid #{record.semaphor_color.raw_value or '#ea580c'};">
+                                <div class="o_kanban_record_top">
+                                    <strong><field name="name"/></strong>
+                                </div>
+                                <div><field name="partner_id"/></div>
+                                <div t-if="record.current_document_name.raw_value">
+                                    <span><field name="current_document_name"/></span>
+                                </div>
+                                <div style="margin-top:6px;">
+                                    <span t-attf-style="display:inline-block;padding:2px 8px;border-radius:999px;background:#{record.semaphor_color.raw_value or '#ea580c'};color:#fff;font-size:11px;font-weight:600;">
+                                        <t t-esc="record.semaphor_label.value or ''"/>
+                                    </span>
+                                </div>
+                                <div style="margin-top:6px;font-size:12px;">
+                                    <span>Horas:</span>
+                                    <field name="time_in_current_state_hours"/>
+                                </div>
+                                <div style="margin-top:4px;font-size:12px;">
+                                    <field name="user_id"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="view_doorandoor_process_flow_form" model="ir.ui.view">
+            <field name="name">doorandoor.process.flow.form</field>
+            <field name="model">doorandoor.process.flow</field>
+            <field name="arch" type="xml">
+                <form string="Process Flow">
+                    <header>
+                        <button name="action_mark_in_progress" type="object" string="En proceso" invisible="state != 'iniciado'"/>
+                        <button name="action_mark_delivered" type="object" string="Entregado" invisible="state not in ('iniciado', 'en_proceso')"/>
+                        <button name="action_mark_en_route" type="object" string="En ruta" invisible="state != 'entregado'"/>
+                        <button name="action_mark_closed" type="object" string="Cerrado" invisible="state not in ('entregado', 'en_ruta')"/>
+                        <field name="state" widget="statusbar" statusbar_visible="iniciado,en_proceso,entregado,en_ruta,cerrado"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_tasks" type="object" class="oe_stat_button" icon="fa-tasks">
+                                <field name="task_count" string="Tasks" widget="statinfo"/>
+                            </button>
+                            <button name="action_open_sale_order" type="object" class="oe_stat_button" icon="fa-shopping-cart" invisible="not sale_order_id">
+                                <span class="o_stat_text">Venta</span>
+                            </button>
+                            <button name="action_open_invoice" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="not account_move_id">
+                                <span class="o_stat_text">Factura</span>
+                            </button>
+                            <button name="action_open_mrp_production" type="object" class="oe_stat_button" icon="fa-industry" invisible="not mrp_production_id">
+                                <span class="o_stat_text">MO</span>
+                            </button>
+                            <button name="action_open_picking" type="object" class="oe_stat_button" icon="fa-truck" invisible="not stock_picking_id">
+                                <span class="o_stat_text">Picking</span>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="partner_id"/>
+                                <field name="user_id"/>
+                                <field name="priority"/>
+                                <field name="due_datetime"/>
+                            </group>
+                            <group>
+                                <field name="sale_order_id"/>
+                                <field name="account_move_id"/>
+                                <field name="mrp_production_id"/>
+                                <field name="stock_picking_id"/>
+                                <field name="pickup_order_id"/>
+                            </group>
+                        </group>
+                        <group string="Timing">
+                            <group>
+                                <field name="started_at"/>
+                                <field name="in_progress_at"/>
+                                <field name="delivered_at"/>
+                            </group>
+                            <group>
+                                <field name="en_route_at"/>
+                                <field name="closed_at"/>
+                                <field name="last_state_change_at"/>
+                            </group>
+                        </group>
+                        <group string="Status">
+                            <group>
+                                <field name="semaphor_label" readonly="1"/>
+                                <field name="time_in_current_state_hours" readonly="1"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Tasks">
+                                <field name="task_ids" context="{'default_flow_id': id}">
+                                    <list editable="bottom">
+                                        <field name="name"/>
+                                        <field name="area"/>
+                                        <field name="task_type"/>
+                                        <field name="user_id"/>
+                                        <field name="state"/>
+                                        <field name="due_datetime"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Notes">
+                                <field name="notes"/>
+                            </page>
+                            <page string="Chatter">
+                                <field name="message_follower_ids"/>
+                                <field name="activity_ids"/>
+                                <field name="message_ids"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_doorandoor_process_task_tree" model="ir.ui.view">
+            <field name="name">doorandoor.process.task.tree</field>
+            <field name="model">doorandoor.process.task</field>
+            <field name="arch" type="xml">
+                <list string="Process Tasks" default_order="priority desc, write_date desc">
+                    <field name="name"/>
+                    <field name="flow_id"/>
+                    <field name="area"/>
+                    <field name="task_type"/>
+                    <field name="partner_id"/>
+                    <field name="state"/>
+                    <field name="semaphor_label" string="Status"/>
+                    <field name="user_id"/>
+                    <field name="last_state_change_at"/>
+                    <field name="time_in_current_state_hours"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_doorandoor_process_task_search" model="ir.ui.view">
+            <field name="name">doorandoor.process.task.search</field>
+            <field name="model">doorandoor.process.task</field>
+            <field name="arch" type="xml">
+                <search string="Search Process Tasks">
+                    <field name="name" string="Tarea"/>
+                    <field name="flow_id" string="Proceso"/>
+                    <field name="partner_id" string="Cliente"/>
+                    <field name="task_type" string="Tipo"/>
+                    <field name="area" string="Area"/>
+                    <field name="state" string="Estado"/>
+                    <field name="user_id" string="Responsable"/>
+                    <filter string="Iniciado" name="task_state_iniciado" domain="[('state', '=', 'iniciado')]"/>
+                    <filter string="En proceso" name="task_state_en_proceso" domain="[('state', '=', 'en_proceso')]"/>
+                    <filter string="Entregado" name="task_state_entregado" domain="[('state', '=', 'entregado')]"/>
+                    <filter string="En ruta" name="task_state_en_ruta" domain="[('state', '=', 'en_ruta')]"/>
+                    <filter string="Cerrado" name="task_state_cerrado" domain="[('state', '=', 'cerrado')]"/>
+                    <filter string="Asignadas a mi" name="assigned_to_me" domain="[('user_id', '=', uid)]"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Cliente" name="task_group_partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Estado" name="task_group_state" context="{'group_by': 'state'}"/>
+                        <filter string="Proceso" name="task_group_flow" context="{'group_by': 'flow_id'}"/>
+                        <filter string="Area" name="task_group_area" context="{'group_by': 'area'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_doorandoor_process_task_kanban" model="ir.ui.view">
+            <field name="name">doorandoor.process.task.kanban</field>
+            <field name="model">doorandoor.process.task</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state" class="o_kanban_small_column">
+                    <field name="name"/>
+                    <field name="flow_id"/>
+                    <field name="partner_id"/>
+                    <field name="area"/>
+                    <field name="task_type"/>
+                    <field name="user_id"/>
+                    <field name="semaphor_label"/>
+                    <field name="semaphor_color"/>
+                    <field name="time_in_current_state_hours"/>
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_card oe_kanban_global_click" t-attf-style="border-left: 6px solid #{record.semaphor_color.raw_value or '#ea580c'};">
+                                <div class="o_kanban_record_top">
+                                    <strong><field name="name"/></strong>
+                                </div>
+                                <div><field name="flow_id"/></div>
+                                <div><field name="partner_id"/></div>
+                                <div style="margin-top:4px;"><field name="area"/></div>
+                                <div style="margin-top:6px;">
+                                    <span t-attf-style="display:inline-block;padding:2px 8px;border-radius:999px;background:#{record.semaphor_color.raw_value or '#ea580c'};color:#fff;font-size:11px;font-weight:600;">
+                                        <t t-esc="record.semaphor_label.value or ''"/>
+                                    </span>
+                                </div>
+                                <div style="margin-top:6px;font-size:12px;">
+                                    <span>Horas:</span>
+                                    <field name="time_in_current_state_hours"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="view_doorandoor_process_task_form" model="ir.ui.view">
+            <field name="name">doorandoor.process.task.form</field>
+            <field name="model">doorandoor.process.task</field>
+            <field name="arch" type="xml">
+                <form string="Process Task">
+                    <header>
+                        <button name="action_mark_in_progress" type="object" string="En proceso" invisible="state != 'iniciado'"/>
+                        <button name="action_mark_delivered" type="object" string="Entregado" invisible="state not in ('iniciado', 'en_proceso')"/>
+                        <button name="action_mark_en_route" type="object" string="En ruta" invisible="state != 'entregado'"/>
+                        <button name="action_mark_closed" type="object" string="Cerrado" invisible="state not in ('entregado', 'en_ruta')"/>
+                        <field name="state" widget="statusbar" statusbar_visible="iniciado,en_proceso,entregado,en_ruta,cerrado"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_open_sale_order" type="object" class="oe_stat_button" icon="fa-shopping-cart" invisible="not sale_order_id">
+                                <span class="o_stat_text">Venta</span>
+                            </button>
+                            <button name="action_open_invoice" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="not account_move_id">
+                                <span class="o_stat_text">Factura</span>
+                            </button>
+                            <button name="action_open_mrp_production" type="object" class="oe_stat_button" icon="fa-industry" invisible="not mrp_production_id">
+                                <span class="o_stat_text">MO</span>
+                            </button>
+                            <button name="action_open_picking" type="object" class="oe_stat_button" icon="fa-truck" invisible="not stock_picking_id">
+                                <span class="o_stat_text">Picking</span>
+                            </button>
+                            <button name="action_print_invoice_labels" type="object" class="oe_stat_button" icon="fa-tag" invisible="not account_move_id">
+                                <span class="o_stat_text">Label factura</span>
+                            </button>
+                            <button name="action_print_mrp_labels" type="object" class="oe_stat_button" icon="fa-tags" invisible="not mrp_production_id">
+                                <span class="o_stat_text">Label MO</span>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="flow_id"/>
+                                <field name="area"/>
+                                <field name="task_type"/>
+                                <field name="user_id"/>
+                            </group>
+                            <group>
+                                <field name="partner_id"/>
+                                <field name="priority"/>
+                                <field name="due_datetime"/>
+                                <field name="semaphor_label" readonly="1"/>
+                                <field name="time_in_current_state_hours" readonly="1"/>
+                            </group>
+                        </group>
+                        <group string="Timing">
+                            <group>
+                                <field name="started_at"/>
+                                <field name="in_progress_at"/>
+                                <field name="delivered_at"/>
+                            </group>
+                            <group>
+                                <field name="en_route_at"/>
+                                <field name="closed_at"/>
+                                <field name="last_state_change_at"/>
+                            </group>
+                        </group>
+                        <group string="Documents">
+                            <group>
+                                <field name="sale_order_id"/>
+                                <field name="account_move_id"/>
+                            </group>
+                            <group>
+                                <field name="mrp_production_id"/>
+                                <field name="stock_picking_id"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Notes">
+                                <field name="notes"/>
+                            </page>
+                            <page string="Chatter">
+                                <field name="message_follower_ids"/>
+                                <field name="activity_ids"/>
+                                <field name="message_ids"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_doorandoor_process_flow" model="ir.actions.act_window">
+            <field name="name">Process Flows</field>
+            <field name="res_model">doorandoor.process.flow</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_flow_search"/>
+            <field name="context">{}</field>
+        </record>
+
+        <record id="action_doorandoor_process_task" model="ir.actions.act_window">
+            <field name="name">Process Tasks</field>
+            <field name="res_model">doorandoor.process.task</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_task_search"/>
+            <field name="context">{}</field>
+        </record>
+
+        <record id="action_ddpc_sales_tasks" model="ir.actions.act_window">
+            <field name="name">Tareas de ventas</field>
+            <field name="res_model">doorandoor.process.task</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_task_search"/>
+            <field name="domain">[('area', '=', 'ventas')]</field>
+            <field name="context">{'search_default_assigned_to_me': 1, 'default_area': 'ventas'}</field>
+        </record>
+
+        <record id="action_ddpc_sales_flows" model="ir.actions.act_window">
+            <field name="name">Procesos de ventas</field>
+            <field name="res_model">doorandoor.process.flow</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_flow_search"/>
+            <field name="domain">['|', ('sale_order_id', '!=', False), ('account_move_id', '!=', False)]</field>
+            <field name="context">{}</field>
+        </record>
+
+        <record id="action_ddpc_accounting_tasks" model="ir.actions.act_window">
+            <field name="name">Tareas de facturacion</field>
+            <field name="res_model">doorandoor.process.task</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_task_search"/>
+            <field name="domain">[('area', '=', 'facturacion')]</field>
+            <field name="context">{'search_default_assigned_to_me': 1, 'default_area': 'facturacion'}</field>
+        </record>
+
+        <record id="action_ddpc_accounting_flows" model="ir.actions.act_window">
+            <field name="name">Procesos de facturacion</field>
+            <field name="res_model">doorandoor.process.flow</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_flow_search"/>
+            <field name="domain">[('account_move_id', '!=', False)]</field>
+            <field name="context">{}</field>
+        </record>
+
+        <record id="action_ddpc_manufacturing_tasks" model="ir.actions.act_window">
+            <field name="name">Tareas de manufactura</field>
+            <field name="res_model">doorandoor.process.task</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_task_search"/>
+            <field name="domain">[('area', '=', 'manufactura')]</field>
+            <field name="context">{'search_default_assigned_to_me': 1, 'default_area': 'manufactura'}</field>
+        </record>
+
+        <record id="action_ddpc_manufacturing_flows" model="ir.actions.act_window">
+            <field name="name">Procesos de manufactura</field>
+            <field name="res_model">doorandoor.process.flow</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_flow_search"/>
+            <field name="domain">[('mrp_production_id', '!=', False)]</field>
+            <field name="context">{}</field>
+        </record>
+
+        <record id="action_ddpc_inventory_tasks" model="ir.actions.act_window">
+            <field name="name">Tareas de almacen</field>
+            <field name="res_model">doorandoor.process.task</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_task_search"/>
+            <field name="domain">[('area', '=', 'almacen')]</field>
+            <field name="context">{'search_default_assigned_to_me': 1, 'default_area': 'almacen'}</field>
+        </record>
+
+        <record id="action_ddpc_inventory_flows" model="ir.actions.act_window">
+            <field name="name">Procesos logisticos</field>
+            <field name="res_model">doorandoor.process.flow</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="search_view_id" ref="view_doorandoor_process_flow_search"/>
+            <field name="domain">[('stock_picking_id', '!=', False)]</field>
+            <field name="context">{}</field>
+        </record>
+
+        <record id="action_ddpc_prefacturas" model="ir.actions.act_window">
+            <field name="name">Prefacturas</field>
+            <field name="res_model">account.move</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain">[('move_type', '=', 'out_invoice'), ('state', '=', 'draft')]</field>
+            <field name="context">{'default_move_type': 'out_invoice'}</field>
+        </record>
+
+        <record id="action_ddpc_facturas" model="ir.actions.act_window">
+            <field name="name">Facturas</field>
+            <field name="res_model">account.move</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain">[('move_type', '=', 'out_invoice')]</field>
+            <field name="context">{'default_move_type': 'out_invoice'}</field>
+        </record>
+    </data>
+</odoo>

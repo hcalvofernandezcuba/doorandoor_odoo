@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_picking_form_inherit_ddpc" model="ir.ui.view">
+            <field name="name">stock.picking.form.ddpc</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="action_view_ddpc_process_flows" type="object" class="oe_stat_button" icon="fa-sitemap">
+                        <field name="ddpc_process_flow_count" string="Processes" widget="statinfo"/>
+                    </button>
+                </xpath>
+                <xpath expr="//header" position="inside">
+                    <button name="action_create_ddpc_process_flow" type="object" string="Crear proceso" groups="doorandoor_process_control.group_ddpc_user"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -244,6 +244,20 @@ class TestInvoiceToSaleOrder(TransactionCase):
         self.assertFalse(move.ddsn_reservation_expires_at)
         self.assertFalse(move.ddsn_reservation_active)
 
+    def test_old_preinvoice_is_deleted_after_cleanup_window(self):
+        move = self._create_stock_invoice()
+        move.write(
+            {
+                "ddsn_reservation_expires_at": False,
+                "create_date": fields.Datetime.now() - timedelta(hours=49),
+            }
+        )
+
+        processed_count = self.env["account.move"]._ddsn_release_expired_preinvoice_reservations()
+
+        self.assertEqual(processed_count, 1)
+        self.assertFalse(move.exists())
+
     def test_posting_same_invoice_does_not_duplicate_fulfillment_lines(self):
         move = self._create_customer_invoice()
 

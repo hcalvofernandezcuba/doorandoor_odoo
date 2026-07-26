@@ -51,7 +51,9 @@ class DocumentLabelWizard(models.TransientModel):
     def _iter_products(self):
         self.ensure_one()
         if self.move_id:
-            return self.move_id.invoice_line_ids.filtered(lambda line: line.product_id and not line.display_type)
+            return self.move_id.invoice_line_ids.filtered(
+                lambda line: line.product_id and line.display_type in (False, "product")
+            )
         product = self.production_id.product_id
         return self.env["product.product"].browse(product.id) if product else self.env["product.product"]
 
@@ -64,7 +66,9 @@ class DocumentLabelWizard(models.TransientModel):
         customer_name = self._get_customer_name()
 
         if self.move_id:
-            products = self.move_id.invoice_line_ids.filtered(lambda line: line.product_id and not line.display_type)
+            products = self.move_id.invoice_line_ids.filtered(
+                lambda line: line.product_id and line.display_type in (False, "product")
+            )
             for line in products:
                 product = line.product_id
                 tmpl = product.product_tmpl_id
@@ -124,6 +128,12 @@ class DocumentLabelWizard(models.TransientModel):
         if not self.move_id and not self.production_id:
             raise UserError(_("Debe abrir este wizard desde una factura o una orden de manufactura."))
         payloads = self._prepare_label_payloads()
+        if not payloads:
+            raise UserError(
+                _(
+                    "No se generaron labels para este documento. Revise que existan lineas de producto validas y que los productos tengan Codigo de producto."
+                )
+            )
         if self.quantity > 1:
             payloads = payloads * self.quantity
         action = self.env.ref("doorandoor_stock_labels.action_report_ddsl_document_labels")

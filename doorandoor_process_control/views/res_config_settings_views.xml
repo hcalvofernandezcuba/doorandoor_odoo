@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_res_config_settings_inherit_ddpc" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.ddpc</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="inside">
+                    <app string="Process Control" name="doorandoor_process_control" groups="doorandoor_process_control.group_ddpc_manager">
+                        <block title="Process Colors">
+                            <setting string="Overdue Color">
+                                <field name="ddpc_color_overdue"/>
+                            </setting>
+                            <setting string="In Progress Color">
+                                <field name="ddpc_color_in_progress"/>
+                            </setting>
+                            <setting string="Done Color">
+                                <field name="ddpc_color_done"/>
+                            </setting>
+                        </block>
+                    </app>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

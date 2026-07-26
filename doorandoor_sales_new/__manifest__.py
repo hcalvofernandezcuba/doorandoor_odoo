@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New",
-    "version": "18.0.1.0.62",
+    "version": "18.0.1.0.72",
     "category": "Sales",
     "summary": "Invoice-driven sales, payment release, delivery and production orchestration",
     "description": """
@@ -183,6 +183,46 @@ Historial resumido
 - 18.0.1.0.62
   Se empareja el tamano del bloque de datos del cliente con el de direccion de envio.
   Tambien se incrementa nuevamente el tamano visual de la tabla de productos para priorizar su lectura en la factura impresa.
+
+- 18.0.1.0.63
+  El boton estandar de publicacion en facturas de cliente en borrador se renombra visualmente a `Crear factura`.
+  Esto alinea mejor la accion visible con el lenguaje operativo usado por el cliente dentro de Odoo CE 18.
+
+- 18.0.1.0.64
+  Amplia el renombrado visual de `action_post` a todas las variantes del boton presentes en la vista de factura.
+  Esto evita que siga apareciendo el texto `Confirmar` cuando otra variante del mismo boton es la que queda visible en pantalla.
+
+- 18.0.1.0.65
+  Reemplaza visualmente el boton estandar `Confirmar` en facturas de cliente por un boton propio `Crear factura` que llama a la misma accion.
+  Esto evita depender de variantes internas de la vista base de Odoo CE 18 que seguian mostrando `Confirmar` en borrador.
+
+- 18.0.1.0.66
+  Corrige la duplicidad de botones en prefacturas reemplazando el nodo del encabezado en lugar de sumar un boton adicional.
+  En borrador de factura de cliente debe quedar visible solo `Crear factura`, evitando confusion operativa para el usuario.
+
+- 18.0.1.0.67
+  Simplifica el ajuste del encabezado de factura dejando solo el cambio de texto sobre `action_post`.
+  Se elimina la estrategia de reemplazo visual para evitar duplicidades y se conserva unicamente el rename del boton a `Crear factura`.
+
+- 18.0.1.0.68
+  Ajusta el rename del boton de publicacion para apuntar especificamente al nodo `action_post` con texto base `Confirm` en la vista de factura.
+  Esto responde a la estructura real de Odoo CE 18 donde el boton visible en prefacturas no era la variante `Post`, sino la variante `Confirm`.
+
+- 18.0.1.0.69
+  Reemplaza el `xpath` dependiente del texto `Confirm` por una referencia estructural al segundo boton `action_post` del encabezado.
+  Esto evita errores de actualizacion por traduccion o diferencias de etiqueta y mantiene el rename visual a `Crear factura` en prefacturas.
+
+- 18.0.1.0.70
+  Ajusta nuevamente la herencia del encabezado usando `replace` sobre el segundo boton `action_post` del header.
+  Esto evita la ruta de parseo que seguia fallando en la actualizacion y mantiene el texto visible `Crear factura` para prefacturas.
+
+- 18.0.1.0.71
+  Extiende el cron de prefacturas para que la reserva siga liberandose a las 24 horas y, ademas, elimine automaticamente prefacturas borrador obsoletas a las 48 horas.
+
+- 18.0.1.0.72
+  El reporte impreso de `Picking` agrega un encabezado visible con el titulo del documento y el numero de picking.
+  Esto reduce confusion operativa al identificar rapidamente que el PDF corresponde a una salida o traslado de inventario.
+  Esto limpia la lista de prefacturas perdidas o innecesarias y restablece el enlace de la venta a estado de cotizacion cuando corresponde.
 
 Autor
 -----

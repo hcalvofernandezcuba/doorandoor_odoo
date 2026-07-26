@@ -68,6 +68,10 @@
                     </button>
                 </xpath>
 
+                <xpath expr="//header/button[@name='action_post'][2]" position="replace">
+                    <button name="action_post" string="Crear factura" class="oe_highlight" type="object"/>
+                </xpath>
+
                 <xpath expr="//header" position="inside">
                     <button
                         name="action_print_pdf"

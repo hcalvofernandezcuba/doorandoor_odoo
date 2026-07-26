@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddpc_process_flow_user,access.ddpc.process.flow.user,model_doorandoor_process_flow,doorandoor_process_control.group_ddpc_user,1,1,1,0
+access_ddpc_process_flow_manager,access.ddpc.process.flow.manager,model_doorandoor_process_flow,doorandoor_process_control.group_ddpc_manager,1,1,1,1
+access_ddpc_process_task_user,access.ddpc.process.task.user,model_doorandoor_process_task,doorandoor_process_control.group_ddpc_user,1,1,1,0
+access_ddpc_process_task_manager,access.ddpc.process.task.manager,model_doorandoor_process_task,doorandoor_process_control.group_ddpc_manager,1,1,1,1
+access_ddpc_process_backfill_wizard_manager,access.ddpc.process.backfill.wizard.manager,model_doorandoor_process_backfill_wizard,doorandoor_process_control.group_ddpc_manager,1,1,1,1

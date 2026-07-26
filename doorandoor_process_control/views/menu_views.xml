@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem
+            id="menu_ddpc_root"
+            name="Operaciones"
+            sequence="60"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_process_flows"
+            name="Process Flows"
+            parent="menu_ddpc_root"
+            action="action_doorandoor_process_flow"
+            sequence="10"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_process_tasks"
+            name="Process Tasks"
+            parent="menu_ddpc_root"
+            action="action_doorandoor_process_task"
+            sequence="20"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_process_backfill"
+            name="Cargar historicos"
+            parent="menu_ddpc_root"
+            action="action_ddpc_process_backfill_wizard"
+            sequence="30"
+            groups="doorandoor_process_control.group_ddpc_manager"/>
+
+        <menuitem
+            id="menu_ddpc_root_quotations"
+            name="Cotizaciones"
+            parent="menu_ddpc_root"
+            action="sale.action_quotations"
+            sequence="40"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_root_preinvoices"
+            name="Prefacturas"
+            parent="menu_ddpc_root"
+            action="action_ddpc_prefacturas"
+            sequence="50"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_root_invoices"
+            name="Facturas"
+            parent="menu_ddpc_root"
+            action="action_ddpc_facturas"
+            sequence="60"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_sales_root"
+            name="Operaciones"
+            parent="sale.sale_menu_root"
+            sequence="95"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_sales_tasks"
+            name="Tareas de ventas"
+            parent="menu_ddpc_sales_root"
+            action="action_ddpc_sales_tasks"
+            sequence="10"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_sales_flows"
+            name="Procesos de ventas"
+            parent="menu_ddpc_sales_root"
+            action="action_ddpc_sales_flows"
+            sequence="20"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_sales_quotations"
+            name="Cotizaciones"
+            parent="menu_ddpc_sales_root"
+            action="sale.action_quotations"
+            sequence="30"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_sales_preinvoices"
+            name="Prefacturas"
+            parent="menu_ddpc_sales_root"
+            action="action_ddpc_prefacturas"
+            sequence="40"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_sales_invoices"
+            name="Facturas"
+            parent="menu_ddpc_sales_root"
+            action="action_ddpc_facturas"
+            sequence="50"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_account_root"
+            name="Operaciones"
+            parent="account.menu_finance"
+            sequence="95"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_account_tasks"
+            name="Tareas de facturacion"
+            parent="menu_ddpc_account_root"
+            action="action_ddpc_accounting_tasks"
+            sequence="10"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_account_flows"
+            name="Procesos de facturacion"
+            parent="menu_ddpc_account_root"
+            action="action_ddpc_accounting_flows"
+            sequence="20"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_account_quotations"
+            name="Cotizaciones"
+            parent="menu_ddpc_account_root"
+            action="sale.action_quotations"
+            sequence="30"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_account_preinvoices"
+            name="Prefacturas"
+            parent="menu_ddpc_account_root"
+            action="action_ddpc_prefacturas"
+            sequence="40"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_account_invoices"
+            name="Facturas"
+            parent="menu_ddpc_account_root"
+            action="action_ddpc_facturas"
+            sequence="50"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_mrp_root"
+            name="Operaciones"
+            parent="mrp.menu_mrp_root"
+            sequence="95"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_mrp_tasks"
+            name="Tareas de manufactura"
+            parent="menu_ddpc_mrp_root"
+            action="action_ddpc_manufacturing_tasks"
+            sequence="10"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_mrp_flows"
+            name="Procesos de manufactura"
+            parent="menu_ddpc_mrp_root"
+            action="action_ddpc_manufacturing_flows"
+            sequence="20"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_stock_root"
+            name="Operaciones"
+            parent="stock.menu_stock_root"
+            sequence="97"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_stock_tasks"
+            name="Tareas de almacen"
+            parent="menu_ddpc_stock_root"
+            action="action_ddpc_inventory_tasks"
+            sequence="10"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_stock_flows"
+            name="Procesos logisticos"
+            parent="menu_ddpc_stock_root"
+            action="action_ddpc_inventory_flows"
+            sequence="20"
+            groups="doorandoor_process_control.group_ddpc_user"/>
+    </data>
+</odoo>

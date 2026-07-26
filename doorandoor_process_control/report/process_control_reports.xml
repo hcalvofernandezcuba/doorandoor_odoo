@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_process_flow_list_document">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Process Flows</h2>
+                        <p>
+                            <strong>Fecha:</strong>
+                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                            <strong style="margin-left: 16px;">Impreso por:</strong>
+                            <span t-esc="user.name"/>
+                        </p>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Proceso</th>
+                                    <th>Cliente</th>
+                                    <th>Documento</th>
+                                    <th>Estado</th>
+                                    <th>Responsable</th>
+                                    <th>Ultimo cambio</th>
+                                    <th>Horas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="docs" t-as="doc">
+                                    <td><span t-esc="doc.name"/></td>
+                                    <td><span t-esc="doc.partner_id.display_name or ''"/></td>
+                                    <td><span t-esc="doc.current_document_name or ''"/></td>
+                                    <td>
+                                        <span t-attf-style="display:inline-block;padding:2px 8px;border-radius:999px;background:#{doc.semaphor_color or '#ea580c'};color:#fff;font-weight:600;">
+                                            <t t-esc="dict(doc._fields['state'].selection).get(doc.state, '')"/>
+                                        </span>
+                                    </td>
+                                    <td><span t-esc="doc.user_id.name or ''"/></td>
+                                    <td><span t-esc="doc.last_state_change_at or ''"/></td>
+                                    <td><span t-esc="doc.time_in_current_state_hours"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <template id="report_process_task_list_document">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Process Tasks</h2>
+                        <p>
+                            <strong>Fecha:</strong>
+                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                            <strong style="margin-left: 16px;">Impreso por:</strong>
+                            <span t-esc="user.name"/>
+                        </p>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Tarea</th>
+                                    <th>Proceso</th>
+                                    <th>Area</th>
+                                    <th>Tipo</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
+                                    <th>Responsable</th>
+                                    <th style="width: 70px; text-align: center;">Iniciado</th>
+                                    <th style="width: 90px; text-align: center;">Terminado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="docs" t-as="doc">
+                                    <td><span t-esc="doc.name"/></td>
+                                    <td><span t-esc="doc.flow_id.name or ''"/></td>
+                                    <td><span t-esc="dict(doc._fields['area'].selection).get(doc.area, '')"/></td>
+                                    <td><span t-esc="dict(doc._fields['task_type'].selection).get(doc.task_type, '')"/></td>
+                                    <td><span t-esc="doc.partner_id.display_name or ''"/></td>
+                                    <td>
+                                        <span t-attf-style="display:inline-block;padding:2px 8px;border-radius:999px;background:#{doc.semaphor_color or '#ea580c'};color:#fff;font-weight:600;">
+                                            <t t-esc="dict(doc._fields['state'].selection).get(doc.state, '')"/>
+                                        </span>
+                                    </td>
+                                    <td><span t-esc="doc.user_id.name or ''"/></td>
+                                    <td style="height: 26px;"></td>
+                                    <td style="height: 26px;"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <record id="action_report_ddpc_process_flows" model="ir.actions.report">
+            <field name="name">Imprimir Process Flows</field>
+            <field name="model">doorandoor.process.flow</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">doorandoor_process_control.report_process_flow_list_document</field>
+            <field name="report_file">doorandoor_process_control.report_process_flow_list_document</field>
+            <field name="binding_model_id" ref="model_doorandoor_process_flow"/>
+            <field name="binding_type">report</field>
+            <field name="print_report_name">'Process Flows'</field>
+        </record>
+
+        <record id="action_report_ddpc_process_tasks" model="ir.actions.report">
+            <field name="name">Imprimir Process Tasks</field>
+            <field name="model">doorandoor.process.task</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">doorandoor_process_control.report_process_task_list_document</field>
+            <field name="report_file">doorandoor_process_control.report_process_task_list_document</field>
+            <field name="binding_model_id" ref="model_doorandoor_process_task"/>
+            <field name="binding_type">report</field>
+            <field name="print_report_name">'Process Tasks'</field>
+        </record>
+    </data>
+</odoo>

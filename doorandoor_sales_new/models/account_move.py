@@ -370,6 +370,10 @@ class AccountMove(models.Model):
         except (TypeError, ValueError):
             return 24
 
+    def _ddsn_get_preinvoice_cleanup_window_hours(self):
+        # Lost preinvoices should not remain forever in the draft invoice list.
+        return max(self._ddsn_get_reservation_window_hours() * 2, 48)
+
     def _ddsn_has_active_reservation(self):
         self.ensure_one()
         self._compute_ddsn_reservation_status()
@@ -418,7 +422,26 @@ class AccountMove(models.Model):
                     "ddsn_preinvoice_move_id": False,
                 }
             )
-        return len(expired_moves)
+        cleanup_cutoff = now - timedelta(hours=self._ddsn_get_preinvoice_cleanup_window_hours())
+        obsolete_preinvoices = self.search(
+            [
+                ("move_type", "=", "out_invoice"),
+                ("state", "=", "draft"),
+                ("create_date", "!=", False),
+                ("create_date", "<=", cleanup_cutoff),
+            ]
+        )
+        for move in obsolete_preinvoices.filtered("sale_order_id"):
+            move.sale_order_id.write(
+                {
+                    "ddsn_flow_stage": "quotation",
+                    "ddsn_preinvoice_move_id": False,
+                }
+            )
+        obsolete_count = len(obsolete_preinvoices)
+        if obsolete_preinvoices:
+            obsolete_preinvoices.unlink()
+        return len(expired_moves) + obsolete_count
 
     def _ddsn_create_sale_orders_and_fulfillment(self):
         for move in self:
