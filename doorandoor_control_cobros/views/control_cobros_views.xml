@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddc_cobro_control_tree" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.tree</field>
+        <field name="model">doorandoor.cobro.control</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="state"/>
+                <field name="payment_state"/>
+                <field name="invoice_payment_state"/>
+                <field name="move_id"/>
+                <field name="payment_id"/>
+                <field name="partner_id"/>
+                <field name="journal_id"/>
+                <field name="payment_date"/>
+                <field name="amount_reported"/>
+                <field name="sale_user_id"/>
+                <field name="accountant_user_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddc_cobro_control_form" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.form</field>
+        <field name="model">doorandoor.cobro.control</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_report" type="object" string="Reportar" invisible="state != 'draft'"/>
+                    <button name="action_mark_pending" type="object" string="Pasar a pendiente" invisible="state not in ('reported', 'draft')"/>
+                    <button name="action_review" type="object" string="Revisar" invisible="state not in ('reported', 'pending')"/>
+                    <button name="action_validate" type="object" string="Validar" invisible="state not in ('review', 'pending', 'reported')"/>
+                    <button name="action_reject" type="object" string="Rechazar" invisible="state not in ('review', 'pending', 'reported')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,reported,pending,review,validated,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="move_id"/>
+                            <field name="payment_id"/>
+                            <field name="payment_state" readonly="1"/>
+                            <field name="invoice_payment_state" readonly="1"/>
+                            <field name="partner_id"/>
+                            <field name="journal_id"/>
+                            <field name="payment_date"/>
+                        </group>
+                        <group>
+                            <field name="amount_reported"/>
+                            <field name="payment_reference"/>
+                            <field name="sale_user_id"/>
+                            <field name="accountant_user_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="review_date" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notas">
+                            <field name="notes"/>
+                        </page>
+                        <page string="Rechazo">
+                            <field name="rejection_reason" readonly="state != 'rejected'"/>
+                        </page>
+                        <page string="Actividad">
+                            <field name="message_follower_ids"/>
+                            <field name="activity_ids"/>
+                            <field name="message_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ddc_cobro_control_search" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.search</field>
+        <field name="model">doorandoor.cobro.control</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="move_id"/>
+                <field name="partner_id"/>
+                <field name="journal_id"/>
+                <field name="payment_id"/>
+                <field name="payment_state"/>
+                <field name="invoice_payment_state"/>
+                <filter string="Pendientes" name="pending" domain="[('state', 'in', ['reported', 'pending', 'review'])]"/>
+                <filter string="Validados" name="validated" domain="[('state', '=', 'validated')]"/>
+                <filter string="Rechazados" name="rejected" domain="[('state', '=', 'rejected')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Estado del pago" name="group_payment_state" context="{'group_by': 'payment_state'}"/>
+                    <filter string="Estado de la factura" name="group_invoice_payment_state" context="{'group_by': 'invoice_payment_state'}"/>
+                    <filter string="Diario" name="group_journal" context="{'group_by': 'journal_id'}"/>
+                    <filter string="Vendedor" name="group_user" context="{'group_by': 'sale_user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddc_cobro_control" model="ir.actions.act_window">
+        <field name="name">Control de Cobros</field>
+        <field name="res_model">doorandoor.cobro.control</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_ddc_cobro_control_search"/>
+    </record>
+
+    <record id="view_ddc_cobro_control_pivot" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.pivot</field>
+        <field name="model">doorandoor.cobro.control</field>
+        <field name="arch" type="xml">
+            <pivot string="Reporte de pagos">
+                <field name="journal_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="payment_state" type="col"/>
+                <field name="amount_reported" type="measure"/>
+                <field name="id" type="measure" string="Cantidad"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_ddc_cobro_control_graph" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.graph</field>
+        <field name="model">doorandoor.cobro.control</field>
+        <field name="arch" type="xml">
+            <graph string="Pagos por diario" type="bar">
+                <field name="journal_id"/>
+                <field name="amount_reported" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_ddc_cobro_report" model="ir.actions.act_window">
+        <field name="name">Reporte de pagos</field>
+        <field name="res_model">doorandoor.cobro.control</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_ddc_cobro_control_search"/>
+        <field name="context">{'search_default_group_journal': 1}</field>
+    </record>
+</odoo>

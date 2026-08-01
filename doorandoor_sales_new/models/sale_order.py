@@ -82,7 +82,14 @@ class SaleOrder(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         sequence_code = "sale.order"
+        force_current_salesperson = self.env.user.has_group("sales_team.group_sale_salesman") and not self.env.user.has_group(
+            "sales_team.group_sale_salesman_all_leads"
+        )
         for vals in vals_list:
+            if force_current_salesperson:
+                vals["user_id"] = self.env.user.id
+            else:
+                vals.setdefault("user_id", self.env.user.id)
             if vals.get("name") and vals["name"] != "New":
                 continue
             if self.env.context.get("ddsn_assign_number_immediately"):
@@ -95,6 +102,10 @@ class SaleOrder(models.Model):
 
     def action_ddsn_register_quote(self):
         for order in self:
+            if self.env.user.has_group("sales_team.group_sale_salesman") and not self.env.user.has_group(
+                "sales_team.group_sale_salesman_all_leads"
+            ) and order.user_id != self.env.user:
+                order.user_id = self.env.user
             if order.ddsn_quote_registered:
                 preinvoice = order.ddsn_preinvoice_move_id.filtered(lambda move: move.state == "draft")[:1]
                 if preinvoice:
@@ -126,6 +137,10 @@ class SaleOrder(models.Model):
 
     def _ddsn_assign_quote_number(self):
         for order in self:
+            if self.env.user.has_group("sales_team.group_sale_salesman") and not self.env.user.has_group(
+                "sales_team.group_sale_salesman_all_leads"
+            ) and order.user_id != self.env.user:
+                order.user_id = self.env.user
             if not order.name or order.name == "New":
                 order.name = self.env["ir.sequence"].next_by_code("sale.order") or "New"
             order.ddsn_quote_registered = True

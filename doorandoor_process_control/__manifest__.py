@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Process Control",
-    "version": "18.0.1.0.13",
+    "version": "18.0.1.0.17",
     "category": "Operations",
-    "summary": "18.0.1.0.13 - Agrega accesos rapidos a cotizaciones prefacturas y facturas",
+    "summary": "18.0.1.0.17 - Retira override de modulo no instalado",
     "description": """
 DoorAndDoor Process Control
 ===========================
@@ -93,6 +93,22 @@ Historial resumido
 - 18.0.1.0.13
   Agrega accesos rapidos a `Cotizaciones`, `Prefacturas` y `Facturas` dentro de `Operaciones`, `Ventas` y `Facturacion`.
   Estos accesos no se muestran en `Manufactura`, manteniendo separada la navegacion operativa comercial de la productiva.
+
+- 18.0.1.0.14
+  La accion `Prefacturas` ahora abre el formulario con contexto explicito de modo prefactura.
+  Esto permite mostrar `Crear factura` solo en ese flujo y conservar `Confirmar` en facturas normales.
+
+- 18.0.1.0.15
+  Los grupos funcionales base de Ventas, Facturacion, Manufactura e Inventario ahora heredan automaticamente `DoorAndDoor Process User`.
+  Esto permite que usuarios operativos vean `Operaciones` y naveguen sus menus sin asignacion manual adicional del grupo tecnico.
+
+- 18.0.1.0.16
+  Se corrige la accion estandar `Prepare Wave` por tipo de picking para que no falle cuando entra sin `active_id` en contexto.
+  Esto evita el error `Name 'active_id' is not defined` al abrir ciertos menus o vistas con usuarios operativos.
+
+- 18.0.1.0.17
+  Se retira la sobreescritura de `stock_picking_batch.action_prepare_wave_for_picking_type` porque ese modulo no esta instalado en esta base.
+  Esto restablece la actualizacion de `doorandoor_process_control` sin depender de un XML ID externo inexistente localmente.
     """,
     "author": "Hanoi Calvo Fernandez for Doorandoor",
     "website": "https://gestion.doorandoor.com",

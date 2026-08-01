@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Tax State",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "category": "Accounting",
     "summary": "State-based sales tax mapping by company for multi-company flows",
     "description": """
@@ -40,6 +40,10 @@ Control de versiones
 
 - `18.0.1.0.1`
   Se alinea la herencia del reporte de factura para conservar el bloque consolidado `Total de impuestos` definido por DoorAndDoor.
+
+- `18.0.1.0.2`
+  Los vendedores normales reciben permiso de solo lectura sobre reglas y tasas de impuesto por estado.
+  Esto permite crear cotizaciones y ventas sin requerir perfil de `Contabilidad/Administrador`, manteniendo la edicion de esas reglas solo en contabilidad.
     """,
     "author": "Hanoi Calvo Fernandez (doorandoor)",
     "website": "https://doorandoor.com",

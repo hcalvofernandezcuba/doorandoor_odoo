@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New",
-    "version": "18.0.1.0.72",
+    "version": "18.0.1.0.77",
     "category": "Sales",
     "summary": "Invoice-driven sales, payment release, delivery and production orchestration",
     "description": """
@@ -222,7 +222,26 @@ Historial resumido
 - 18.0.1.0.72
   El reporte impreso de `Picking` agrega un encabezado visible con el titulo del documento y el numero de picking.
   Esto reduce confusion operativa al identificar rapidamente que el PDF corresponde a una salida o traslado de inventario.
-  Esto limpia la lista de prefacturas perdidas o innecesarias y restablece el enlace de la venta a estado de cotizacion cuando corresponde.
+
+- 18.0.1.0.73
+  El boton principal de publicacion en factura vuelve a distinguirse por contexto de accion.
+  `Prefacturas` muestra `Crear factura`, mientras que `Facturas` conserva `Confirmar` para no mezclar ambos flujos en la misma vista.
+
+- 18.0.1.0.74
+  Se corrige la accion de cotizaciones por equipo para no depender de `active_id` cuando el contexto no lo trae cargado.
+  Esto evita el error `Name 'active_id' is not defined` al entrar con ciertos usuarios o desde vistas privadas.
+
+- 18.0.1.0.75
+  La cotizacion queda forzada al vendedor actual al crearla y tambien al validar `Validar cotizacion`.
+  Esto evita bloqueos con usuarios `User: Own Documents Only` cuando el flujo de prefactura intenta trabajar una venta que Odoo no reconoce como propia.
+
+- 18.0.1.0.76
+  El vendedor actual se fuerza de manera estricta para usuarios `User: Own Documents Only`, incluso si el cliente trae otro comercial por defecto.
+  Esto evita que el chatter muestre al creador correcto pero la propiedad real del documento quede en otro usuario y bloquee la validacion de cotizaciones.
+
+- 18.0.1.0.77
+  Se corrigen los calculos de reservas visibles en cotizaciones y prefacturas para vendedores con `User: Own Documents Only`.
+  El computo ya no rompe al leer `sale.order` ajenas durante la evaluacion de stock reservado, manteniendo la restriccion documental pero permitiendo validar la propia cotizacion.
 
 Autor
 -----

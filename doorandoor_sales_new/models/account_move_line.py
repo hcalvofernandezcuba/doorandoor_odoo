@@ -137,7 +137,7 @@ class AccountMoveLine(models.Model):
         for reserved_move in reserved_moves:
             if not reserved_move._ddsn_has_active_reservation():
                 continue
-            reservation_warehouse = reserved_move.sale_order_id.warehouse_id
+            reservation_warehouse = reserved_move.sudo().sale_order_id.warehouse_id
             if warehouse and reservation_warehouse and reservation_warehouse != warehouse:
                 continue
             reserved_qty += sum(

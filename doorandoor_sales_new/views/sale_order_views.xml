@@ -49,8 +49,8 @@
         <record id="sale.action_quotations_salesteams" model="ir.actions.act_window">
             <field name="domain">[('ddsn_quote_list_visible', '=', True)]</field>
             <field name="context">{
-                'search_default_team_id': [active_id],
-                'default_team_id': active_id,
+                'search_default_team_id': [context.get('active_id')] if context.get('active_id') else [],
+                'default_team_id': context.get('active_id') or False,
                 'show_address': 1,
             }</field>
         </record>

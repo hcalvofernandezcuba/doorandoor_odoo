@@ -446,7 +446,7 @@
             <field name="res_model">account.move</field>
             <field name="view_mode">list,form</field>
             <field name="domain">[('move_type', '=', 'out_invoice'), ('state', '=', 'draft')]</field>
-            <field name="context">{'default_move_type': 'out_invoice'}</field>
+            <field name="context">{'default_move_type': 'out_invoice', 'ddsn_preinvoice_mode': True}</field>
         </record>
 
         <record id="action_ddpc_facturas" model="ir.actions.act_window">
@@ -456,5 +456,6 @@
             <field name="domain">[('move_type', '=', 'out_invoice')]</field>
             <field name="context">{'default_move_type': 'out_invoice'}</field>
         </record>
+
     </data>
 </odoo>

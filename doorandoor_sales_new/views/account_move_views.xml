@@ -69,7 +69,18 @@
                 </xpath>
 
                 <xpath expr="//header/button[@name='action_post'][2]" position="replace">
-                    <button name="action_post" string="Crear factura" class="oe_highlight" type="object"/>
+                    <button
+                        name="action_post"
+                        string="Crear factura"
+                        class="oe_highlight"
+                        type="object"
+                        invisible="not context.get('ddsn_preinvoice_mode')"/>
+                    <button
+                        name="action_post"
+                        string="Confirmar"
+                        class="oe_highlight"
+                        type="object"
+                        invisible="context.get('ddsn_preinvoice_mode')"/>
                 </xpath>
 
                 <xpath expr="//header" position="inside">

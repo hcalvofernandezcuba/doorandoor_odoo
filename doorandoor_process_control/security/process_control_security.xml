@@ -14,6 +14,22 @@
             <field name="users" eval="[(4, ref('base.user_admin'))]"/>
         </record>
 
+        <record id="sales_team.group_sale_salesman" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('doorandoor_process_control.group_ddpc_user'))]"/>
+        </record>
+
+        <record id="account.group_account_invoice" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('doorandoor_process_control.group_ddpc_user'))]"/>
+        </record>
+
+        <record id="mrp.group_mrp_user" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('doorandoor_process_control.group_ddpc_user'))]"/>
+        </record>
+
+        <record id="stock.group_stock_user" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('doorandoor_process_control.group_ddpc_user'))]"/>
+        </record>
+
         <record id="seq_doorandoor_process_flow" model="ir.sequence">
             <field name="name">DoorAndDoor Process Flow</field>
             <field name="code">doorandoor.process.flow</field>
