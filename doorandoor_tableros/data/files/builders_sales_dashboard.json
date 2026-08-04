@@ -1,0 +1,301 @@
+{
+  "version": 21,
+  "sheets": [
+    {
+      "id": "dbfc3dc7-39ab-420b-a567-7a89e3b2a4f1",
+      "name": "Dashboard",
+      "colNumber": 8,
+      "rowNumber": 80,
+      "rows": {
+        "1": { "size": 34 },
+        "2": { "size": 34 },
+        "3": { "size": 34 },
+        "4": { "size": 34 },
+        "5": { "size": 34 },
+        "6": { "size": 34 }
+      },
+      "cols": {
+        "0": { "size": 160 },
+        "1": { "size": 160 },
+        "2": { "size": 160 },
+        "3": { "size": 160 },
+        "4": { "size": 160 },
+        "5": { "size": 160 },
+        "6": { "size": 160 },
+        "7": { "size": 160 }
+      },
+      "cells": {
+        "A1": { "content": "[Constructores y Ventas]" },
+        "A2": { "content": "Tablero comercial para cruzar clientes, constructores asociados y ventas reales." },
+        "A3": { "content": "Usa el filtro Periodo para escoger un rango manual desde/hasta sobre las ventas." }
+      },
+      "styles": {},
+      "formats": {},
+      "borders": {},
+      "conditionalFormats": [],
+      "tables": [],
+      "areGridLinesVisible": false,
+      "isVisible": true,
+      "headerGroups": {},
+      "dataValidationRules": [],
+      "comments": {},
+      "figures": [
+        {
+          "id": "fig-builder-clients",
+          "x": 0,
+          "y": 95,
+          "width": 620,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Clientes por constructor" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["ddfc_builder_id"],
+              "measure": "__count",
+              "order": "desc",
+              "resModel": "res.partner",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["ddfc_builder_id"] },
+              "domain": [["ddfc_builder_id", "!=", false], ["customer_rank", ">", 0]],
+              "groupBy": ["ddfc_builder_id"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "64c87b1a-5ab5-4e0a-bdae-2574ab6161f0": { "chain": "ddfc_builder_id", "type": "many2one" },
+              "9ff1b6cb-b933-4d1f-b83f-240cd0594f44": { "chain": "state_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-sales-builders",
+          "x": 640,
+          "y": 95,
+          "width": 610,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Ventas por constructor" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["ddfc_builder_id"],
+              "measure": "amount_total",
+              "order": "desc",
+              "resModel": "sale.order",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["ddfc_builder_id"] },
+              "domain": [["ddfc_builder_id", "!=", false], ["state", "not in", ["draft", "cancel"]]],
+              "groupBy": ["ddfc_builder_id"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "4f7cf711-dc31-4e3b-804e-8af9802f3b47": { "chain": "date_order", "type": "date", "offset": 0 },
+              "64c87b1a-5ab5-4e0a-bdae-2574ab6161f0": { "chain": "ddfc_builder_id", "type": "many2one" },
+              "5ed03822-f985-45c7-a24b-58fa940a4333": { "chain": "user_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-sales-timeline",
+          "x": 0,
+          "y": 435,
+          "width": 620,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Monto vendido por fecha" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["date_order:month"],
+              "measure": "amount_total",
+              "order": null,
+              "resModel": "sale.order",
+              "mode": "line"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["date_order"] },
+              "domain": [["ddfc_builder_id", "!=", false], ["state", "not in", ["draft", "cancel"]]],
+              "groupBy": ["date_order"],
+              "orderBy": []
+            },
+            "type": "odoo_line",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fillArea": true,
+            "fieldMatching": {
+              "4f7cf711-dc31-4e3b-804e-8af9802f3b47": { "chain": "date_order", "type": "date", "offset": 0 },
+              "64c87b1a-5ab5-4e0a-bdae-2574ab6161f0": { "chain": "ddfc_builder_id", "type": "many2one" },
+              "5ed03822-f985-45c7-a24b-58fa940a4333": { "chain": "user_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-sales-sellers",
+          "x": 640,
+          "y": 435,
+          "width": 610,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Vendedores por monto vendido" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["user_id"],
+              "measure": "amount_total",
+              "order": "desc",
+              "resModel": "sale.order",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["user_id"] },
+              "domain": [["ddfc_builder_id", "!=", false], ["state", "not in", ["draft", "cancel"]], ["user_id", "!=", false]],
+              "groupBy": ["user_id"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "4f7cf711-dc31-4e3b-804e-8af9802f3b47": { "chain": "date_order", "type": "date", "offset": 0 },
+              "64c87b1a-5ab5-4e0a-bdae-2574ab6161f0": { "chain": "ddfc_builder_id", "type": "many2one" },
+              "5ed03822-f985-45c7-a24b-58fa940a4333": { "chain": "user_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-builder-states",
+          "x": 0,
+          "y": 775,
+          "width": 620,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Constructores por estado" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["state_id"],
+              "measure": "__count",
+              "order": "desc",
+              "resModel": "ddfc.builder.profile",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["state_id"] },
+              "domain": [["active", "=", true], ["state_id", "!=", false]],
+              "groupBy": ["state_id"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "64c87b1a-5ab5-4e0a-bdae-2574ab6161f0": { "chain": "id", "type": "many2one" },
+              "9ff1b6cb-b933-4d1f-b83f-240cd0594f44": { "chain": "state_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-sales-count",
+          "x": 640,
+          "y": 775,
+          "width": 610,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Cantidad de ventas por constructor" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["ddfc_builder_id"],
+              "measure": "__count",
+              "order": "desc",
+              "resModel": "sale.order",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["ddfc_builder_id"] },
+              "domain": [["ddfc_builder_id", "!=", false], ["state", "not in", ["draft", "cancel"]]],
+              "groupBy": ["ddfc_builder_id"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "4f7cf711-dc31-4e3b-804e-8af9802f3b47": { "chain": "date_order", "type": "date", "offset": 0 },
+              "64c87b1a-5ab5-4e0a-bdae-2574ab6161f0": { "chain": "ddfc_builder_id", "type": "many2one" },
+              "5ed03822-f985-45c7-a24b-58fa940a4333": { "chain": "user_id", "type": "many2one" }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "styles": {},
+  "formats": {},
+  "borders": {},
+  "revisionId": "1",
+  "uniqueFigureIds": [],
+  "settings": { "locale": "es_419" },
+  "pivots": {},
+  "pivotNextId": 1,
+  "customTableStyles": {},
+  "odooVersion": 18,
+  "globalFilters": [
+    {
+      "id": "4f7cf711-dc31-4e3b-804e-8af9802f3b47",
+      "type": "date",
+      "label": "Periodo",
+      "rangeType": "from_to",
+      "defaultValue": []
+    },
+    {
+      "id": "64c87b1a-5ab5-4e0a-bdae-2574ab6161f0",
+      "type": "relation",
+      "label": "Constructor",
+      "modelName": "ddfc.builder.profile",
+      "includeChildren": false,
+      "defaultValue": []
+    },
+    {
+      "id": "5ed03822-f985-45c7-a24b-58fa940a4333",
+      "type": "relation",
+      "label": "Vendedor",
+      "modelName": "res.users",
+      "includeChildren": false,
+      "defaultValue": []
+    },
+    {
+      "id": "9ff1b6cb-b933-4d1f-b83f-240cd0594f44",
+      "type": "relation",
+      "label": "Estado",
+      "modelName": "res.country.state",
+      "includeChildren": false,
+      "defaultValue": []
+    }
+  ],
+  "lists": {},
+  "listNextId": 1,
+  "chartOdooMenusReferences": {}
+}

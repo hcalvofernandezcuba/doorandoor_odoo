@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="menu_doorandoor_tableros_root" model="ir.ui.menu">
+            <field name="name">Tableros</field>
+            <field name="action" ref="doorandoor_tableros.action_doorandoor_payment_dashboard"/>
+            <field name="sequence">62</field>
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
+        </record>
+
+        <record id="menu_doorandoor_finance_billing_root" model="ir.ui.menu">
+            <field name="name">Facturacion</field>
+            <field name="parent_id" ref="account.menu_finance"/>
+            <field name="sequence">96</field>
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
+        </record>
+
+        <record id="menu_doorandoor_finance_billing_payments_root" model="ir.ui.menu">
+            <field name="name">Pagos</field>
+            <field name="parent_id" ref="doorandoor_tableros.menu_doorandoor_finance_billing_root"/>
+            <field name="sequence">20</field>
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
+        </record>
+
+        <record id="menu_doorandoor_payment_dashboard" model="ir.ui.menu">
+            <field name="name">Tablero de pagos</field>
+            <field name="parent_id" ref="doorandoor_tableros.menu_doorandoor_tableros_root"/>
+            <field name="action" ref="doorandoor_tableros.action_doorandoor_payment_dashboard"/>
+            <field name="sequence">10</field>
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
+        </record>
+
+        <record id="menu_doorandoor_finance_payment_dashboard" model="ir.ui.menu">
+            <field name="name">Tablero base de pagos</field>
+            <field name="parent_id" ref="doorandoor_tableros.menu_doorandoor_finance_billing_payments_root"/>
+            <field name="action" ref="doorandoor_tableros.action_doorandoor_payment_dashboard"/>
+            <field name="sequence">10</field>
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
+        </record>
+    </data>
+</odoo>

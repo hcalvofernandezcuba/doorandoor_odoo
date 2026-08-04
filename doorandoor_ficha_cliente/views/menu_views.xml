@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="menu_ddfc_constructors_root"
+                  name="Constructores"
+                  parent="contacts.menu_contacts"
+                  sequence="45"/>
+
+        <menuitem id="menu_ddfc_builder_catalog"
+                  name="Catalogo de constructores"
+                  parent="menu_ddfc_constructors_root"
+                  action="action_ddfc_builder_profile"
+                  sequence="10"/>
+
+        <menuitem id="menu_ddfc_builder_report"
+                  name="Clientes por constructor"
+                  parent="menu_ddfc_constructors_root"
+                  action="action_ddfc_partner_builder_report"
+                  sequence="20"/>
+
+        <menuitem id="menu_ddfc_dashboard"
+                  name="Tablero de constructores"
+                  parent="menu_ddfc_constructors_root"
+                  action="action_ddfc_dashboard"
+                  sequence="30"/>
+    </data>
+</odoo>

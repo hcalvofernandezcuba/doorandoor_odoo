@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_sale_order_form_inherit_ddfc_builder" model="ir.ui.view">
+            <field name="name">sale.order.form.ddfc.builder</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="priority">120</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="ddfc_builder_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="ddfc_builder_discount_percent"/>
+                    <field name="ddfc_pricing_source"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_sale_order_tree_inherit_ddfc_builder" model="ir.ui.view">
+            <field name="name">sale.order.tree.ddfc.builder</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="ddfc_builder_id" optional="hide"/>
+                    <field name="ddfc_pricing_source" optional="hide"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,3 +1,6 @@
+from markupsafe import Markup
+
+from odoo import _
 from odoo import models
 
 
@@ -60,6 +63,15 @@ class AccountPaymentRegister(models.TransientModel):
                         "state": "pending",
                         "notes": "Cobro generado automaticamente desde Registrar pago y pendiente de validacion.",
                     }
+                )
+                invoice.message_post(
+                    body=Markup(
+                        "<p><strong>Pago reportado para revision</strong></p>"
+                        "<p>Se registro un pago por <strong>%s</strong> en el diario <strong>%s</strong>.</p>"
+                        "<p>La factura queda en revision hasta que Contabilidad confirme el ingreso.</p>"
+                    )
+                    % (amount_reported, payment.journal_id.display_name),
+                    subtype_xmlid="mail.mt_note",
                 )
 
     def _ddc_get_invoice_amount_map(self):

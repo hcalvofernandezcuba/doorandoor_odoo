@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="cobro_wizard_pdf">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Reporte de Cobros</h2>
+                        <p class="mb-3">
+                            Vista preliminar para revision operativa con ventas y contabilidad.
+                        </p>
+
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <strong>Clientes:</strong>
+                                <span t-esc="', '.join(wizard.partner_ids.mapped('display_name')) or 'Todos'"/>
+                                <br/>
+                                <strong>Vendedores:</strong>
+                                <span t-esc="', '.join(wizard.user_ids.mapped('name')) or 'Todos'"/>
+                                <br/>
+                                <strong>Diarios:</strong>
+                                <span t-esc="', '.join(wizard.journal_ids.mapped('display_name')) or 'Todos'"/>
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong>Estado:</strong>
+                                <span t-esc="dict(wizard._fields['state_filter'].selection).get(wizard.state_filter)"/>
+                                <br/>
+                                <strong>Desde:</strong>
+                                <span t-esc="wizard.date_from or '-'"/>
+                                <br/>
+                                <strong>Hasta:</strong>
+                                <span t-esc="wizard.date_to or '-'"/>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-3">
+                                <div style="border: 1px solid #cfcfcf; padding: 10px; min-height: 72px;">
+                                    <div><strong>Controles</strong></div>
+                                    <div style="font-size: 24px;" t-esc="count_controls"/>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div style="border: 1px solid #cfcfcf; padding: 10px; min-height: 72px;">
+                                    <div><strong>Pendientes</strong></div>
+                                    <div style="font-size: 24px;" t-esc="count_pending"/>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div style="border: 1px solid #cfcfcf; padding: 10px; min-height: 72px;">
+                                    <div><strong>Validados</strong></div>
+                                    <div style="font-size: 24px;" t-esc="count_validated"/>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div style="border: 1px solid #cfcfcf; padding: 10px; min-height: 72px;">
+                                    <div><strong>Monto total</strong></div>
+                                    <div style="font-size: 24px;">
+                                        <span t-out="total_amount" t-options='{"widget": "monetary", "display_currency": wizard.env.company.currency_id}'/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Control</th>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Vendedor</th>
+                                    <th>Factura</th>
+                                    <th>Diario</th>
+                                    <th class="text-end">Monto</th>
+                                    <th>Estado</th>
+                                    <th t-if="wizard.include_reference">Referencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="controls" t-as="control">
+                                    <td><span t-field="control.name"/></td>
+                                    <td><span t-field="control.payment_date"/></td>
+                                    <td><span t-field="control.partner_id"/></td>
+                                    <td><span t-field="control.sale_user_id"/></td>
+                                    <td><span t-field="control.move_id.name"/></td>
+                                    <td><span t-field="control.journal_id"/></td>
+                                    <td class="text-end"><span t-field="control.amount_reported"/></td>
+                                    <td><span t-field="control.state"/></td>
+                                    <td t-if="wizard.include_reference"><span t-field="control.payment_reference"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div t-if="wizard.include_notes" class="mt-4">
+                            <strong>Notas y observaciones</strong>
+                            <div style="border: 1px solid #cfcfcf; min-height: 70px; padding: 10px;">
+                                <span t-esc="wizard.notes or 'Sin observaciones adicionales para esta variante preliminar.'"/>
+                            </div>
+                        </div>
+
+                        <div t-if="wizard.include_rejection_reason and count_rejected" class="mt-4">
+                            <strong>Controles rechazados</strong>
+                            <table class="table table-sm table-bordered mt-2">
+                                <thead>
+                                    <tr>
+                                        <th>Control</th>
+                                        <th>Cliente</th>
+                                        <th>Motivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="rejected_controls" t-as="control">
+                                        <td><span t-field="control.name"/></td>
+                                        <td><span t-field="control.partner_id"/></td>
+                                        <td><span t-esc="control.rejection_reason or '-'"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div t-if="wizard.include_signatures" class="row mt-5 pt-4">
+                            <div class="col-6">
+                                <div><strong>Preparado por</strong></div>
+                                <div style="border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; min-height: 22px;">
+                                    <span t-esc="wizard.env.user.name"/>
+                                </div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <div><strong>Revisado por</strong></div>
+                                <div style="border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; min-height: 22px;">
+                                    <span> </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <record id="action_report_ddc_cobro_wizard_pdf" model="ir.actions.report">
+            <field name="name">Reporte PDF de Cobros</field>
+            <field name="model">doorandoor.cobro.report.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">doorandoor_control_cobros.cobro_wizard_pdf</field>
+            <field name="report_file">doorandoor_control_cobros.cobro_wizard_pdf</field>
+            <field name="print_report_name">'Reporte de Cobros - %s' % (object.create_date.date() if object.create_date else 'borrador')</field>
+        </record>
+    </data>
+</odoo>

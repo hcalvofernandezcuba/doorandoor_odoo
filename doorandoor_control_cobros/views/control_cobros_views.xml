@@ -7,6 +7,8 @@
             <list>
                 <field name="name"/>
                 <field name="state"/>
+                <field name="matching_status"/>
+                <field name="is_partial"/>
                 <field name="payment_state"/>
                 <field name="invoice_payment_state"/>
                 <field name="move_id"/>
@@ -15,6 +17,7 @@
                 <field name="journal_id"/>
                 <field name="payment_date"/>
                 <field name="amount_reported"/>
+                <field name="validated_amount"/>
                 <field name="sale_user_id"/>
                 <field name="accountant_user_id"/>
             </list>
@@ -27,8 +30,11 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_print_control_report" type="object" string="Imprimir" class="btn-secondary"/>
                     <button name="action_report" type="object" string="Reportar" invisible="state != 'draft'"/>
-                    <button name="action_mark_pending" type="object" string="Pasar a pendiente" invisible="state not in ('reported', 'draft')"/>
+                    <button name="action_open_match_wizard" type="object" string="Asociar pago/factura" invisible="state == 'validated'"/>
+                    <button name="action_create_payment_entry" type="object" string="Crear pago contable" invisible="payment_id != False"/>
+                    <button name="action_mark_pending" type="object" string="Pasar a pendiente" invisible="state not in ('reported', 'draft', 'rejected')"/>
                     <button name="action_review" type="object" string="Revisar" invisible="state not in ('reported', 'pending')"/>
                     <button name="action_validate" type="object" string="Validar" invisible="state not in ('review', 'pending', 'reported')"/>
                     <button name="action_reject" type="object" string="Rechazar" invisible="state not in ('review', 'pending', 'reported')"/>
@@ -42,6 +48,7 @@
                         <group>
                             <field name="move_id"/>
                             <field name="payment_id"/>
+                            <field name="matching_status" readonly="1"/>
                             <field name="payment_state" readonly="1"/>
                             <field name="invoice_payment_state" readonly="1"/>
                             <field name="partner_id"/>
@@ -50,7 +57,11 @@
                         </group>
                         <group>
                             <field name="amount_reported"/>
+                            <field name="validated_amount"/>
                             <field name="payment_reference"/>
+                            <field name="source_type"/>
+                            <field name="is_unidentified" readonly="1"/>
+                            <field name="is_partial" readonly="1"/>
                             <field name="sale_user_id"/>
                             <field name="accountant_user_id" readonly="1"/>
                         </group>
@@ -58,6 +69,7 @@
                     <group>
                         <group>
                             <field name="review_date" readonly="1"/>
+                            <field name="invoice_residual_snapshot" readonly="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                         <group>
@@ -67,6 +79,9 @@
                     <notebook>
                         <page string="Notas">
                             <field name="notes"/>
+                        </page>
+                        <page string="Identificacion">
+                            <field name="identification_notes" placeholder="Usa este espacio para documentar pagos recibidos antes de identificar su factura o el pago contable real."/>
                         </page>
                         <page string="Rechazo">
                             <field name="rejection_reason" readonly="state != 'rejected'"/>
@@ -92,13 +107,21 @@
                 <field name="partner_id"/>
                 <field name="journal_id"/>
                 <field name="payment_id"/>
+                <field name="matching_status"/>
                 <field name="payment_state"/>
                 <field name="invoice_payment_state"/>
                 <filter string="Pendientes" name="pending" domain="[('state', 'in', ['reported', 'pending', 'review'])]"/>
+                <filter string="Pagos por identificar" name="unidentified" domain="[('move_id', '=', False)]"/>
+                <filter string="Cliente identificado" name="identified" domain="[('matching_status', '=', 'identified')]"/>
+                <filter string="Con factura" name="with_invoice" domain="[('move_id', '!=', False)]"/>
+                <filter string="Con pago contable" name="with_payment" domain="[('payment_id', '!=', False)]"/>
+                <filter string="Sin pago contable" name="without_payment" domain="[('payment_id', '=', False)]"/>
+                <filter string="Parciales" name="partials" domain="[('is_partial', '=', True)]"/>
                 <filter string="Validados" name="validated" domain="[('state', '=', 'validated')]"/>
                 <filter string="Rechazados" name="rejected" domain="[('state', '=', 'rejected')]"/>
                 <group expand="0" string="Agrupar por">
                     <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Asociacion" name="group_matching_status" context="{'group_by': 'matching_status'}"/>
                     <filter string="Estado del pago" name="group_payment_state" context="{'group_by': 'payment_state'}"/>
                     <filter string="Estado de la factura" name="group_invoice_payment_state" context="{'group_by': 'invoice_payment_state'}"/>
                     <filter string="Diario" name="group_journal" context="{'group_by': 'journal_id'}"/>
@@ -124,7 +147,6 @@
                 <field name="state" type="col"/>
                 <field name="payment_state" type="col"/>
                 <field name="amount_reported" type="measure"/>
-                <field name="id" type="measure" string="Cantidad"/>
             </pivot>
         </field>
     </record>
@@ -143,8 +165,16 @@
     <record id="action_ddc_cobro_report" model="ir.actions.act_window">
         <field name="name">Reporte de pagos</field>
         <field name="res_model">doorandoor.cobro.control</field>
-        <field name="view_mode">pivot,graph,list</field>
+        <field name="view_mode">list,form,pivot,graph</field>
         <field name="search_view_id" ref="view_ddc_cobro_control_search"/>
         <field name="context">{'search_default_group_journal': 1}</field>
+    </record>
+
+    <record id="action_ddc_account_payments" model="ir.actions.act_window">
+        <field name="name">Pagos</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('partner_type', '=', 'customer')]</field>
+        <field name="context">{'default_partner_type': 'customer', 'search_default_inbound_filter': 1}</field>
     </record>
 </odoo>

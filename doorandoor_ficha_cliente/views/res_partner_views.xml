@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_partner_form_inherit_ddfc_builder" model="ir.ui.view">
+            <field name="name">res.partner.form.ddfc.builder</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="priority">120</field>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Ficha comercial">
+                        <group string="Referencia comercial y garantias">
+                            <group>
+                                <field name="ddfc_builder_id"
+                                       options="{'no_open': False, 'no_create_edit': False}"
+                                       domain="[]"/>
+                            </group>
+                            <group>
+                                <label for="ddfc_builder_id" string="Uso del campo"/>
+                                <div class="text-muted">
+                                    Vincula aqui el constructor o instalador que termina
+                                    ejecutando la obra, aunque no sea quien realiza la compra.
+                                </div>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_partner_search_inherit_ddfc_builder" model="ir.ui.view">
+            <field name="name">res.partner.search.ddfc.builder</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search" position="inside">
+                    <field name="ddfc_builder_id"/>
+                    <filter string="Con constructor" name="with_builder" domain="[('ddfc_builder_id', '!=', False)]"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Constructor" name="group_builder" context="{'group_by': 'ddfc_builder_id'}"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_partner_tree_inherit_ddfc_builder" model="ir.ui.view">
+            <field name="name">res.partner.tree.ddfc.builder</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='category_id']" position="after">
+                    <field name="ddfc_builder_id" optional="hide"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_res_partner_pivot_ddfc_builder" model="ir.ui.view">
+            <field name="name">res.partner.pivot.ddfc.builder</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <pivot string="Clientes por constructor">
+                    <field name="ddfc_builder_id" type="row"/>
+                    <field name="state_id" type="col"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="view_res_partner_graph_ddfc_builder" model="ir.ui.view">
+            <field name="name">res.partner.graph.ddfc.builder</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <graph string="Clientes por constructor" type="bar">
+                    <field name="ddfc_builder_id"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="action_ddfc_partner_builder_report" model="ir.actions.act_window">
+            <field name="name">Clientes por constructor</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">list,form,pivot,graph</field>
+            <field name="domain">[('ddfc_builder_id', '!=', False)]</field>
+            <field name="context">
+                {
+                    'search_default_filter_customers': 1,
+                    'search_default_with_builder': 1,
+                    'group_by': ['ddfc_builder_id']
+                }
+            </field>
+            <field name="view_ids" eval="[
+                (5, 0, 0),
+                (0, 0, {'view_mode': 'list', 'view_id': ref('base.view_partner_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('base.view_partner_form')}),
+                (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_res_partner_pivot_ddfc_builder')}),
+                (0, 0, {'view_mode': 'graph', 'view_id': ref('view_res_partner_graph_ddfc_builder')})
+            ]"/>
+            <field name="help" type="html">
+                <p>
+                    Esta vista permite analizar que clientes estan vinculados a
+                    cada constructor o instalador asociado.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddc_cobro_match_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.match.wizard.form</field>
+        <field name="model">doorandoor.cobro.match.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Asociar control detectado">
+                <group>
+                    <group>
+                        <field name="control_id"/>
+                        <field name="partner_id"/>
+                        <field name="move_id"/>
+                        <field name="payment_id"/>
+                    </group>
+                    <group>
+                        <field name="journal_id"/>
+                        <field name="amount_reported"/>
+                        <field name="invoice_residual"/>
+                        <field name="send_to_pending"/>
+                    </group>
+                </group>
+                <group>
+                    <field
+                        name="matching_note"
+                        placeholder="Describe como se identifico el pago, quien confirmo la factura correcta o cualquier detalle util para el seguimiento."/>
+                </group>
+                <footer>
+                    <button name="action_apply" type="object" string="Aplicar asociacion" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddc_cobro_match_wizard" model="ir.actions.act_window">
+        <field name="name">Asociar control detectado</field>
+        <field name="res_model">doorandoor.cobro.match.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_ddc_cobro_match_wizard_form"/>
+        <field name="context">{'default_control_id': active_id}</field>
+    </record>
+</odoo>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_ddfc_builder_profile_tree" model="ir.ui.view">
+            <field name="name">ddfc.builder.profile.tree</field>
+            <field name="model">ddfc.builder.profile</field>
+            <field name="arch" type="xml">
+                <list string="Constructores asociados">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="partner_id"/>
+                    <field name="phone"/>
+                    <field name="email"/>
+                    <field name="city"/>
+                    <field name="state_id"/>
+                    <field name="customer_count"/>
+                    <field name="active" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_ddfc_builder_profile_form" model="ir.ui.view">
+            <field name="name">ddfc.builder.profile.form</field>
+            <field name="model">ddfc.builder.profile</field>
+            <field name="arch" type="xml">
+                <form string="Constructor asociado">
+                    <header>
+                        <button name="action_view_customers"
+                                type="object"
+                                string="Clientes asociados"
+                                class="oe_stat_button"
+                                icon="fa-users"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_customers"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-users">
+                                <field name="customer_count" widget="statinfo" string="Clientes"/>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="active"/>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="partner_id"/>
+                            </group>
+                            <group>
+                                <field name="phone"/>
+                                <field name="mobile"/>
+                                <field name="email"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="city"/>
+                                <field name="state_id"/>
+                                <field name="country_id"/>
+                            </group>
+                            <group>
+                                <field name="notes" placeholder="Referencia comercial, garantia, observaciones operativas..."/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Clientes asociados">
+                                <field name="customer_ids" context="{'default_ddfc_builder_id': id}">
+                                    <list editable="bottom">
+                                        <field name="name"/>
+                                        <field name="phone"/>
+                                        <field name="mobile"/>
+                                        <field name="email"/>
+                                        <field name="city"/>
+                                        <field name="state_id"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_ddfc_builder_profile_search" model="ir.ui.view">
+            <field name="name">ddfc.builder.profile.search</field>
+            <field name="model">ddfc.builder.profile</field>
+            <field name="arch" type="xml">
+                <search string="Buscar constructores">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="partner_id"/>
+                    <field name="state_id"/>
+                    <field name="country_id"/>
+                    <filter string="Activos" name="active_only" domain="[('active', '=', True)]"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Estado" name="group_state" context="{'group_by': 'state_id'}"/>
+                        <filter string="Pais" name="group_country" context="{'group_by': 'country_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_ddfc_builder_profile" model="ir.actions.act_window">
+            <field name="name">Constructores</field>
+            <field name="res_model">ddfc.builder.profile</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_ddfc_builder_profile_search"/>
+            <field name="context">{'search_default_active_only': 1}</field>
+            <field name="help" type="html">
+                <p>
+                    Crea aqui el catalogo de constructores, instaladores o aliados
+                    comerciales que luego podras vincular a cada cliente.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

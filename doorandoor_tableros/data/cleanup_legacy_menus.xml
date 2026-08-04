@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <delete id="menu_doorandoor_tableros_root" model="ir.ui.menu"/>
+    <delete id="menu_doorandoor_finance_billing_root" model="ir.ui.menu"/>
+    <delete id="menu_doorandoor_finance_billing_payments_root" model="ir.ui.menu"/>
+    <delete id="menu_doorandoor_payment_dashboard" model="ir.ui.menu"/>
+    <delete id="menu_doorandoor_finance_payment_dashboard" model="ir.ui.menu"/>
+</odoo>

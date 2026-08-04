@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddc_cobro_report_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.report.wizard.form</field>
+        <field name="model">doorandoor.cobro.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Asistente PDF de Cobros">
+                <sheet>
+                    <group>
+                        <group string="Filtro base">
+                            <field name="partner_ids" widget="many2many_tags"/>
+                            <field name="user_ids" widget="many2many_tags"/>
+                            <field name="control_id"/>
+                            <field name="state_filter"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="journal_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Opciones del PDF">
+                            <field name="layout_variant"/>
+                            <field name="include_reference"/>
+                            <field name="include_notes"/>
+                            <field name="include_rejection_reason"/>
+                            <field name="include_signatures"/>
+                        </group>
+                    </group>
+                    <group string="Notas de definicion">
+                        <field name="notes" placeholder="Aqui iremos documentando variantes o cambios pedidos por clientes y contabilidad."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_print_pdf" type="object" string="Imprimir PDF base" class="btn-primary"/>
+                    <button string="Cerrar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddc_cobro_report_wizard" model="ir.actions.act_window">
+        <field name="name">Asistente PDF de Cobros</field>
+        <field name="res_model">doorandoor.cobro.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

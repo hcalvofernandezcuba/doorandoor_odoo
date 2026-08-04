@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_doorandoor_payment_dashboard_form" model="ir.ui.view">
+        <field name="name">doorandoor.payment.dashboard.form</field>
+        <field name="model">doorandoor.payment.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Tablero de Pagos">
+                <header>
+                    <button name="action_refresh" type="object" string="Actualizar" class="btn-primary"/>
+                    <button name="action_view_controls" type="object" string="Ver controles"/>
+                    <button name="action_view_payments" type="object" string="Ver pagos"/>
+                    <button name="action_view_report" type="object" string="Ver analitico"/>
+                </header>
+                <sheet>
+                    <group string="Filtros">
+                        <group>
+                            <field name="period_mode"/>
+                            <field name="date_filter_type"/>
+                            <field name="date_from" invisible="period_mode != 'manual'"/>
+                            <field name="date_to" invisible="period_mode != 'manual'"/>
+                        </group>
+                        <group>
+                            <field name="journal_ids" widget="many2many_tags"/>
+                            <field name="partner_ids" widget="many2many_tags"/>
+                            <field name="user_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <group string="Indicadores">
+                        <group>
+                            <field name="total_controls" readonly="1"/>
+                            <field name="total_payments_linked" readonly="1"/>
+                            <field name="total_invoices_linked" readonly="1"/>
+                            <field name="total_pending_controls" readonly="1"/>
+                            <field name="total_review_controls" readonly="1"/>
+                            <field name="total_reported_controls" readonly="1"/>
+                            <field name="total_unidentified_controls" readonly="1"/>
+                            <field name="total_partial_controls" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="total_validated_controls" readonly="1"/>
+                            <field name="total_rejected_controls" readonly="1"/>
+                            <field name="total_amount_reported" readonly="1"/>
+                            <field name="total_amount_pending" readonly="1"/>
+                            <field name="total_amount_validated" readonly="1"/>
+                            <field name="total_amount_rejected" readonly="1"/>
+                            <field name="total_amount_linked_payments" readonly="1"/>
+                            <field name="average_validation_hours" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Ranking operativo">
+                        <group>
+                            <field name="top_customer_count_id" readonly="1"/>
+                            <field name="top_customer_count_value" readonly="1"/>
+                            <field name="top_customer_amount_id" readonly="1"/>
+                            <field name="top_customer_amount_value" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="top_journal_count_id" readonly="1"/>
+                            <field name="top_journal_count_value" readonly="1"/>
+                            <field name="top_journal_amount_id" readonly="1"/>
+                            <field name="top_journal_amount_value" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Notas de evolucion">
+                        <field name="notes" placeholder="Aqui podemos ir documentando nuevas ideas del tablero dentro del propio modulo."/>
+                    </group>
+                    <notebook>
+                        <page string="Controles">
+                            <field name="control_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="state"/>
+                                    <field name="matching_status"/>
+                                    <field name="partner_id"/>
+                                    <field name="move_id"/>
+                                    <field name="payment_id"/>
+                                    <field name="journal_id"/>
+                                    <field name="payment_date"/>
+                                    <field name="amount_reported"/>
+                                    <field name="validated_amount"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Pagos">
+                            <field name="payment_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="date"/>
+                                    <field name="journal_id"/>
+                                    <field name="amount"/>
+                                    <field name="state"/>
+                                    <field name="memo"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Facturas">
+                            <field name="move_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_date_due"/>
+                                    <field name="amount_total"/>
+                                    <field name="amount_residual"/>
+                                    <field name="payment_state"/>
+                                    <field name="ddc_payment_review_state"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_doorandoor_payment_dashboard" model="ir.actions.act_window">
+        <field name="name">Tablero de pagos</field>
+        <field name="res_model">doorandoor.payment.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_doorandoor_payment_dashboard_form"/>
+        <field name="target">current</field>
+        <field name="context">{'form_view_initial_mode': 'edit'}</field>
+    </record>
+</odoo>

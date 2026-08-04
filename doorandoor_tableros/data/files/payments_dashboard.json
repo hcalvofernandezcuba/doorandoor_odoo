@@ -1,0 +1,309 @@
+{
+  "version": 21,
+  "sheets": [
+    {
+      "id": "0f7241d0-bd3d-4cf0-b602-d88b85d76f55",
+      "name": "Dashboard",
+      "colNumber": 8,
+      "rowNumber": 80,
+      "rows": {
+        "1": { "size": 34 },
+        "2": { "size": 34 },
+        "3": { "size": 34 },
+        "4": { "size": 34 },
+        "5": { "size": 34 },
+        "6": { "size": 34 }
+      },
+      "cols": {
+        "0": { "size": 160 },
+        "1": { "size": 160 },
+        "2": { "size": 160 },
+        "3": { "size": 160 },
+        "4": { "size": 160 },
+        "5": { "size": 160 },
+        "6": { "size": 160 },
+        "7": { "size": 160 }
+      },
+      "cells": {
+        "A1": { "content": "[Pagos y Cobros]" },
+        "A2": { "content": "Tablero base de cobros y pagos integrado en Finanzas." },
+        "A3": { "content": "Usa el filtro Periodo para escoger un rango manual desde/hasta." }
+      },
+      "styles": {},
+      "formats": {},
+      "borders": {},
+      "conditionalFormats": [],
+      "tables": [],
+      "areGridLinesVisible": false,
+      "isVisible": true,
+      "headerGroups": {},
+      "dataValidationRules": [],
+      "comments": {},
+      "figures": [
+        {
+          "id": "fig-line-1",
+          "x": 0,
+          "y": 95,
+          "width": 760,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Cobros reportados por fecha" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["payment_date:month"],
+              "measure": "amount_reported",
+              "order": null,
+              "resModel": "doorandoor.cobro.control",
+              "mode": "line"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["payment_date"] },
+              "domain": [["active", "=", true]],
+              "groupBy": ["payment_date"],
+              "orderBy": []
+            },
+            "type": "odoo_line",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fillArea": true,
+            "fieldMatching": {
+              "d65e90cd-f4c2-4d5d-9f5c-c9aa0dc3f1b1": { "chain": "payment_date", "type": "date", "offset": 0 },
+              "30fb5a24-7914-412f-a04f-2b16fa5590eb": { "chain": "partner_id", "type": "many2one" },
+              "65dc665a-ae48-4faa-b65e-c7c716dbf6b1": { "chain": "journal_id", "type": "many2one" },
+              "ce535b3f-480a-43eb-a428-7709576567bd": { "chain": "sale_user_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-bar-1",
+          "x": 780,
+          "y": 95,
+          "width": 470,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Cobros por estado del control" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["state"],
+              "measure": "amount_reported",
+              "order": null,
+              "resModel": "doorandoor.cobro.control",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["state"] },
+              "domain": [["active", "=", true]],
+              "groupBy": ["state"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "d65e90cd-f4c2-4d5d-9f5c-c9aa0dc3f1b1": { "chain": "payment_date", "type": "date", "offset": 0 },
+              "30fb5a24-7914-412f-a04f-2b16fa5590eb": { "chain": "partner_id", "type": "many2one" },
+              "65dc665a-ae48-4faa-b65e-c7c716dbf6b1": { "chain": "journal_id", "type": "many2one" },
+              "ce535b3f-480a-43eb-a428-7709576567bd": { "chain": "sale_user_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-bar-journal",
+          "x": 0,
+          "y": 435,
+          "width": 620,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Cobros por diario" },
+            "background": "#FFFFFF",
+            "legendPosition": "right",
+            "metaData": {
+              "groupBy": ["journal_id"],
+              "measure": "amount_reported",
+              "order": null,
+              "resModel": "doorandoor.cobro.control",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["journal_id"] },
+              "domain": [["active", "=", true], ["journal_id", "!=", false]],
+              "groupBy": ["journal_id"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "d65e90cd-f4c2-4d5d-9f5c-c9aa0dc3f1b1": { "chain": "payment_date", "type": "date", "offset": 0 },
+              "30fb5a24-7914-412f-a04f-2b16fa5590eb": { "chain": "partner_id", "type": "many2one" },
+              "65dc665a-ae48-4faa-b65e-c7c716dbf6b1": { "chain": "journal_id", "type": "many2one" },
+              "ce535b3f-480a-43eb-a428-7709576567bd": { "chain": "sale_user_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-bar-2",
+          "x": 640,
+          "y": 435,
+          "width": 610,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Top clientes por monto reportado" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["partner_id"],
+              "measure": "amount_reported",
+              "order": "desc",
+              "resModel": "doorandoor.cobro.control",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["partner_id"] },
+              "domain": [["active", "=", true], ["partner_id", "!=", false]],
+              "groupBy": ["partner_id"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "d65e90cd-f4c2-4d5d-9f5c-c9aa0dc3f1b1": { "chain": "payment_date", "type": "date", "offset": 0 },
+              "30fb5a24-7914-412f-a04f-2b16fa5590eb": { "chain": "partner_id", "type": "many2one" },
+              "65dc665a-ae48-4faa-b65e-c7c716dbf6b1": { "chain": "journal_id", "type": "many2one" },
+              "ce535b3f-480a-43eb-a428-7709576567bd": { "chain": "sale_user_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-bar-3",
+          "x": 0,
+          "y": 775,
+          "width": 620,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Cobros por estado del pago" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["payment_state"],
+              "measure": "amount_reported",
+              "order": null,
+              "resModel": "doorandoor.cobro.control",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["payment_state"] },
+              "domain": [["active", "=", true], ["payment_state", "!=", false]],
+              "groupBy": ["payment_state"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "d65e90cd-f4c2-4d5d-9f5c-c9aa0dc3f1b1": { "chain": "payment_date", "type": "date", "offset": 0 },
+              "30fb5a24-7914-412f-a04f-2b16fa5590eb": { "chain": "partner_id", "type": "many2one" },
+              "65dc665a-ae48-4faa-b65e-c7c716dbf6b1": { "chain": "journal_id", "type": "many2one" },
+              "ce535b3f-480a-43eb-a428-7709576567bd": { "chain": "sale_user_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "fig-bar-4",
+          "x": 640,
+          "y": 775,
+          "width": 610,
+          "height": 320,
+          "tag": "chart",
+          "data": {
+            "title": { "text": "Pagos por identificar" },
+            "background": "#FFFFFF",
+            "legendPosition": "none",
+            "metaData": {
+              "groupBy": ["matching_status"],
+              "measure": "amount_reported",
+              "order": null,
+              "resModel": "doorandoor.cobro.control",
+              "mode": "bar"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": { "group_by": ["matching_status"] },
+              "domain": [["active", "=", true]],
+              "groupBy": ["matching_status"],
+              "orderBy": []
+            },
+            "type": "odoo_bar",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "d65e90cd-f4c2-4d5d-9f5c-c9aa0dc3f1b1": { "chain": "payment_date", "type": "date", "offset": 0 },
+              "30fb5a24-7914-412f-a04f-2b16fa5590eb": { "chain": "partner_id", "type": "many2one" },
+              "65dc665a-ae48-4faa-b65e-c7c716dbf6b1": { "chain": "journal_id", "type": "many2one" },
+              "ce535b3f-480a-43eb-a428-7709576567bd": { "chain": "sale_user_id", "type": "many2one" }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "styles": {},
+  "formats": {},
+  "borders": {},
+  "revisionId": "2",
+  "uniqueFigureIds": [],
+  "settings": { "locale": "es_419" },
+  "pivots": {},
+  "pivotNextId": 1,
+  "customTableStyles": {},
+  "odooVersion": 18,
+  "globalFilters": [
+    {
+      "id": "d65e90cd-f4c2-4d5d-9f5c-c9aa0dc3f1b1",
+      "type": "date",
+      "label": "Periodo",
+      "rangeType": "from_to",
+      "defaultValue": []
+    },
+    {
+      "id": "30fb5a24-7914-412f-a04f-2b16fa5590eb",
+      "type": "relation",
+      "label": "Cliente",
+      "modelName": "res.partner",
+      "includeChildren": false,
+      "defaultValue": []
+    },
+    {
+      "id": "65dc665a-ae48-4faa-b65e-c7c716dbf6b1",
+      "type": "relation",
+      "label": "Diario",
+      "modelName": "account.journal",
+      "includeChildren": false,
+      "defaultValue": []
+    },
+    {
+      "id": "ce535b3f-480a-43eb-a428-7709576567bd",
+      "type": "relation",
+      "label": "Vendedor",
+      "modelName": "res.users",
+      "includeChildren": false,
+      "defaultValue": []
+    }
+  ],
+  "lists": {},
+  "listNextId": 1,
+  "chartOdooMenusReferences": {}
+}

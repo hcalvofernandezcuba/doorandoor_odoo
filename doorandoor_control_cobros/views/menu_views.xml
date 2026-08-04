@@ -1,26 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <menuitem
-            id="menu_ddc_root"
-            name="Control de Cobros"
-            sequence="61"
-            groups="doorandoor_control_cobros.group_ddc_user"/>
+        <record id="menu_ddc_root" model="ir.ui.menu">
+            <field name="name">Control de Cobros</field>
+            <field name="sequence">61</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
 
-        <menuitem
-            id="menu_ddc_controls"
-            name="Controles"
-            parent="menu_ddc_root"
-            action="action_ddc_cobro_control"
-            sequence="10"
-            groups="doorandoor_control_cobros.group_ddc_user"/>
+        <record id="menu_ddc_controls" model="ir.ui.menu">
+            <field name="name">Controles</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_root"/>
+            <field name="action" ref="doorandoor_control_cobros.action_ddc_cobro_control"/>
+            <field name="sequence">10</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
 
-        <menuitem
-            id="menu_ddc_reports"
-            name="Reporte de pagos"
-            parent="menu_ddc_root"
-            action="action_ddc_cobro_report"
-            sequence="20"
-            groups="doorandoor_control_cobros.group_ddc_user"/>
+        <record id="menu_ddc_payments" model="ir.ui.menu">
+            <field name="name">Pagos</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_root"/>
+            <field name="action" ref="doorandoor_control_cobros.action_ddc_account_payments"/>
+            <field name="sequence">15</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
+
+        <record id="menu_ddc_reports" model="ir.ui.menu">
+            <field name="name">Reportes</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_root"/>
+            <field name="action" eval="False"/>
+            <field name="sequence">20</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
+
+        <record id="menu_ddc_report_list" model="ir.ui.menu">
+            <field name="name">Reporte de pagos</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_reports"/>
+            <field name="action" ref="doorandoor_control_cobros.action_ddc_cobro_report"/>
+            <field name="sequence">10</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
+
+        <record id="menu_ddc_report_wizard" model="ir.ui.menu">
+            <field name="name">Asistente PDF</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_reports"/>
+            <field name="action" ref="doorandoor_control_cobros.action_ddc_cobro_report_wizard"/>
+            <field name="sequence">20</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
     </data>
 </odoo>

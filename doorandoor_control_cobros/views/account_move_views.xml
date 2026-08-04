@@ -5,6 +5,32 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info mb-3" role="status" invisible="move_type != 'out_invoice' or ddc_payment_review_state != 'reviewing'">
+                    <strong>Pago en revision.</strong>
+                    Ventas reporto un pago y Contabilidad aun no lo valida contra banco.
+                </div>
+                <div class="alert alert-danger mb-3" role="alert" invisible="move_type != 'out_invoice' or ddc_payment_review_state != 'rejected'">
+                    <strong>Factura rechazada.</strong>
+                    El pago reportado fue rechazado por Contabilidad. La factura requiere correccion o nuevo reporte de pago.
+                </div>
+                <div class="alert alert-success mb-3" role="status" invisible="move_type != 'out_invoice' or ddc_payment_review_state != 'validated'">
+                    <strong>Pago validado.</strong>
+                    El cobro fue confirmado por Contabilidad y la factura ya puede reflejar su resultado final.
+                </div>
+            </xpath>
+            <xpath expr="(//widget[@name='web_ribbon'])[2]" position="attributes">
+                <attribute name="title">Pago en revision</attribute>
+                <attribute name="invisible">payment_state != 'in_payment' or move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') or ddc_payment_review_state != 'reviewing'</attribute>
+            </xpath>
+            <xpath expr="(//widget[@name='web_ribbon'])[3]" position="before">
+                <widget name="web_ribbon" title="Factura rechazada"
+                        bg_color="text-bg-danger"
+                        invisible="ddc_payment_review_state != 'rejected' or move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
+                <widget name="web_ribbon" title="Pago validado"
+                        bg_color="text-bg-success"
+                        invisible="ddc_payment_review_state != 'validated' or payment_state == 'paid' or move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
+            </xpath>
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button
                     name="action_view_ddc_controls"
@@ -17,10 +43,28 @@
             </xpath>
             <xpath expr="//sheet//group" position="inside">
                 <group string="Control de cobros" invisible="move_type != 'out_invoice'">
-                    <field name="ddc_collection_state" readonly="1"/>
+                    <field
+                        name="ddc_payment_review_state"
+                        widget="badge"
+                        readonly="1"
+                        decoration-info="ddc_payment_review_state == 'reviewing'"
+                        decoration-warning="ddc_payment_review_state == 'partial'"
+                        decoration-success="ddc_payment_review_state == 'validated'"
+                        decoration-danger="ddc_payment_review_state == 'rejected'"/>
+                    <field
+                        name="ddc_collection_state"
+                        widget="badge"
+                        readonly="1"
+                        decoration-info="ddc_collection_state == 'pending'"
+                        decoration-success="ddc_collection_state == 'validated'"
+                        decoration-danger="ddc_collection_state == 'rejected'"/>
+                    <field name="ddc_total_reported" readonly="1"/>
+                    <field name="ddc_total_validated" readonly="1"/>
+                    <field name="ddc_total_pending" readonly="1"/>
+                    <field name="ddc_total_rejected" readonly="1"/>
+                    <field name="ddc_balance_pending" readonly="1"/>
                 </group>
             </xpath>
         </field>
     </record>
 </odoo>
-

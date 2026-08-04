@@ -1,4 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_ddc_cobro_control_user,access.ddc.cobro.control.user,model_doorandoor_cobro_control,doorandoor_control_cobros.group_ddc_user,1,1,1,0
 access_ddc_cobro_control_manager,access.ddc.cobro.control.manager,model_doorandoor_cobro_control,doorandoor_control_cobros.group_ddc_manager,1,1,1,1
-
+access_ddc_cobro_report_wizard_user,access.ddc.cobro.report.wizard.user,model_doorandoor_cobro_report_wizard,doorandoor_control_cobros.group_ddc_user,1,1,1,0
+access_ddc_cobro_match_wizard_user,access.ddc.cobro.match.wizard.user,model_doorandoor_cobro_match_wizard,doorandoor_control_cobros.group_ddc_user,1,1,1,0
