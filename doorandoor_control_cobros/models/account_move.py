@@ -127,19 +127,31 @@ class AccountMove(models.Model):
             else:
                 move.ddc_collection_state = "pending"
 
-    @api.depends("move_type", "ddc_collection_state", "ddc_control_ids", "ddc_control_ids.state", "ddc_total_validated", "amount_total")
+    @api.depends(
+        "move_type",
+        "ddc_collection_state",
+        "ddc_control_ids",
+        "ddc_control_ids.state",
+        "ddc_total_validated",
+        "amount_total",
+        "amount_residual",
+    )
     def _compute_ddc_payment_review_state(self):
         for move in self:
             if move.move_type != "out_invoice" or not move.ddc_control_ids:
                 move.ddc_payment_review_state = "no_control"
+                continue
+            if move.ddc_collection_state == "rejected":
+                move.ddc_payment_review_state = "rejected"
+                continue
+            if move.currency_id.is_zero(move.amount_residual):
+                move.ddc_payment_review_state = "validated"
                 continue
             if move.ddc_collection_state == "validated":
                 if move.currency_id.compare_amounts(move.ddc_total_validated, move.amount_total) < 0:
                     move.ddc_payment_review_state = "partial"
                 else:
                     move.ddc_payment_review_state = "validated"
-            elif move.ddc_collection_state == "rejected":
-                move.ddc_payment_review_state = "rejected"
             else:
                 move.ddc_payment_review_state = "reviewing"
 
@@ -210,6 +222,9 @@ class AccountMove(models.Model):
                 move.payment_state = "in_payment"
                 continue
             if move.ddc_payment_review_state == "partial":
+                if move.currency_id.is_zero(move.amount_residual):
+                    move.payment_state = "paid"
+                    continue
                 move.payment_state = "partial"
                 continue
             if move.state != "posted":

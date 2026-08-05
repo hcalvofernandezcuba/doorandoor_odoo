@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_ddfc_builder_profile_user,access.ddfc.builder.profile.user,model_ddfc_builder_profile,base.group_user,1,1,1,1
+access_ddfc_dashboard_user,access.ddfc.dashboard.user,model_ddfc_dashboard,base.group_user,1,0,0,0

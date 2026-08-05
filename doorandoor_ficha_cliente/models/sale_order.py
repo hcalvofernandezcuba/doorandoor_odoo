@@ -30,7 +30,35 @@ class SaleOrder(models.Model):
         string="Descuento constructor activo",
         store=False,
     )
-    ddfc_pricing_source = fields.Char(string="Fuente de precio", default="base", readonly=True)
+    ddfc_builder_discount_for_new_process = fields.Boolean(
+        related="ddfc_builder_id.ddfc_discount_for_new_process",
+        string="Constructor nuevo para descuento",
+        store=False,
+    )
+    ddfc_pricing_source = fields.Char(
+        string="Fuente de precio",
+        compute="_compute_ddfc_pricing_source",
+        readonly=True,
+        store=True,
+    )
+
+    @api.depends(
+        "partner_id",
+        "partner_id.ddfc_builder_id",
+        "ddfc_builder_id",
+        "ddfc_builder_id.discount_active",
+        "ddfc_builder_id.ddfc_discount_for_new_process",
+    )
+    def _compute_ddfc_pricing_source(self):
+        for order in self:
+            if (
+                not order.ddfc_builder_id
+                or not order.ddfc_builder_id.discount_active
+                or not order.ddfc_builder_id.ddfc_discount_for_new_process
+            ):
+                order.ddfc_pricing_source = "base"
+            else:
+                order.ddfc_pricing_source = "constructor"
 
     @api.onchange("partner_id")
     def _onchange_partner_id(self):
@@ -47,20 +75,28 @@ class SaleOrder(models.Model):
 
     def write(self, vals):
         result = super().write(vals)
+        if self.env.context.get("skip_builder_discount"):
+            return result
         if any(key in vals for key in ["partner_id", "ddfc_builder_id", "order_line"]):
             self._apply_builder_discount()
         return result
 
     def _apply_builder_discount(self):
         for order in self:
-            if not order.ddfc_builder_id or not order.ddfc_builder_id.discount_active:
+            if (
+                not order.ddfc_builder_id
+                or not order.ddfc_builder_id.discount_active
+                or not order.ddfc_builder_id.ddfc_discount_for_new_process
+            ):
                 order.ddfc_pricing_source = "base"
                 for line in order.order_line:
-                    line.discount = 0.0
+                    line.with_context(skip_builder_discount=True).write({"discount": 0.0})
                 continue
             order.ddfc_pricing_source = "constructor"
             for line in order.order_line:
-                line.discount = order.ddfc_builder_id.discount_percent
+                line.with_context(skip_builder_discount=True).write({"discount": order.ddfc_builder_id.discount_percent})
+            order.with_context(skip_builder_discount=True).write({"ddfc_pricing_source": order.ddfc_pricing_source})
+        self._compute_ddfc_pricing_source()
 
     def action_apply_builder_discount(self):
         self._apply_builder_discount()

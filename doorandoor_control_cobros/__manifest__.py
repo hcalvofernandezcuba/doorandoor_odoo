@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Control de Cobros",
-    "version": "18.0.1.7.4",
+    "version": "18.0.1.7.6",
     "category": "Accounting",
-    "summary": "18.0.1.7.4 - Limpia los mensajes del chatter para mostrar texto legible al usuario",
+    "summary": "18.0.1.7.6 - Corrige estado final pagado tras cobros parciales/completos en control de cobros",
     "description": """
 DoorAndDoor Control de Cobros
 =============================
@@ -240,6 +240,19 @@ Historial resumido
   El usuario ya no ve etiquetas HTML crudas dentro del texto operativo y
   los avisos quedan redactados de forma mas natural para ventas y
   contabilidad.
+
+- 18.0.1.7.5
+  Se corrigen etiquetas visuales del flujo de cobros controlados en
+  factura. Se normaliza `Pago en revisión` y se agrega etiqueta
+  especifica para `Pago parcial validado` en alerta y cinta, evitando
+  inconsistencias cuando el control valida solo una parte del cobro.
+
+- 18.0.1.7.6
+  Se corrige el calculo de estado final en facturas con multiples
+  controles de cobro. Si el residual de la factura llega a cero tras
+  validar un segundo pago (por ejemplo Zelle), el estado funcional pasa
+  a `Pago validado` y la factura queda `Pagada`, evitando que permanezca
+  erroneamente en `Pago parcial validado`.
     """,
     "author": "Hanoi Calvo Fernandez for Doorandoor",
     "website": "https://gestion.doorandoor.com",

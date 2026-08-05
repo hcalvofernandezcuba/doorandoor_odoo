@@ -115,5 +115,77 @@
                 </p>
             </field>
         </record>
+
+        <!-- Dashboard views -->
+        <record id="view_ddfc_dashboard_tree" model="ir.ui.view">
+            <field name="name">ddfc.dashboard.tree</field>
+            <field name="model">ddfc.dashboard</field>
+            <field name="arch" type="xml">
+                <list string="Tablero de constructores">
+                    <field name="builder_name"/>
+                    <field name="seller_name"/>
+                    <field name="customer_count"/>
+                    <field name="sale_count"/>
+                    <field name="invoice_count"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_ddfc_dashboard_form" model="ir.ui.view">
+            <field name="name">ddfc.dashboard.form</field>
+            <field name="model">ddfc.dashboard</field>
+            <field name="arch" type="xml">
+                <form string="Tablero de constructor">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="builder_id" readonly="1"/>
+                                <field name="builder_name" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="seller_id" readonly="1"/>
+                                <field name="seller_name" readonly="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="customer_count" readonly="1"/>
+                                <field name="sale_count" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="invoice_count" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_ddfc_dashboard_search" model="ir.ui.view">
+            <field name="name">ddfc.dashboard.search</field>
+            <field name="model">ddfc.dashboard</field>
+            <field name="arch" type="xml">
+                <search string="Buscar tablero">
+                    <field name="builder_name"/>
+                    <field name="seller_name"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Constructor" name="group_builder" context="{'group_by': 'builder_name'}"/>
+                        <filter string="Vendedor" name="group_seller" context="{'group_by': 'seller_name'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_ddfc_dashboard" model="ir.actions.act_window">
+            <field name="name">Tablero de constructores</field>
+            <field name="res_model">ddfc.dashboard</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_ddfc_dashboard_search"/>
+            <field name="help" type="html">
+                <p>
+                    Tablero con métricas por constructor, clientes, ventas y facturas.
+                </p>
+            </field>
+        </record>
     </data>
 </odoo>

@@ -25,7 +25,7 @@ class DdfcDashboard(models.Model):
                     b.name AS builder_name,
                     COALESCE(COUNT(DISTINCT p.id), 0) AS customer_count,
                     s.id AS seller_id,
-                    s.name AS seller_name,
+                    COALESCE(rp.name, s.login) AS seller_name,
                     COALESCE(COUNT(DISTINCT so.id), 0) AS sale_count,
                     COALESCE(COUNT(DISTINCT am.id), 0) AS invoice_count
                 FROM ddfc_builder_profile b
@@ -33,6 +33,7 @@ class DdfcDashboard(models.Model):
                 LEFT JOIN sale_order so ON so.ddfc_builder_id = b.id
                 LEFT JOIN account_move am ON am.ddfc_builder_id = b.id
                 LEFT JOIN res_users s ON s.id = so.user_id
-                GROUP BY b.id, b.name, s.id, s.name
+                LEFT JOIN res_partner rp ON rp.id = s.partner_id
+                GROUP BY b.id, b.name, s.id, s.login, rp.name
             )
         """)

@@ -25,6 +25,12 @@ class DdfcBuilderProfile(models.Model):
     state_id = fields.Many2one("res.country.state", string="Estado")
     country_id = fields.Many2one("res.country", string="Pais")
     notes = fields.Text(string="Notas internas")
+    ddfc_discount_for_new_process = fields.Boolean(
+        string="Elegible en flujo nuevo",
+        default=False,
+        tracking=True,
+        help="Marca si el constructor fue creado desde cotizacion/factura para aplicar el descuento del flujo nuevo.",
+    )
     discount_active = fields.Boolean(string="Descuento activo", default=True, tracking=True)
     discount_percent = fields.Float(string="Descuento especial (%)", default=0.0, tracking=True)
     customer_ids = fields.One2many(
