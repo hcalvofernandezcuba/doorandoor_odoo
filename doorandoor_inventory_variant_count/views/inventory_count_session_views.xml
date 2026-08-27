@@ -1,0 +1,121 @@
+<odoo>
+    <record id="view_inventory_count_session_list" model="ir.ui.view">
+        <field name="name">inventory.count.session.list</field>
+        <field name="model">inventory.count.session</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'done'" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="location_id"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="line_count"/>
+                <field name="difference_count"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_inventory_count_session_search" model="ir.ui.view">
+        <field name="name">inventory.count.session.search</field>
+        <field name="model">inventory.count.session</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="location_id"/>
+                <field name="user_id"/>
+                <filter name="my_counts" string="My Counts" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="open" string="Open" domain="[('state', 'in', ['draft', 'counting', 'review'])]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_location" string="Location" context="{'group_by': 'location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_inventory_count_session_form" model="ir.ui.view">
+        <field name="name">inventory.count.session.form</field>
+        <field name="model">inventory.count.session</field>
+        <field name="arch" type="xml">
+            <form class="o_inventory_count_mobile">
+                <header>
+                    <button name="action_start" string="Start and Load Stock" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_review" string="Review" type="object" class="btn-primary" invisible="state != 'counting'"/>
+                    <button name="action_back_to_counting" string="Back to Counting" type="object" invisible="state != 'review'"/>
+                    <button name="action_validate" string="Validate Adjustment" type="object" class="btn-primary" invisible="state != 'review'" groups="doorandoor_inventory_variant_count.group_inventory_count_manager" confirm="This will apply the physical inventory adjustment. Continue?"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancel')"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object" invisible="state != 'cancel'" groups="doorandoor_inventory_variant_count.group_inventory_count_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,counting,review,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="location_id" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="user_id" readonly="state in ('done', 'cancel')"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                            <field name="line_count"/>
+                            <field name="difference_count"/>
+                        </group>
+                    </group>
+                    <group string="Barcode Capture" invisible="state != 'counting'" class="o_inventory_scan_box">
+                        <field name="barcode_input" placeholder="Scan item barcode..."/>
+                        <field name="scan_qty"/>
+                        <button name="action_scan" string="Add Scan" type="object" class="btn-primary" icon="fa-barcode"/>
+                    </group>
+                    <notebook>
+                        <page string="Items to Count" name="items">
+                            <field name="item_line_ids" readonly="state not in ('counting', 'review')" context="{'default_session_id': id}">
+                                <list editable="bottom" import="true" decoration-danger="is_counted and difference_qty != 0" decoration-success="is_counted and difference_qty == 0">
+                                    <field name="product_id" readonly="1"/>
+                                    <field name="item_id" readonly="1"/>
+                                    <field name="item_code" optional="show" readonly="1"/>
+                                    <field name="barcode" optional="show" readonly="1"/>
+                                    <field name="expected_qty" readonly="1"/>
+                                    <field name="counted_qty"/>
+                                    <field name="is_counted"/>
+                                    <field name="difference_qty" readonly="1"/>
+                                    <field name="uom_id" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Variants / Adjustment" name="variants">
+                            <field name="line_ids" readonly="state in ('done', 'cancel')">
+                                <list decoration-danger="is_counted and difference_qty != 0" decoration-success="is_counted and difference_qty == 0">
+                                    <field name="product_id" readonly="1"/>
+                                    <field name="lot_id" optional="show" readonly="1"/>
+                                    <field name="package_id" optional="hide" readonly="1"/>
+                                    <field name="owner_id" optional="hide" readonly="1"/>
+                                    <field name="expected_qty" readonly="1"/>
+                                    <field name="counted_qty" readonly="item_line_ids"/>
+                                    <field name="is_counted" readonly="item_line_ids"/>
+                                    <field name="difference_qty" readonly="1"/>
+                                    <field name="uom_id" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes"><field name="note" placeholder="Observations, incidents, or approvals..."/></page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_inventory_count_session" model="ir.actions.act_window">
+        <field name="name">Inventory Count Sessions</field>
+        <field name="res_model">inventory.count.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_inventory_count_session_search"/>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+    <record id="action_inventory_count_item_lines" model="ir.actions.act_window">
+        <field name="name">Import / Edit Item Counts</field>
+        <field name="res_model">inventory.count.item.line</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('state', '=', 'counting')]</field>
+        <field name="help" type="html"><p>Use Favorites → Import records to upload CSV or XLSX counts.</p></field>
+    </record>
+</odoo>

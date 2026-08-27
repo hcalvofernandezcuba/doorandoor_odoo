@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="product_labels_report_inventory_items"
+              inherit_id="doorandoor_stock_labels.product_labels_report">
+        <xpath expr="//t[@t-foreach='labels']" position="replace">
+            <t t-foreach="labels" t-as="label">
+                <div class="page" style="width:102mm;height:152mm;margin:0;padding:0;box-sizing:border-box;font-size:0;overflow:hidden;position:relative;">
+                <div style="position:absolute;left:3mm;top:3mm;width:96mm;height:146mm;margin:0;padding:0;box-sizing:border-box;page-break-inside:avoid;overflow:hidden;color:#000;">
+                    <div style="border:0.35mm solid #222;height:100%;padding:4mm 6mm;box-sizing:border-box;background:#fff;position:relative;overflow:hidden;">
+                        <div style="text-align:center;font-size:25px;font-weight:700;letter-spacing:0.6px;line-height:1.05;">DOORANDOOR</div>
+                        <div style="text-align:center;font-size:14px;font-weight:500;line-height:1.1;margin-top:0.8mm;">WWW.DOORANDOOR.COM</div>
+
+                        <div style="margin-top:6mm;font-size:17px;line-height:1.3;white-space:normal;max-height:76mm;overflow:hidden;word-break:break-word;">
+                            <div>
+                                <strong>PRODUCT:</strong>
+                                <t t-esc="label.get('product_name')"/>
+                            </div>
+                            <div t-if="label.get('warehouse_name')">
+                                <strong>WAREHOUSE:</strong>
+                                <t t-esc="label.get('warehouse_name')"/>
+                            </div>
+                            <div t-if="label.get('variant_attributes')" style="margin-top:2mm;font-size:17px;line-height:1.35;">
+                                <t t-foreach="label.get('variant_attributes')" t-as="attribute">
+                                    <span style="display:inline-block;width:49%;vertical-align:top;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                        <strong><t t-esc="attribute.get('name')"/>:</strong>
+                                        <t t-esc="attribute.get('value')"/>
+                                    </span>
+                                </t>
+                            </div>
+                            <div t-elif="label.get('variant_name')">
+                                <strong>VARIANT:</strong>
+                                <t t-esc="label.get('variant_name')"/>
+                            </div>
+                            <div t-if="label.get('inventory_warning')"
+                                 style="margin-top:2mm;text-align:center;color:#a00000;font-weight:700;font-size:15px;">
+                                <t t-esc="label.get('inventory_warning')"/>
+                            </div>
+                        </div>
+
+                        <div style="position:absolute;left:5mm;right:5mm;bottom:7mm;text-align:center;white-space:nowrap;">
+                            <img t-if="label.get('barcode_src')"
+                                 t-att-src="label.get('barcode_src')"
+                                 style="width:78mm;height:36mm;display:inline-block;"/>
+                            <div style="font-size:18px;font-weight:700;line-height:1.1;letter-spacing:0.6px;margin-top:1.5mm;">
+                                BARCODE: <t t-esc="label.get('product_code')"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

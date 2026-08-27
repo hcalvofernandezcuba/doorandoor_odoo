@@ -1,5 +1,4 @@
-from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo import api, fields, models
 
 
 class ProductLabelWizard(models.TransientModel):
@@ -15,6 +14,33 @@ class ProductLabelWizard(models.TransientModel):
     )
     company_id = fields.Many2one("res.company", required=True, default=lambda self: self.env.company)
     quantity = fields.Integer(string="Labels Quantity", default=1, required=True)
+    product_label_code = fields.Char(
+        related="product_tmpl_id.ddsl_product_label_code",
+        string="Codigo de producto para label",
+        readonly=False,
+        help="Puedes escribir aqui el codigo comercial que debe aparecer en el label.",
+    )
+    effective_label_code = fields.Char(
+        string="Codigo que se imprimira",
+        compute="_compute_effective_label_code",
+    )
+    uses_automatic_label_code = fields.Boolean(
+        compute="_compute_effective_label_code",
+    )
+
+    @api.depends(
+        "product_tmpl_id",
+        "product_label_code",
+        "product_tmpl_id.default_code",
+        "product_tmpl_id.barcode",
+        "product_tmpl_id.product_variant_ids.default_code",
+        "product_tmpl_id.product_variant_ids.barcode",
+    )
+    def _compute_effective_label_code(self):
+        for wizard in self:
+            product = wizard.product_tmpl_id
+            wizard.effective_label_code = product.ddsl_get_product_label_code() if product else False
+            wizard.uses_automatic_label_code = bool(product and not wizard.product_label_code)
 
     @api.model
     def default_get(self, field_list):
@@ -34,11 +60,7 @@ class ProductLabelWizard(models.TransientModel):
     def _prepare_label_payloads(self):
         self.ensure_one()
         product = self.product_tmpl_id
-        product_code = product.ddsl_product_label_code or product.default_code or product.barcode
-        if not product_code:
-            raise UserError(
-                _("El producto %s debe tener un Codigo de producto para imprimir su label.") % product.display_name
-            )
+        product_code = self.effective_label_code or product.ddsl_get_product_label_code()
 
         label_data = {
             "product_name": product.display_name or product.name or "",

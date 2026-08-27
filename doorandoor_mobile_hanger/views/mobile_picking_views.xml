@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddmh_mobile_picking_form" model="ir.ui.view">
+        <field name="name">stock.picking.form.ddmh.mobile</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <form string="Operación de almacén" create="0" edit="0" delete="0">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <div class="text-center mb-3">
+                        <i class="fa fa-barcode fa-3x text-primary"/>
+                        <h1><field name="name"/></h1>
+                        <field name="ddpc_operation_category" widget="badge"/>
+                    </div>
+                    <group>
+                        <group string="Ruta">
+                            <field name="ddpc_source_warehouse_id"/>
+                            <field name="ddpc_dest_warehouse_id"/>
+                            <field name="location_id"/>
+                            <field name="location_dest_id"/>
+                        </group>
+                        <group string="Documento">
+                            <field name="partner_id"/>
+                            <field name="origin"/>
+                            <field name="scheduled_date"/>
+                        </group>
+                    </group>
+                    <separator string="Productos esperados"/>
+                    <field name="move_ids" readonly="1">
+                        <list create="0" delete="0" edit="0">
+                            <field name="product_id"/>
+                            <field name="product_uom_qty" string="Esperado"/>
+                            <field name="quantity" string="Procesado"/>
+                            <field name="product_uom" string="Unidad"/>
+                        </list>
+                    </field>
+                    <div class="d-grid gap-2 mt-4">
+                        <button name="action_open_ddsl_receipt_scan_wizard"
+                                type="object" string="Contar productos de recepción"
+                                class="btn-primary btn-lg"
+                                invisible="picking_type_code != 'incoming' or state in ('done', 'cancel')"/>
+                        <button name="action_ddmh_open_full_operation"
+                                type="object" string="Abrir operación completa"
+                                class="btn-secondary btn-lg"/>
+                    </div>
+                    <field name="picking_type_code" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddmh_mobile_picking" model="ir.actions.act_window">
+        <field name="name">Operación móvil</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_ddmh_mobile_picking_form"/>
+        <field name="target">current</field>
+    </record>
+</odoo>

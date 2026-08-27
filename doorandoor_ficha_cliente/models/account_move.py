@@ -34,6 +34,12 @@ class AccountMove(models.Model):
         string="Constructor nuevo para descuento",
         store=False,
     )
+    ddfc_builder_name_text = fields.Char(
+        string="Constructor / instalador",
+        help="Escribe el nombre y se creará o vinculará automáticamente.",
+        copy=False,
+        store=False,
+    )
     ddfc_pricing_source = fields.Char(
         string="Fuente de precio",
         compute="_compute_ddfc_pricing_source",
@@ -77,12 +83,30 @@ class AccountMove(models.Model):
         prepared_vals_list = []
         for vals in vals_list:
             prepared_vals = dict(vals)
-            if "ddfc_builder_id" not in prepared_vals:
+            if prepared_vals.get("ddfc_builder_name_text") and not prepared_vals.get("ddfc_builder_id"):
+                builder = self.env["ddfc.builder.profile"].resolve_or_create_from_name(
+                    prepared_vals.get("ddfc_builder_name_text"),
+                    document=False,
+                )
+                if builder:
+                    prepared_vals["ddfc_builder_id"] = builder.id
+                    prepared_vals["ddfc_builder_name_text"] = builder.name
+            elif "ddfc_builder_id" not in prepared_vals:
                 prepared_vals["ddfc_builder_id"] = self._ddfc_resolve_builder_id(prepared_vals)
             prepared_vals_list.append(prepared_vals)
         return super().create(prepared_vals_list)
 
     def write(self, vals):
+        if "ddfc_builder_name_text" in vals and vals.get("ddfc_builder_name_text"):
+            normalized_name = vals.get("ddfc_builder_name_text").strip()
+            builder = self.env["ddfc.builder.profile"].resolve_or_create_from_name(
+                normalized_name,
+                document=False,
+            )
+            if builder:
+                vals["ddfc_builder_id"] = builder.id
+                vals["ddfc_builder_name_text"] = builder.name
+
         result = super().write(vals)
 
         if self.env.context.get("ddfc_skip_auto_builder"):
@@ -100,3 +124,23 @@ class AccountMove(models.Model):
                 move.with_context(ddfc_skip_auto_builder=True).write({"ddfc_builder_id": resolved_builder_id})
 
         return result
+
+    def ddfc_action_open_builder_wizard(self):
+        """Abre el formulario estándar de contacto para crear un constructor"""
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Crear Constructor",
+            "res_model": "res.partner",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_is_company": True,
+                "default_company_type": "company",
+                "default_customer_rank": 1,
+                "default_supplier_rank": 1,
+                "default_ddfc_is_builder_creation": True,
+                "ddfc_source_model": "account.move",
+                "ddfc_source_id": self.id,
+                "form_view_initial_mode": "edit",
+            },
+        }

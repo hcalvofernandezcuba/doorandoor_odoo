@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="doorandoor_mobile_hanger.DdmhCameraBarcodeField">
+        <div class="w-100">
+            <div class="input-group input-group-lg">
+                <input type="text" class="o_input form-control"
+                       t-att-value="value"
+                       t-att-placeholder="props.placeholder || 'Escanee o escriba el código'"
+                       t-on-input="onInput"
+                       t-att-readonly="props.readonly"/>
+                <button type="button" class="btn btn-primary"
+                        t-on-click.stop="startCamera"
+                        t-att-disabled="state.active || state.starting || props.readonly">
+                    <i class="fa fa-camera me-1"/>
+                    <t t-if="state.starting">Abriendo...</t>
+                    <t t-else="">Usar cámara</t>
+                </button>
+            </div>
+            <div class="d-grid gap-2 mt-2">
+                <button t-if="props.autoAction" type="button" class="btn btn-success btn-lg"
+                        t-on-click.stop="registerTypedCode" t-att-disabled="state.starting || props.readonly">
+                    <i class="fa fa-check-circle me-1"/>Registrar barcode escrito
+                </button>
+            </div>
+            <div t-att-class="'card bg-dark mt-3 overflow-hidden ' + (state.active ? '' : 'd-none')">
+                <div t-ref="reader" t-att-id="readerId"
+                     class="w-100 bg-dark" style="min-height: 280px;"/>
+                <div class="card-footer d-grid">
+                    <button type="button" class="btn btn-danger btn-lg" t-on-click.stop="stopCamera">
+                        <i class="fa fa-stop-circle me-1"/>Cerrar cámara
+                    </button>
+                </div>
+            </div>
+            <div t-if="state.status" class="alert alert-info mt-2 mb-0" role="status">
+                <i class="fa fa-spinner fa-spin me-1"/><t t-esc="state.status"/>
+            </div>
+            <div t-if="state.error" class="alert alert-warning mt-2 mb-0" role="alert">
+                <i class="fa fa-exclamation-triangle me-1"/>
+                <t t-esc="state.error"/>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -40,6 +40,20 @@ class DoorAndDoorCobroReportWizard(models.TransientModel):
         default="all",
         required=True,
     )
+    credit_state_filter = fields.Selection(
+        selection=[
+            ("all", "Todos"),
+            ("pending", "Pendientes de autorizacion"),
+            ("active", "Credito utilizado"),
+            ("partial", "Pagados parcialmente"),
+            ("paid", "Liquidados"),
+            ("expired", "Vencidos"),
+            ("cancelled", "Cancelados"),
+        ],
+        string="Estado del credito",
+        default="all",
+        required=True,
+    )
     include_reference = fields.Boolean(string="Incluir referencia", default=True)
     include_notes = fields.Boolean(string="Incluir notas", default=True)
     include_rejection_reason = fields.Boolean(string="Incluir motivo de rechazo", default=True)
@@ -124,6 +138,75 @@ class DoorAndDoorCobroReportWizard(models.TransientModel):
             }
         return self.env.ref("doorandoor_control_cobros.action_report_ddc_cobro_wizard_pdf").report_action(self)
 
+    def _get_credit_authorizations(self):
+        self.ensure_one()
+        domain = [("company_id", "=", self.env.company.id)]
+        if self.partner_ids:
+            domain.append(("partner_id", "in", self.partner_ids.commercial_partner_id.ids))
+        if self.journal_ids:
+            domain.append(("journal_id", "in", self.journal_ids.ids))
+        authorizations = self.env["doorandoor.credit.authorization"].search(
+            domain, order="used_at desc, create_date desc, id desc"
+        )
+        if self.date_from:
+            authorizations = authorizations.filtered(
+                lambda auth: fields.Date.to_date(auth.used_at or auth.create_date)
+                >= self.date_from
+            )
+        if self.date_to:
+            authorizations = authorizations.filtered(
+                lambda auth: fields.Date.to_date(auth.used_at or auth.create_date)
+                <= self.date_to
+            )
+        if self.credit_state_filter != "all":
+            authorizations = authorizations.filtered(
+                lambda auth: auth.accounting_state == self.credit_state_filter
+            )
+        return authorizations
+
+    def _get_credit_report_payload(self):
+        self.ensure_one()
+        authorizations = self._get_credit_authorizations()
+        partner_groups = []
+        for partner in authorizations.mapped("partner_id"):
+            records = authorizations.filtered(lambda auth: auth.partner_id == partner)
+            partner_groups.append(
+                {
+                    "partner": partner,
+                    "records": records,
+                    "authorized": sum(records.mapped("amount_company_currency")),
+                    "repaid": sum(records.mapped("amount_repaid")),
+                    "due": sum(records.mapped("amount_due")),
+                }
+            )
+        return {
+            "authorizations": authorizations,
+            "partner_groups": partner_groups,
+            "credit_count": len(authorizations),
+            "credit_total_authorized": sum(
+                authorizations.mapped("amount_company_currency")
+            ),
+            "credit_total_repaid": sum(authorizations.mapped("amount_repaid")),
+            "credit_total_due": sum(authorizations.mapped("amount_due")),
+        }
+
+    def action_print_credit_pdf(self):
+        self.ensure_one()
+        if not self._get_credit_authorizations():
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("Reporte de creditos autorizados"),
+                    "message": _("No existen creditos con los filtros seleccionados."),
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
+        return self.env.ref(
+            "doorandoor_control_cobros.action_report_ddc_authorized_credit_pdf"
+        ).report_action(self)
+
 
 class DoorAndDoorCobroWizardReport(models.AbstractModel):
     _name = "report.doorandoor_control_cobros.cobro_wizard_pdf"
@@ -133,6 +216,23 @@ class DoorAndDoorCobroWizardReport(models.AbstractModel):
         docs = self.env["doorandoor.cobro.report.wizard"].browse(docids)
         wizard = docs[:1]
         payload = wizard._get_report_payload() if wizard else {}
+        return {
+            "doc_ids": docs.ids,
+            "doc_model": "doorandoor.cobro.report.wizard",
+            "docs": docs,
+            "wizard": wizard,
+            **payload,
+        }
+
+
+class DoorAndDoorAuthorizedCreditWizardReport(models.AbstractModel):
+    _name = "report.doorandoor_control_cobros.authorized_credit_pdf"
+    _description = "Reporte PDF de Creditos Autorizados"
+
+    def _get_report_values(self, docids, data=None):
+        docs = self.env["doorandoor.cobro.report.wizard"].browse(docids)
+        wizard = docs[:1]
+        payload = wizard._get_credit_report_payload() if wizard else {}
         return {
             "doc_ids": docs.ids,
             "doc_model": "doorandoor.cobro.report.wizard",

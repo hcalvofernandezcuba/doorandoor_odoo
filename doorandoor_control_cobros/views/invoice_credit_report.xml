@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_customer_credit" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@id='right-elements']" position="after">
+            <div t-if="o.move_type == 'out_invoice' and o.ddc_customer_credit_available &gt; 0"
+                 class="clearfix mt-2">
+                <div class="float-end" style="min-width: 260px;">
+                    <div class="alert alert-success py-2 px-3 mb-1" role="status">
+                        <strong>Crédito disponible del cliente:</strong>
+                        <span t-field="o.ddc_customer_credit_available"
+                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

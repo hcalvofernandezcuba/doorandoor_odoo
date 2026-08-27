@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Tableros",
-    "version": "18.0.1.1.0",
+    "version": "18.0.1.3.0",
     "category": "Reporting",
-    "summary": "18.0.1.1.0 - Agrega tablero nativo de constructores y ventas asociadas en Ventas",
+    "summary": "18.0.1.3.0 - Agrega análisis gerencial de reservas y prereservas en Ventas",
     "description": """
 DoorAndDoor Tableros
 ====================
@@ -27,6 +27,16 @@ Alcance inicial
 
 Historial resumido
 ------------------
+
+- 18.0.1.3.0
+  Agrega Reservas y Prereservas en Tableros/Ventas con analisis de ocupacion,
+  cantidades sin reservar, valor comprometido, riesgo de vencimiento,
+  almacenes, productos, clientes y vendedores.
+
+- 18.0.1.2.0
+  Incorpora Entregas en la seccion Ventas de los tableros nativos. Presenta
+  estados, pendientes y entregados por almacen, productos, clientes y la
+  evolucion temporal, usando directamente el control operativo oficial.
 
 - 18.0.1.0.0
   Se crea el modulo `doorandoor_tableros` como base instalable para los
@@ -107,8 +117,9 @@ Historial resumido
   constructor, ventas por constructor, monto vendido por fecha y
   vendedores con mayor monto asociado a constructores.
     """,
-    "author": "Hanoi Calvo Fernandez for Doorandoor",
-    "website": "https://gestion.doorandoor.com",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
+    "website": "https://doorandoor.com",
     "license": "LGPL-3",
     "depends": [
         "mail",
@@ -117,6 +128,7 @@ Historial resumido
         "doorandoor_control_cobros",
         "sale",
         "doorandoor_ficha_cliente",
+        "doorandoor_process_control",
     ],
     "data": [
         "security/ir.model.access.csv",

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_ddmh_scan_operation"
+              name="Escanear operación"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              action="action_ddmh_document_scan"
+              sequence="1"
+              groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+</odoo>

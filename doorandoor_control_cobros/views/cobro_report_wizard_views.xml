@@ -12,6 +12,7 @@
                             <field name="user_ids" widget="many2many_tags"/>
                             <field name="control_id"/>
                             <field name="state_filter"/>
+                            <field name="credit_state_filter"/>
                             <field name="date_from"/>
                             <field name="date_to"/>
                             <field name="journal_ids" widget="many2many_tags"/>
@@ -30,6 +31,8 @@
                 </sheet>
                 <footer>
                     <button name="action_print_pdf" type="object" string="Imprimir PDF base" class="btn-primary"/>
+                    <button name="action_print_credit_pdf" type="object"
+                            string="PDF de creditos autorizados" class="btn-primary"/>
                     <button string="Cerrar" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>

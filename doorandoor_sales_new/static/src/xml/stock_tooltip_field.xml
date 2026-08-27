@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="doorandoor_sales_new.DdsnStockTooltipField">
+        <button type="button"
+              class="ddsn_stock_tooltip btn btn-link btn-sm position-relative d-inline-flex align-items-center gap-1 p-0"
+              t-on-mouseenter="onMouseEnter"
+              t-on-mouseleave="onMouseLeave"
+              t-on-click.stop="onClick">
+            <i class="fa fa-cubes text-primary"/>
+            <span class="text-primary text-decoration-underline">Ver existencias</span>
+            <span t-if="state.open"
+                  class="position-absolute bg-dark text-white rounded shadow p-2"
+                  style="z-index: 1080; left: 0; bottom: calc(100% + 6px); min-width: 230px; max-width: 360px; white-space: pre-line; pointer-events: none;">
+                <t t-if="state.loading">Actualizando existencias...</t>
+                <t t-else="" t-esc="state.text"/>
+            </span>
+        </button>
+    </t>
+</templates>

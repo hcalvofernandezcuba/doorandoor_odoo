@@ -16,6 +16,45 @@
             groups="doorandoor_process_control.group_ddpc_user"/>
 
         <menuitem
+            id="menu_ddpc_warehouse_root"
+            name="Almacén"
+            parent="menu_ddpc_root"
+            sequence="5"
+            groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+
+        <menuitem
+            id="menu_ddpc_warehouse_receipts"
+            name="Recepciones"
+            parent="menu_ddpc_warehouse_root"
+            action="action_ddpc_warehouse_receipts"
+            sequence="10"
+            groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+
+        <menuitem
+            id="menu_ddpc_warehouse_deliveries"
+            name="Entregas"
+            parent="menu_ddpc_warehouse_root"
+            action="action_ddpc_pending_deliveries"
+            sequence="20"
+            groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+
+        <menuitem
+            id="menu_ddpc_warehouse_factory_entries"
+            name="Entradas de fábrica"
+            parent="menu_ddpc_warehouse_root"
+            action="action_ddpc_factory_entries"
+            sequence="30"
+            groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+
+        <menuitem
+            id="menu_ddpc_warehouse_transfers"
+            name="Traslados"
+            parent="menu_ddpc_warehouse_root"
+            action="action_ddpc_warehouse_transfers"
+            sequence="40"
+            groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+
+        <menuitem
             id="menu_ddpc_process_tasks"
             name="Process Tasks"
             parent="menu_ddpc_root"
@@ -46,6 +85,22 @@
             action="action_ddpc_prefacturas"
             sequence="50"
             groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_root_warehouse_prereservations"
+            name="Prereservas por almacen"
+            parent="menu_ddpc_root"
+            action="action_ddpc_warehouse_prereservations"
+            sequence="55"
+            groups="stock.group_stock_user,base.group_system"/>
+
+        <menuitem
+            id="menu_ddpc_root_pending_deliveries"
+            name="Entregas pendientes"
+            parent="menu_ddpc_root"
+            action="action_ddpc_pending_deliveries"
+            sequence="57"
+            groups="stock.group_stock_user,base.group_system"/>
 
         <menuitem
             id="menu_ddpc_root_invoices"
@@ -194,5 +249,21 @@
             action="action_ddpc_inventory_flows"
             sequence="20"
             groups="doorandoor_process_control.group_ddpc_user"/>
+
+        <menuitem
+            id="menu_ddpc_stock_warehouse_prereservations"
+            name="Prereservas por almacen"
+            parent="menu_ddpc_stock_root"
+            action="action_ddpc_warehouse_prereservations"
+            sequence="30"
+            groups="stock.group_stock_user,base.group_system"/>
+
+        <menuitem
+            id="menu_ddpc_stock_pending_deliveries"
+            name="Entregas pendientes"
+            parent="menu_ddpc_stock_root"
+            action="action_ddpc_pending_deliveries"
+            sequence="40"
+            groups="stock.group_stock_user,base.group_system"/>
     </data>
 </odoo>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="authorized_credit_pdf">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Reporte de Creditos Autorizados</h2>
+                    <p>Deuda financiada basada en partidas contables y facturas liquidadas con credito.</p>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <strong>Clientes:</strong>
+                            <span t-esc="', '.join(wizard.partner_ids.mapped('display_name')) or 'Todos'"/>
+                        </div>
+                        <div class="col-6 text-end">
+                            <strong>Estado:</strong>
+                            <span t-esc="dict(wizard._fields['credit_state_filter'].selection).get(wizard.credit_state_filter)"/>
+                            <br/><strong>Periodo:</strong>
+                            <span t-esc="wizard.date_from or '-'"/> — <span t-esc="wizard.date_to or '-'"/>
+                        </div>
+                    </div>
+                    <table class="table table-sm table-bordered mb-4">
+                        <thead><tr><th>Operaciones</th><th class="text-end">Credito usado</th><th class="text-end">Pagado real</th><th class="text-end">Saldo por cobrar</th></tr></thead>
+                        <tbody><tr>
+                            <td t-esc="credit_count"/>
+                            <td class="text-end"><span t-out="credit_total_authorized" t-options='{"widget":"monetary","display_currency":wizard.env.company.currency_id}'/></td>
+                            <td class="text-end"><span t-out="credit_total_repaid" t-options='{"widget":"monetary","display_currency":wizard.env.company.currency_id}'/></td>
+                            <td class="text-end"><strong><span t-out="credit_total_due" t-options='{"widget":"monetary","display_currency":wizard.env.company.currency_id}'/></strong></td>
+                        </tr></tbody>
+                    </table>
+                    <t t-foreach="partner_groups" t-as="group">
+                        <h4><span t-esc="group['partner'].display_name"/></h4>
+                        <p>
+                            Usado: <span t-out="group['authorized']" t-options='{"widget":"monetary","display_currency":wizard.env.company.currency_id}'/>
+                            · Pagado: <span t-out="group['repaid']" t-options='{"widget":"monetary","display_currency":wizard.env.company.currency_id}'/>
+                            · <strong>Debe: <span t-out="group['due']" t-options='{"widget":"monetary","display_currency":wizard.env.company.currency_id}'/></strong>
+                        </p>
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>Autorizacion</th><th>Factura</th><th>Fecha</th><th>Subcuenta</th><th class="text-end">Usado</th><th class="text-end">Pagado</th><th class="text-end">Debe</th><th>Estado</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="group['records']" t-as="auth">
+                                    <td><span t-field="auth.name"/></td>
+                                    <td><span t-field="auth.invoice_id.name"/></td>
+                                    <td><span t-field="auth.used_at"/></td>
+                                    <td><span t-esc="auth.financing_line_id.account_id.code or '-'"/></td>
+                                    <td class="text-end"><span t-field="auth.amount_company_currency"/></td>
+                                    <td class="text-end"><span t-field="auth.amount_repaid"/></td>
+                                    <td class="text-end"><span t-field="auth.amount_due"/></td>
+                                    <td><span t-field="auth.accounting_state"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_ddc_authorized_credit_pdf" model="ir.actions.report">
+        <field name="name">Reporte de Creditos Autorizados</field>
+        <field name="model">doorandoor.cobro.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_control_cobros.authorized_credit_pdf</field>
+        <field name="report_file">doorandoor_control_cobros.authorized_credit_pdf</field>
+        <field name="print_report_name">'Creditos Autorizados - %s' % (object.create_date.date() if object.create_date else 'reporte')</field>
+    </record>
+</odoo>

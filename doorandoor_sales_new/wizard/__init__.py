@@ -1,1 +1,1 @@
-# Wizard package placeholder for next implementation phase.
+from . import supply_warehouse_change_wizard

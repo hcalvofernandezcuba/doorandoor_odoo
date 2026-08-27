@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_order_form_template_only_ddpc" model="ir.ui.view">
+            <field name="name">sale.order.form.ddpc.template.only</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="priority">120</field>
+            <field name="arch" type="xml">
+                <!-- La lista comercial siempre busca plantillas. La variante
+                     tecnica solo se asigna al confirmar el configurador. -->
+                <xpath expr="//field[@name='order_line']/list/field[@name='product_id']" position="attributes">
+                    <attribute name="column_invisible">1</attribute>
+                    <attribute name="optional">hide</attribute>
+                    <attribute name="required">0</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']" position="attributes">
+                    <attribute name="string">Producto</attribute>
+                    <attribute name="optional">show</attribute>
+                    <attribute name="domain">[('sale_ok', '=', True)]</attribute>
+                </xpath>
+
+                <!-- El formulario expandido de la linea nativa solo incluye
+                     product_id. Se agrega el selector por plantilla y se
+                     mantiene oculta la variante resultante. -->
+                <xpath expr="//field[@name='order_line']/form//label[@for='product_id']" position="attributes">
+                    <attribute name="for">product_template_id</attribute>
+                    <attribute name="string">Producto</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="before">
+                    <field name="product_template_id"
+                           string="Producto"
+                           domain="[('sale_ok', '=', True)]"
+                           context="{
+                               'partner_id': parent.partner_id,
+                               'quantity': product_uom_qty,
+                               'pricelist': parent.pricelist_id,
+                               'uom': product_uom,
+                               'company_id': parent.company_id,
+                               'default_uom_id': product_uom,
+                           }"
+                           options="{'no_open': True}"
+                           readonly="not product_updatable"
+                           required="not display_type and not is_downpayment"
+                           force_save="1"
+                           widget="sol_product_many2one"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                    <attribute name="required">0</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

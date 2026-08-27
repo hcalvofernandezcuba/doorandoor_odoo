@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder_transformed_production" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//td[@name='td_name']/span[@t-field='line.name']" position="replace">
+            <t t-if="line.product_id">
+                <div t-esc="line.product_id.product_tmpl_id._ddsp_get_commercial_report_name(line.product_id)"/>
+                <div class="mt-1">
+                    <t t-foreach="line.product_id.product_tmpl_id._ddsp_get_commercial_report_attributes(line.product_id)"
+                       t-as="attribute">
+                        <div>
+                            <span t-esc="attribute['name']"/>:
+                            <span t-esc="attribute['value']"/>
+                        </div>
+                    </t>
+                </div>
+            </t>
+            <span t-else="" t-field="line.name">Producto</span>
+        </xpath>
+        <xpath expr="//div[@id='total']" position="before">
+            <t t-set="transformed_lines" t-value="doc.order_line.filtered('ddsp_is_special_product')"/>
+            <div t-if="transformed_lines" class="alert alert-info mt-3" style="font-size: 11px;">
+                <strong>Salida a Produccion</strong>
+                <t t-foreach="transformed_lines" t-as="line">
+                    <div>
+                        <span t-field="line.product_id"/>:
+                        <span t-esc="line._ddsp_get_production_report_status()"/>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="report_invoice_transformed_production" inherit_id="account.report_invoice_document">
+        <xpath expr="//td[@name='account_invoice_line_name']/span[@t-field='line.name']" position="replace">
+            <t t-if="line.product_id">
+                <div t-esc="line.product_id.product_tmpl_id._ddsp_get_commercial_report_name(line.product_id)"/>
+                <div class="mt-1">
+                    <t t-foreach="line.product_id.product_tmpl_id._ddsp_get_commercial_report_attributes(line.product_id)"
+                       t-as="attribute">
+                        <div>
+                            <span t-esc="attribute['name']"/>:
+                            <span t-esc="attribute['value']"/>
+                        </div>
+                    </t>
+                </div>
+            </t>
+            <span t-elif="line.name" t-field="line.name" t-options="{'widget': 'text'}" dir="auto">Producto</span>
+        </xpath>
+        <xpath expr="//div[@id='total']" position="before">
+            <t t-set="transformed_lines" t-value="o.invoice_line_ids.filtered('ddsp_is_special_product')"/>
+            <div t-if="transformed_lines" class="alert alert-info mt-3" style="font-size: 10px;">
+                <strong>Salida a Produccion</strong>
+                <t t-foreach="transformed_lines" t-as="line">
+                    <div>
+                        <span t-field="line.product_id"/>:
+                        <span t-esc="line._ddsp_get_production_report_status()"/>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </template>
+</odoo>

@@ -21,12 +21,12 @@ class DoorAndDoorCobroMatchWizard(models.TransientModel):
     move_id = fields.Many2one(
         "account.move",
         string="Factura",
-        domain="[('move_type', '=', 'out_invoice'), ('state', '=', 'posted'), ('partner_id', '=', partner_id)]",
+        domain="[('move_type', '=', 'out_invoice'), ('state', '=', 'posted')]",
     )
     payment_id = fields.Many2one(
         "account.payment",
         string="Pago contable existente",
-        domain="[('partner_type', '=', 'customer'), ('partner_id', '=', partner_id)]",
+        domain="[('partner_type', '=', 'customer')]",
     )
     journal_id = fields.Many2one(
         related="control_id.journal_id",
@@ -88,6 +88,8 @@ class DoorAndDoorCobroMatchWizard(models.TransientModel):
     def action_apply(self):
         self.ensure_one()
         control = self.control_id
+        if self.payment_id and self.payment_id != control.payment_id:
+            control._ddc_check_official_payment_permission()
         same_partner = control.partner_id == self.partner_id
         same_move = control.move_id == self.move_id
         same_payment = control.payment_id == self.payment_id
@@ -103,8 +105,8 @@ class DoorAndDoorCobroMatchWizard(models.TransientModel):
             "identification_notes": self.matching_note or control.identification_notes,
         }
         if self.move_id:
-            if self.move_id.partner_id != self.partner_id:
-                raise ValidationError(_("La factura seleccionada no pertenece al cliente indicado."))
+            invoice_partner = self.move_id.commercial_partner_id
+            vals["partner_id"] = invoice_partner.id
             vals.update(
                 {
                     "move_id": self.move_id.id,
@@ -114,14 +116,39 @@ class DoorAndDoorCobroMatchWizard(models.TransientModel):
                 }
             )
         if self.payment_id:
-            if self.payment_id.partner_id != self.partner_id:
-                raise ValidationError(_("El pago contable seleccionado no pertenece al cliente indicado."))
+            if self.move_id:
+                other_control = self.env["doorandoor.cobro.control"].search(
+                    [
+                        ("id", "!=", control.id),
+                        ("active", "=", True),
+                        ("state", "!=", "rejected"),
+                        ("payment_id", "=", self.payment_id.id),
+                    ],
+                    limit=1,
+                )
+                if other_control:
+                    raise ValidationError(
+                        _("El pago seleccionado ya esta asociado a otro control activo.")
+                    )
+                if self.payment_id.ddc_invoice_id and self.payment_id.ddc_invoice_id != self.move_id:
+                    raise ValidationError(_("El pago seleccionado ya esta asociado a otra factura."))
             vals["payment_id"] = self.payment_id.id
             vals.setdefault("currency_id", self.payment_id.currency_id.id)
             vals.setdefault("company_id", self.payment_id.company_id.id)
         if self.send_to_pending and control.state in ("draft", "reported", "rejected"):
             vals["state"] = "pending"
         control.write(vals)
+        control._ddc_validate_official_payment_link()
+        if self.payment_id and self.move_id and not self.payment_id.ddc_invoice_id:
+            payment_values = {"ddc_invoice_id": self.move_id.id}
+            if self.payment_id.partner_id.commercial_partner_id != self.move_id.commercial_partner_id:
+                payment_values.update(
+                    {
+                        "ddc_reported_payer_id": self.payment_id.partner_id.id,
+                        "partner_id": self.move_id.commercial_partner_id.id,
+                    }
+                )
+            self.payment_id.write(payment_values)
         control._ddc_notify_transition(
             _("Control asociado"),
             _(

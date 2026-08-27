@@ -50,39 +50,75 @@ class SaleOrder(models.Model):
         for order in self:
             order.delivery_count = len(order.delivery_ids)
 
+    @api.depends(
+        'state',
+        'invoice_ids.state',
+        'invoice_ids.payment_state',
+        'invoice_ids.amount_total',
+        'invoice_ids.amount_residual',
+    )
     def _compute_dddb_delivery_controls(self):
-        AccountMove = self.env['account.move']
-        has_sale_order_link = 'sale_order_id' in AccountMove._fields
         for order in self:
-            enabled = order.state in ('sale', 'done')
-            reason = False
-            if enabled and has_sale_order_link:
-                invoice = AccountMove.search([
-                    ('sale_order_id', '=', order.id),
-                    ('move_type', '=', 'out_invoice'),
-                    ('state', '=', 'posted'),
-                ], order='invoice_date desc, id desc', limit=1)
-                if invoice:
-                    enabled = order._dddb_is_invoice_fully_paid(invoice)
-                    if not enabled:
-                        reason = _(
-                            'La entrega solo puede gestionarse cuando la factura vinculada este totalmente pagada.'
-                        )
+            enabled, reason = order._dddb_get_delivery_authorization()
             order.dddb_delivery_enabled = enabled
             order.dddb_delivery_block_reason = reason
+
+    def _dddb_get_delivery_invoices(self):
+        self.ensure_one()
+        invoices = self.invoice_ids
+        AccountMove = self.env['account.move']
+        if 'sale_order_id' in AccountMove._fields:
+            invoices |= AccountMove.search([
+                ('sale_order_id', '=', self.id),
+                ('move_type', '=', 'out_invoice'),
+                ('state', '!=', 'cancel'),
+            ])
+        if 'ddsn_invoice_move_id' in self._fields:
+            invoices |= self.ddsn_invoice_move_id
+        return invoices.filtered(
+            lambda invoice: invoice.move_type == 'out_invoice'
+            and invoice.state != 'cancel'
+            and not getattr(invoice, 'ddsn_is_preinvoice', False)
+        )
+
+    def _dddb_get_delivery_authorization(self):
+        self.ensure_one()
+        if self.state not in ('sale', 'done'):
+            return False, _('La cotizacion debe estar confirmada antes de gestionar una entrega.')
+
+        invoices = self._dddb_get_delivery_invoices()
+        if not invoices:
+            return False, _(
+                'No existe una factura fiscal vinculada. Las cotizaciones y prefacturas no autorizan entregas.'
+            )
+        if any(invoice.state != 'posted' for invoice in invoices):
+            return False, _('Todas las facturas vinculadas deben estar publicadas antes de entregar.')
+        if not all(self._dddb_is_invoice_fully_paid(invoice) for invoice in invoices):
+            return False, _(
+                'La entrega permanece bloqueada hasta que todas las facturas vinculadas esten totalmente pagadas.'
+            )
+        return True, False
+
+    def _dddb_assert_delivery_allowed(self):
+        for order in self:
+            enabled, reason = order._dddb_get_delivery_authorization()
+            if not enabled:
+                raise UserError(reason)
+        return True
 
     def _dddb_is_invoice_fully_paid(self, invoice):
         self.ensure_one()
         currency = invoice.currency_id
         total_amount = abs(invoice.amount_total)
         residual_amount = abs(invoice.amount_residual)
-        if not total_amount or currency.is_zero(total_amount):
-            return True
-        if currency.is_zero(residual_amount):
-            return True
         if hasattr(invoice, '_ddsn_is_fully_paid'):
-            return invoice._ddsn_is_fully_paid()
-        return False
+            return bool(total_amount and not currency.is_zero(total_amount) and invoice._ddsn_is_fully_paid())
+        return bool(
+            total_amount
+            and not currency.is_zero(total_amount)
+            and currency.is_zero(residual_amount)
+            and invoice.payment_state == 'paid'
+        )
 
     # -------------------------------------------------------------------------
     # MÉTODOS DE ACCIÓN
@@ -111,10 +147,7 @@ class SaleOrder(models.Model):
                 'El estado actual es: %s'
             ) % self.state)
 
-        if not self.dddb_delivery_enabled:
-            raise UserError(self.dddb_delivery_block_reason or _(
-                'La entrega permanece bloqueada hasta que la factura vinculada este totalmente pagada.'
-            ))
+        self._dddb_assert_delivery_allowed()
 
         # Buscar pickings relacionados
         Picking = self.env['stock.picking']
@@ -158,6 +191,7 @@ class SaleOrder(models.Model):
             stock.picking: El picking recién creado
         """
         self.ensure_one()
+        self._dddb_assert_delivery_allowed()
 
         # Determinar almacén: primero warehouse_id de la venta, luego compañía
         warehouse = self.warehouse_id

@@ -14,14 +14,27 @@ class ProductTemplate(models.Model):
         help="If enabled, label barcode uses the product barcode. Otherwise it uses the internal reference.",
     )
     ddsl_product_label_code = fields.Char(
-        string="Product Label Code",
-        help="Code printed as barcode in the dedicated product label.",
+        string="Codigo de producto para label",
+        help="Codigo que se imprimira como texto y codigo de barras en el label del producto.",
     )
     ddsl_label_model = fields.Char(string="Label Model")
     ddsl_label_design = fields.Char(string="Label Design")
     ddsl_label_size = fields.Char(string="Label Size")
     ddsl_label_swing = fields.Char(string="Label Swing")
     ddsl_label_hinge = fields.Char(string="Label Hinge")
+
+    def ddsl_get_product_label_code(self):
+        self.ensure_one()
+        configured_code = self.ddsl_product_label_code or self.default_code or self.barcode
+        if configured_code:
+            return configured_code
+        active_variants = self.product_variant_ids.filtered("active")
+        if len(active_variants) == 1:
+            variant = active_variants[0]
+            variant_code = variant.barcode or variant.default_code
+            if variant_code:
+                return variant_code
+        return f"DDSL-P{self.id}"
 
     def action_open_ddsl_product_label_wizard(self):
         self.ensure_one()

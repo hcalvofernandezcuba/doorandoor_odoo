@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_ddpc_variant_selector_user,access.ddpc.variant.selector.user,model_ddpc_variant_selector,base.group_user,1,1,1,1
+access_ddpc_variant_selector_option_user,access.ddpc.variant.selector.option.user,model_ddpc_variant_selector_option,base.group_user,1,1,1,1
+access_ddpc_variant_selector_attribute_user,access.ddpc.variant.selector.attribute.user,model_ddpc_variant_selector_attribute,base.group_user,1,1,1,1

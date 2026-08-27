@@ -35,6 +35,12 @@ class SaleOrder(models.Model):
         string="Constructor nuevo para descuento",
         store=False,
     )
+    ddfc_builder_name_text = fields.Char(
+        string="Constructor / instalador",
+        help="Escribe el nombre y se creará o vinculará automáticamente.",
+        copy=False,
+        store=False,
+    )
     ddfc_pricing_source = fields.Char(
         string="Fuente de precio",
         compute="_compute_ddfc_pricing_source",
@@ -67,17 +73,60 @@ class SaleOrder(models.Model):
             self.ddfc_builder_id = self.partner_id.ddfc_builder_id
         self._apply_builder_discount()
 
+    @api.onchange("ddfc_builder_name_text")
+    def _onchange_ddfc_builder_name_text(self):
+        if not self.ddfc_builder_name_text:
+            return
+
+        normalized_name = self.ddfc_builder_name_text.strip()
+        if not normalized_name:
+            return
+
+        if self.ddfc_builder_id and self.ddfc_builder_id.name == normalized_name:
+            return
+
+        builder = self.env["ddfc.builder.profile"].resolve_or_create_from_name(
+            normalized_name,
+            document=self,
+        )
+        if builder:
+            self.ddfc_builder_id = builder
+            self.ddfc_builder_name_text = builder.name
+
     @api.model_create_multi
     def create(self, vals_list):
-        orders = super().create(vals_list)
+        prepared_vals_list = []
+        for vals in vals_list:
+            prepared_vals = dict(vals)
+            if prepared_vals.get("ddfc_builder_name_text") and not prepared_vals.get("ddfc_builder_id"):
+                builder = self.env["ddfc.builder.profile"].resolve_or_create_from_name(
+                    prepared_vals.get("ddfc_builder_name_text"),
+                    document=False,
+                )
+                if builder:
+                    prepared_vals["ddfc_builder_id"] = builder.id
+                    prepared_vals["ddfc_builder_name_text"] = builder.name
+            prepared_vals_list.append(prepared_vals)
+
+        orders = super().create(prepared_vals_list)
         orders._apply_builder_discount()
         return orders
 
     def write(self, vals):
+        if "ddfc_builder_name_text" in vals and vals.get("ddfc_builder_name_text"):
+            normalized_name = vals.get("ddfc_builder_name_text").strip()
+            builder = self.env["ddfc.builder.profile"].resolve_or_create_from_name(
+                normalized_name,
+                document=False,
+            )
+            if builder:
+                vals["ddfc_builder_id"] = builder.id
+                vals["ddfc_builder_name_text"] = builder.name
+
         result = super().write(vals)
         if self.env.context.get("skip_builder_discount"):
             return result
-        if any(key in vals for key in ["partner_id", "ddfc_builder_id", "order_line"]):
+        if any(key in vals for key in ["partner_id", "ddfc_builder_id", "order_line", "ddfc_builder_name_text"]):
             self._apply_builder_discount()
         return result
 
@@ -90,17 +139,37 @@ class SaleOrder(models.Model):
             ):
                 order.ddfc_pricing_source = "base"
                 for line in order.order_line:
-                    line.with_context(skip_builder_discount=True).write({"discount": 0.0})
+                    line.with_context(skip_builder_discount=True, ddsn_automatic_pricing=True).write({"discount": 0.0})
                 continue
             order.ddfc_pricing_source = "constructor"
             for line in order.order_line:
-                line.with_context(skip_builder_discount=True).write({"discount": order.ddfc_builder_id.discount_percent})
+                line.with_context(skip_builder_discount=True, ddsn_automatic_pricing=True).write({"discount": order.ddfc_builder_id.discount_percent})
             order.with_context(skip_builder_discount=True).write({"ddfc_pricing_source": order.ddfc_pricing_source})
         self._compute_ddfc_pricing_source()
 
     def action_apply_builder_discount(self):
         self._apply_builder_discount()
         return True
+
+    def ddfc_action_open_builder_wizard(self):
+        """Abre el formulario estándar de contacto para crear un constructor"""
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Crear Constructor",
+            "res_model": "res.partner",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_is_company": True,
+                "default_company_type": "company",
+                "default_customer_rank": 1,
+                "default_supplier_rank": 1,
+                "default_ddfc_is_builder_creation": True,
+                "ddfc_source_model": "sale.order",
+                "ddfc_source_id": self.id,
+                "form_view_initial_mode": "edit",
+            },
+        }
 
 
 class SaleOrderLine(models.Model):

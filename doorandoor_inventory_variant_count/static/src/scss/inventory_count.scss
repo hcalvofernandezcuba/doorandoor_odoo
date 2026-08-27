@@ -1,0 +1,26 @@
+.o_inventory_count_mobile {
+    .o_inventory_scan_box {
+        padding: 1rem;
+        border-radius: .5rem;
+        background: var(--o-view-background-color, #fff);
+        border: 2px solid var(--o-brand-primary, #714b67);
+    }
+    @media (max-width: 767px) {
+        .o_group { display: block; }
+        .o_inventory_scan_box .btn { width: 100%; min-height: 48px; }
+        .o_list_table { font-size: .9rem; }
+    }
+}
+
+.o_ddsl_label_scope {
+    padding: .75rem 1rem;
+    border-left: 4px solid #198754;
+    border-radius: .25rem;
+    background-color: rgba(25, 135, 84, .08);
+
+    .o_radio_item:first-child label,
+    .form-check:first-child label {
+        color: #146c43;
+        font-weight: 700;
+    }
+}

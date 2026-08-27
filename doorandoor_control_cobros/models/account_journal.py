@@ -12,10 +12,22 @@ class AccountJournal(models.Model):
         selection=[
             ("immediate", "Validacion inmediata"),
             ("controlled", "Requiere revision"),
+            ("authorized_credit", "Credito con autorizacion del cliente"),
         ],
         string="Flujo de cobro",
         default="immediate",
         required=True,
+    )
+    ddc_credit_parent_account_id = fields.Many2one(
+        "account.account",
+        string="Cuenta madre de creditos autorizados",
+        check_company=True,
+        domain="[('account_type', '=', 'asset_receivable'), ('reconcile', '=', True)]",
+        help=(
+            "Cuenta madre que identifica la cartera financiada. Cada cliente "
+            "recibira automaticamente una subcuenta conciliable propia. Este "
+            "diario no admite pagos manuales de entrada ni salida."
+        ),
     )
 
     def write(self, vals):

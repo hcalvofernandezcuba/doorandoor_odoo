@@ -62,8 +62,12 @@ def make_code128_data_uri(value):
     codes.append(106)
     pattern = "".join(CODE128_PATTERNS[code] for code in codes)
 
-    module_width = 1
-    margin = 32
+    # One source pixel per Code128 module becomes sub-pixel after the PDF
+    # renderer scales the fixed-height image. Dedicated laser scanners may
+    # still recover it, but mobile cameras see merged bars. Render every
+    # module at three pixels so the printed label preserves the bar ratios.
+    module_width = 3
+    margin = 36
     barcode_height = 82
     text_height = 26
     width = len(pattern) * module_width + margin * 2

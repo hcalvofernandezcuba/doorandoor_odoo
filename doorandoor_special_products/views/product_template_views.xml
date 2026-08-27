@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_template_form_ddsp_special" model="ir.ui.view">
+        <field name="name">product.template.form.ddsp.special</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+                    name="action_ddsp_validate_bom"
+                    type="object"
+                    string="Validar LDM personalizada"
+                    class="btn-primary"
+                    groups="mrp.group_mrp_user"
+                    invisible="not ddsp_is_special or ddsp_bom_state == 'validated'"/>
+            </xpath>
+            <xpath expr="//field[@name='barcode']" position="after">
+                <field name="ddsp_is_special" invisible="1"/>
+                <field name="ddsp_product_kind" invisible="1"/>
+                <field name="ddsp_allow_special"
+                       string="Permitir productos transformados"
+                       groups="base.group_system"/>
+                <field name="ddsp_manufacturing_family"
+                       groups="mrp.group_mrp_manager"
+                       invisible="ddsp_is_special"/>
+                <field name="ddsp_bom_state" readonly="1" invisible="not ddsp_is_special"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Producto personalizado" invisible="not ddsp_is_special">
+                    <group>
+                        <group string="Origen">
+                            <field name="ddsp_product_kind" readonly="1"/>
+                            <field name="ddsp_base_product_tmpl_id"/>
+                            <field name="ddsp_manufacturing_family" readonly="1"/>
+                            <field name="ddsp_source_bom_template_id" readonly="1"/>
+                            <field name="ddsp_origin_invoice_id"/>
+                            <field name="ddsp_origin_invoice_line_id"/>
+                            <field name="ddsp_origin_sale_order_id"/>
+                            <field name="ddsp_origin_sale_order_line_id"/>
+                            <field name="ddsp_bom_state" readonly="1"/>
+                        </group>
+                        <group string="Ciclo de vida">
+                            <field name="ddsp_sale_date"/>
+                            <field name="ddsp_last_activity_date"/>
+                            <field name="ddsp_archive_after_date"/>
+                        </group>
+                    </group>
+                    <group string="Valor transformado y especificaciones">
+                        <field name="ddsp_special_changes_display" readonly="1" class="fw-bold"/>
+                        <field name="ddsp_special_attribute_id" invisible="1"/>
+                        <field name="ddsp_special_value" invisible="1"/>
+                        <field name="ddsp_special_changes" invisible="1"/>
+                        <field name="ddsp_width" invisible="1"/>
+                        <field name="ddsp_height" invisible="1"/>
+                        <field name="ddsp_dimensions_display" readonly="1"/>
+                        <field name="ddsp_special_notes"/>
+                        <field name="ddsp_production_instructions"/>
+                    </group>
+                </page>
+                <page string="Plantilla de fabricacion"
+                      groups="mrp.group_mrp_manager"
+                      invisible="ddsp_is_special">
+                    <group>
+                        <group string="Clasificacion">
+                            <field name="ddsp_is_manufacturing_template"/>
+                            <field name="ddsp_manufacturing_family" required="ddsp_is_manufacturing_template"/>
+                            <field name="ddsp_template_output_name"
+                                   required="ddsp_is_manufacturing_template"/>
+                            <field name="ddsp_default_special_component_id"
+                                   invisible="not ddsp_is_manufacturing_template"/>
+                            <field name="ddsp_default_special_component_qty"
+                                   invisible="not ddsp_is_manufacturing_template"/>
+                        </group>
+                        <group string="Uso comercial">
+                            <field name="ddsp_allow_special" string="Permitir transformaciones"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        Configure la receta maestra con las herramientas nativas de LDM.
+                        Sus componentes y operaciones se copiaran al producto transformado;
+                        la MO se liberara mediante las reglas de pago existentes.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -12,6 +12,11 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
     _DOCS_DIR = _DOCS_MODULE_DIR / "docs"
     _DOCS_ROUTE = "/doorandoor-sales-new/docs"
     _PUBLISHED_DOCS = [
+        "GUIA_CAPACITACION_COBROS_PAGOS.md",
+        "GUIA_CAPACITACION_INVENTARIOS.md",
+        "GUIA_CONTEO_HANGER_MOVIL.md",
+        "GUIA_PRUEBAS_FLUJOS_DOORANDOOR.md",
+        "GUIA_CONFIGURACION_PRODUCTOS_DOORANDOOR.md",
         "presentation_and_training_guide.md",
         "invoice_sale_fulfillment_flow_explained.md",
         "payment_release_stock_mrp_delivery_flow_explained.md",
@@ -70,6 +75,7 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
         html = []
         paragraph = []
         in_list = False
+        list_tag = None
         in_code = False
         code_lines = []
 
@@ -80,10 +86,11 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
                 paragraph = []
 
         def close_list():
-            nonlocal in_list
+            nonlocal in_list, list_tag
             if in_list:
-                html.append("</ul>")
+                html.append(f"</{list_tag}>")
                 in_list = False
+                list_tag = None
 
         def flush_code():
             nonlocal in_code, code_lines
@@ -125,18 +132,26 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
 
             if re.match(r"^[-*]\s+", stripped):
                 flush_paragraph()
+                if in_list and list_tag != "ul":
+                    close_list()
                 if not in_list:
                     html.append("<ul>")
                     in_list = True
+                    list_tag = "ul"
                 item = re.sub(r"^[-*]\s+", "", stripped)
                 html.append(f"<li>{self._format_inline_markdown(item)}</li>")
                 continue
 
             if re.match(r"^\d+\.\s+", stripped):
                 flush_paragraph()
-                if in_list:
+                if in_list and list_tag != "ol":
                     close_list()
-                html.append(f"<p>{self._format_inline_markdown(stripped)}</p>")
+                if not in_list:
+                    html.append("<ol>")
+                    in_list = True
+                    list_tag = "ol"
+                item = re.sub(r"^\d+\.\s+", "", stripped)
+                html.append(f"<li>{self._format_inline_markdown(item)}</li>")
                 continue
 
             paragraph.append(stripped)

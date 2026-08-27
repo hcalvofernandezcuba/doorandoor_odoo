@@ -1,0 +1,38 @@
+{
+  "version": 21,
+  "sheets": [{
+    "id": "dd-deliveries-dashboard",
+    "name": "Dashboard",
+    "colNumber": 8,
+    "rowNumber": 100,
+    "rows": {"1":{"size":34},"2":{"size":34},"3":{"size":34}},
+    "cols": {"0":{"size":160},"1":{"size":160},"2":{"size":160},"3":{"size":160},"4":{"size":160},"5":{"size":160},"6":{"size":160},"7":{"size":160}},
+    "cells": {
+      "A1":{"content":"[Entregas de Ventas]"},
+      "A2":{"content":"Seguimiento de entregas liberadas, parciales y terminadas por almacén."},
+      "A3":{"content":"Los datos provienen del flujo oficial de factura pagada y stock.picking."}
+    },
+    "styles": {}, "formats": {}, "borders": {}, "conditionalFormats": [], "tables": [],
+    "areGridLinesVisible": false, "isVisible": true, "headerGroups": {},
+    "dataValidationRules": [], "comments": {},
+    "figures": [
+      {"id":"fig-delivery-state","x":0,"y":95,"width":620,"height":320,"tag":"chart","data":{"title":{"text":"Operaciones por estado"},"background":"#FFFFFF","legendPosition":"none","metaData":{"groupBy":["operational_state"],"measure":"__count","order":"desc","resModel":"doorandoor.pending.delivery","mode":"bar"},"searchParams":{"comparison":null,"context":{"group_by":["operational_state"]},"domain":[],"groupBy":["operational_state"],"orderBy":[]},"type":"odoo_bar","verticalAxisPosition":"left","stacked":false,"fieldMatching":{"flt-period":{"chain":"invoice_date","type":"date","offset":0},"flt-warehouse":{"chain":"warehouse_id","type":"many2one"},"flt-customer":{"chain":"partner_id","type":"many2one"},"flt-seller":{"chain":"salesperson_id","type":"many2one"},"flt-product":{"chain":"product_id","type":"many2one"}}}},
+      {"id":"fig-pending-warehouse","x":640,"y":95,"width":610,"height":320,"tag":"chart","data":{"title":{"text":"Cantidad pendiente por almacén"},"background":"#FFFFFF","legendPosition":"none","metaData":{"groupBy":["warehouse_id"],"measure":"qty_pending_delivery","order":"desc","resModel":"doorandoor.pending.delivery","mode":"bar"},"searchParams":{"comparison":null,"context":{"group_by":["warehouse_id"]},"domain":[["qty_pending_delivery",">",0]],"groupBy":["warehouse_id"],"orderBy":[]},"type":"odoo_bar","verticalAxisPosition":"left","stacked":false,"fieldMatching":{"flt-period":{"chain":"invoice_date","type":"date","offset":0},"flt-warehouse":{"chain":"warehouse_id","type":"many2one"},"flt-customer":{"chain":"partner_id","type":"many2one"},"flt-seller":{"chain":"salesperson_id","type":"many2one"},"flt-product":{"chain":"product_id","type":"many2one"}}}},
+      {"id":"fig-delivered-warehouse","x":0,"y":435,"width":620,"height":320,"tag":"chart","data":{"title":{"text":"Cantidad entregada por almacén"},"background":"#FFFFFF","legendPosition":"none","metaData":{"groupBy":["warehouse_id"],"measure":"qty_delivered","order":"desc","resModel":"doorandoor.pending.delivery","mode":"bar"},"searchParams":{"comparison":null,"context":{"group_by":["warehouse_id"]},"domain":[["qty_delivered",">",0]],"groupBy":["warehouse_id"],"orderBy":[]},"type":"odoo_bar","verticalAxisPosition":"left","stacked":false,"fieldMatching":{"flt-period":{"chain":"delivery_date","type":"date","offset":0},"flt-warehouse":{"chain":"warehouse_id","type":"many2one"},"flt-customer":{"chain":"partner_id","type":"many2one"},"flt-seller":{"chain":"salesperson_id","type":"many2one"},"flt-product":{"chain":"product_id","type":"many2one"}}}},
+      {"id":"fig-pending-product","x":640,"y":435,"width":610,"height":320,"tag":"chart","data":{"title":{"text":"Productos pendientes de entregar"},"background":"#FFFFFF","legendPosition":"none","metaData":{"groupBy":["product_id"],"measure":"qty_pending_delivery","order":"desc","resModel":"doorandoor.pending.delivery","mode":"bar"},"searchParams":{"comparison":null,"context":{"group_by":["product_id"]},"domain":[["qty_pending_delivery",">",0]],"groupBy":["product_id"],"orderBy":[]},"type":"odoo_bar","verticalAxisPosition":"left","stacked":false,"fieldMatching":{"flt-period":{"chain":"invoice_date","type":"date","offset":0},"flt-warehouse":{"chain":"warehouse_id","type":"many2one"},"flt-customer":{"chain":"partner_id","type":"many2one"},"flt-seller":{"chain":"salesperson_id","type":"many2one"},"flt-product":{"chain":"product_id","type":"many2one"}}}},
+      {"id":"fig-pending-customer","x":0,"y":775,"width":620,"height":320,"tag":"chart","data":{"title":{"text":"Pendiente por cliente"},"background":"#FFFFFF","legendPosition":"none","metaData":{"groupBy":["partner_id"],"measure":"qty_pending_delivery","order":"desc","resModel":"doorandoor.pending.delivery","mode":"bar"},"searchParams":{"comparison":null,"context":{"group_by":["partner_id"]},"domain":[["qty_pending_delivery",">",0]],"groupBy":["partner_id"],"orderBy":[]},"type":"odoo_bar","verticalAxisPosition":"left","stacked":false,"fieldMatching":{"flt-period":{"chain":"invoice_date","type":"date","offset":0},"flt-warehouse":{"chain":"warehouse_id","type":"many2one"},"flt-customer":{"chain":"partner_id","type":"many2one"},"flt-seller":{"chain":"salesperson_id","type":"many2one"},"flt-product":{"chain":"product_id","type":"many2one"}}}},
+      {"id":"fig-delivery-timeline","x":640,"y":775,"width":610,"height":320,"tag":"chart","data":{"title":{"text":"Entregas terminadas por fecha"},"background":"#FFFFFF","legendPosition":"none","metaData":{"groupBy":["delivery_date:month"],"measure":"qty_delivered","order":null,"resModel":"doorandoor.pending.delivery","mode":"line"},"searchParams":{"comparison":null,"context":{"group_by":["delivery_date"]},"domain":[["operational_state","=","delivered"],["delivery_date","!=",false]],"groupBy":["delivery_date"],"orderBy":[]},"type":"odoo_line","verticalAxisPosition":"left","stacked":false,"fillArea":true,"fieldMatching":{"flt-period":{"chain":"delivery_date","type":"date","offset":0},"flt-warehouse":{"chain":"warehouse_id","type":"many2one"},"flt-customer":{"chain":"partner_id","type":"many2one"},"flt-seller":{"chain":"salesperson_id","type":"many2one"},"flt-product":{"chain":"product_id","type":"many2one"}}}}
+    ]
+  }],
+  "styles": {}, "formats": {}, "borders": {}, "revisionId": "dd-deliveries-v1",
+  "uniqueFigureIds": true, "settings": {"locale":"es_419"}, "pivots": {},
+  "pivotNextId": 1, "customTableStyles": {}, "odooVersion": 18,
+  "globalFilters": [
+    {"id":"flt-period","type":"date","label":"Periodo","rangeType":"from_to","defaultValue":[]},
+    {"id":"flt-warehouse","type":"relation","label":"Almacén","modelName":"stock.warehouse","includeChildren":false,"defaultValue":[]},
+    {"id":"flt-customer","type":"relation","label":"Cliente","modelName":"res.partner","includeChildren":false,"defaultValue":[]},
+    {"id":"flt-seller","type":"relation","label":"Vendedor","modelName":"res.users","includeChildren":false,"defaultValue":[]},
+    {"id":"flt-product","type":"relation","label":"Producto","modelName":"product.product","includeChildren":false,"defaultValue":[]}
+  ],
+  "lists": {}, "listNextId": 1, "chartOdooMenusReferences": {}
+}

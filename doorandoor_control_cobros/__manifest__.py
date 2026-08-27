@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Control de Cobros",
-    "version": "18.0.1.7.6",
+    "version": "18.0.2.8.0",
     "category": "Accounting",
-    "summary": "18.0.1.7.6 - Corrige estado final pagado tras cobros parciales/completos en control de cobros",
+    "summary": "18.0.2.8.0 - Cobra y concilia deudas de crédito autorizado por cliente",
     "description": """
 DoorAndDoor Control de Cobros
 =============================
@@ -20,6 +20,169 @@ Reglas iniciales
 
 Historial resumido
 ------------------
+
+- 18.0.2.8.0
+  Permite seleccionar una deuda abierta de credito autorizado al registrar un
+  cobro real. Crea su Control de Cobro, admite amortizaciones parciales y al
+  validar concilia el pago contra la subcuenta 122xxx del cliente sin modificar
+  nuevamente la factura original ya liquidada.
+
+- 18.0.2.7.5
+  Los operadores del grupo Registrar pagos oficiales pueden consultar en la
+  ficha del cliente el credito autorizado, utilizado y disponible. Los campos
+  son de solo lectura para ese rol; el limite continua editable unicamente por
+  Administrador/Ajustes y la subcuenta tecnica permanece restringida.
+
+- 18.0.2.7.4
+  Impide asociar un pago oficial a mas de un control o a una factura distinta,
+  incluso ante operaciones concurrentes. Restringe su manipulacion a Control
+  de Cobros, muestra el control correspondiente a la factura real y bloquea el
+  rechazo ambiguo de pagos que ya fueron conciliados contablemente.
+
+- 18.0.2.7.3
+  Publica una señal final después de conciliar y recalcular la factura, evitando
+  que las pantallas abiertas conserven el estado intermedio de pago en revisión.
+  Consolida además el bloqueo contable del diario de crédito autorizado.
+
+- 18.0.2.7.2
+  Incorpora al OTP la URL dinamica de la instancia y un enlace directo a la
+  factura, reutilizando web.base.url en local, pruebas y produccion.
+
+- 18.0.2.7.1
+  Amplia el mensaje OTP de Telegram con cliente, factura, vendedor, productos,
+  importes, saldo de factura y credito disponible antes y despues de la venta.
+
+- 18.0.2.7.0
+  Agrega lista, tabla dinamica, grafico y PDF de creditos autorizados por
+  cliente. Calcula credito usado, pagos reales y saldo pendiente desde el
+  residual contable de cada subcuenta y enlaza factura y asiento de origen.
+
+- 18.0.2.6.3
+  El codigo deja de ser obligatorio antes de pulsar Enviar codigo y pasa a ser
+  obligatorio solamente despues de crear la solicitud de autorizacion.
+
+- 18.0.2.6.2
+  Registra el estado, fecha e identificador del mensaje OTP aceptado por
+  Telegram y corrige el tipo tecnico del limite de credito por compania.
+
+- 18.0.2.6.1
+  Impide crear, modificar o validar pagos manuales de entrada y salida con el
+  diario de credito autorizado. Su uso queda limitado al asistente de una
+  factura confirmada y a la validacion del codigo del cliente.
+
+- 18.0.2.6.0
+  Incorpora un diario de credito autorizado, limite administrado por cliente,
+  codigo temporal de seis digitos enviado al bot de pruebas y bloqueo absoluto
+  de la liquidacion sin autorizacion. La factura se liquida reclasificando su
+  saldo como cuenta por cobrar financiada, sin simular una entrada bancaria.
+
+- 18.0.2.5.5
+  Conserva en cola los eventos de pago que llegan durante una recarga y evita
+  registrar como sincronizado un estado mas nuevo que aun no fue renderizado.
+  El aviso parcial cambia al total sin recargar la pagina completa.
+
+- 18.0.2.5.4
+  Atiende la senal nativa de cambio de bundle y recarga automaticamente las
+  sesiones sin cambios pendientes. Evita solicitar combinaciones de teclas a
+  los operadores despues de futuras actualizaciones del frontend.
+
+- 18.0.2.5.3
+  Incorpora en pagos y controles de cobro un boton exclusivo de
+  Administracion/Ajustes que recalcula la factura, registra auditoria y vuelve
+  a notificar todas las pantallas abiertas sin crear pagos ni asientos nuevos.
+
+- 18.0.2.5.2
+  Agrega una comprobacion ligera y segura del estado de facturas abiertas cada
+  diez segundos y al regresar a la pestana. Mantiene el WebSocket inmediato y
+  recupera cambios perdidos por reconexiones, cache o reinicios sin requerir F5.
+
+- 18.0.2.5.1
+  Evita la recarga redundante de la prefactura cuando Crear factura navega al
+  nuevo documento y protege las recargas asincronas si el formulario ya fue
+  desmontado, eliminando el error de cliente Component is destroyed.
+
+- 18.0.2.5.0
+  Muestra en el control de cobros y en el reporte de factura el saldo contable
+  disponible del cliente en anticipos, incluso cuando la factura está pagada.
+
+- 18.0.2.4.1
+  Hace buscable la relacion calculada entre pago y control de cobro para que
+  Odoo pueda resolver correctamente las dependencias y recomputaciones.
+
+- 18.0.2.4.0
+  Amplia el refresco WebSocket a cotizaciones, prefacturas y facturas, y
+  fuerza la recarga segura del modelo tras confirmar o reabrir documentos.
+  Las vistas con cambios sin guardar mantienen la advertencia protectora.
+
+- 18.0.2.3.3
+  El boton Registrar pago de una factura nunca crea pagos, asientos ni
+  conciliaciones al seleccionar un diario controlado, incluso para usuarios
+  administradores. Solo genera la espera comercial; el pago oficial debe
+  ingresar exclusivamente por Control de Cobros/Pagos.
+
+- 18.0.2.3.2
+  En diarios controlados oculta la cinta verde nativa de pago en proceso
+  mientras el cobro espera validacion y conserva la cinta azul Pago en
+  revision, sin alterar saldo, asiento ni conciliacion.
+
+- 18.0.2.3.1
+  El pago oficial reutiliza el reporte pendiente de la factura, priorizando
+  la misma via de cobro, aunque su importe real sea parcial o excedido.
+  El control adopta el diario y el monto reales sin duplicar registros.
+
+- 18.0.2.3.0
+  En diarios controlados, Ventas solo selecciona la via y envia la factura a
+  espera de pago por su saldo real. Se ocultan los datos contables del
+  asistente y el pago oficial posterior reutiliza el reporte pendiente.
+
+- 18.0.2.2.3
+  Evita ejecutar manualmente los computes contables despues de conciliar.
+  Odoo actualiza el saldo y el estado de pago mediante la conciliacion nativa,
+  sin intentar reescribir lineas protegidas de una factura confirmada.
+
+- 18.0.2.2.0
+  Emite eventos operativos en tiempo real al crear, vincular, validar,
+  rechazar o modificar controles. Las vistas abiertas de factura, pago,
+  control y credito se recargan si no tienen cambios pendientes.
+
+- 18.0.2.1.0
+  Registrar pago desde Ventas en diarios controlados crea solamente un Control
+  de Cobro sin asiento ni conciliacion. El pago oficial reutiliza el reporte
+  compatible y la automatizacion cuenta pagos contables unicos, no importes
+  reportados, evitando duplicar dinero sobre una factura.
+
+- 18.0.2.0.0
+  Asocia pagos por la referencia INV encontrada en el memo aunque el pagador
+  sea distinto, conserva el pagador informado y automatiza el control segun
+  el porcentaje acumulado del total de la factura. Las facturas fabricables
+  liberan la MO al 50%; por debajo quedan en revision y el despacho conserva
+  la exigencia de pago total. Los excedentes se trasladan a una subcuenta
+  conciliable por cliente bajo 120000. En contabilidad estadounidense se crea
+  la cuenta madre cuando no exista.
+
+- 18.0.1.12.1
+  Las companias sin cuenta propia de anticipos utilizan la 120000 como cuenta
+  madre compartida, sin bloquear facturas ni pagos y conservando el detalle
+  por compania y cliente para su reclasificacion contable posterior.
+
+- 18.0.1.12.0
+  Traslada excedentes validados a la cuenta 120000 Pagos Anticipados,
+  aplica automaticamente esos saldos al publicar nuevas facturas y mantiene
+  trazabilidad por cliente, pago, control y asiento contable.
+
+- 18.0.1.11.0
+  Agrega una vista gerencial de creditos calculada desde partidas contables
+  abiertas, con saldos original, aplicado y disponible, historial de
+  aplicaciones y acceso directo al asiento contable.
+
+- 18.0.1.10.0
+  Al aplicar un credito validado a otra factura crea un control con origen,
+  saldo anterior, importe aplicado y saldo restante. Si liquida la factura,
+  actualiza su estado y reutiliza el flujo de liberacion de MO y pickings.
+
+- 18.0.1.9.1
+  Conserva intacta la cinta nativa de factura pagada y agrega cintas propias
+  para pagos en revision y pagos parciales validados.
 
 - 18.0.1.0.0
   Version inicial del modulo.
@@ -253,9 +416,49 @@ Historial resumido
   validar un segundo pago (por ejemplo Zelle), el estado funcional pasa
   a `Pago validado` y la factura queda `Pagada`, evitando que permanezca
   erroneamente en `Pago parcial validado`.
+
+- 18.0.1.8.0
+  El formulario de pago incorpora un selector de factura existente para
+  cobros de cliente. La asociacion valida cliente, compania, moneda,
+  tipo de documento y exclusividad pago-factura; al confirmar crea el
+  control de cobro sin omitir la revision y conciliacion ya establecidas.
+
+- 18.0.1.8.1
+  Se permite que el importe de un pago sea menor que el saldo pendiente
+  para completar el flujo de pagos parciales. Cada pago conserva una
+  sola factura asociada, mientras una factura puede acumular pagos y
+  controles sucesivos hasta quedar totalmente saldada.
+
+- 18.0.1.8.2
+  Al seleccionar una factura en un nuevo pago se muestra su saldo
+  pendiente actualizado y se indica si el importe liquidara totalmente
+  la deuda o se aplicara como un nuevo pago parcial.
+
+- 18.0.1.8.3
+  La validacion usa la asignacion contable estandar de Odoo para reducir
+  realmente el residual de la factura, incluyendo pagos que ya llegaron
+  al estado pagado. Si la deuda no disminuye, el control no se marca como
+  validado; los controles inconsistentes existentes pueden reprocesarse.
+
+- 18.0.1.8.4
+  La validacion genera el asiento contable de pagos que quedaron pagados
+  sin `move_id`, o recupera el asiento activo previamente creado para no
+  duplicarlo. Solo despues publica, concilia y actualiza el residual.
+
+- 18.0.1.8.5
+  Los pagos superiores al residual dejan de bloquearse. La conciliacion
+  liquida la factura por su saldo y conserva la diferencia abierta en la
+  cuenta por cobrar como credito a favor del cliente, mostrando ambos
+  importes en el formulario del pago.
+
+- 18.0.1.9.0
+  El pago incorpora una coleccion de documentos asociados para adjuntar
+  capturas, imagenes, PDF, textos y documentos escaneados. Los respaldos
+  tambien pueden consultarse desde el Control de Cobro relacionado.
     """,
-    "author": "Hanoi Calvo Fernandez for Doorandoor",
-    "website": "https://gestion.doorandoor.com",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
+    "website": "https://doorandoor.com",
     "license": "LGPL-3",
     "depends": [
         "mail",
@@ -267,13 +470,25 @@ Historial resumido
         "security/ir.model.access.csv",
         "views/control_cobros_views.xml",
         "views/account_journal_views.xml",
+        "views/account_payment_views.xml",
+        "views/account_payment_register_views.xml",
         "views/account_move_views.xml",
+        "views/invoice_credit_report.xml",
+        "views/res_partner_views.xml",
         "views/control_cobros_report.xml",
         "views/cobro_report_wizard_views.xml",
         "views/cobro_match_wizard_views.xml",
         "views/cobro_report_pdf.xml",
+        "views/authorized_credit_report.xml",
+        "views/customer_credit_views.xml",
         "views/menu_views.xml",
+        "views/credit_authorization_views.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "doorandoor_control_cobros/static/src/js/payment_operational_refresh.js",
+        ],
+    },
     "installable": True,
     "application": True,
 }

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddpc_warehouse_prereservation_list" model="ir.ui.view">
+        <field name="name">doorandoor.warehouse.prereservation.list</field>
+        <field name="model">doorandoor.warehouse.prereservation</field>
+        <field name="arch" type="xml">
+            <list string="Prereservas por almacen" create="0" edit="0" delete="0"
+                  decoration-warning="reservation_state == 'expiring'"
+                  decoration-danger="reservation_state == 'expired'"
+                  default_order="reservation_expires_at asc">
+                <field name="warehouse_id"/>
+                <field name="preinvoice_number"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="reserved_qty" sum="Total prereservado"/>
+                <field name="product_uom_id"/>
+                <field name="reservation_expires_at"/>
+                <field name="hours_remaining" widget="float_time"/>
+                <field name="reservation_state" widget="badge"
+                       decoration-success="reservation_state == 'active'"
+                       decoration-warning="reservation_state == 'expiring'"
+                       decoration-danger="reservation_state == 'expired'"/>
+                <field name="salesperson_id" optional="show"/>
+                <field name="sale_order_id" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddpc_warehouse_prereservation_search" model="ir.ui.view">
+        <field name="name">doorandoor.warehouse.prereservation.search</field>
+        <field name="model">doorandoor.warehouse.prereservation</field>
+        <field name="arch" type="xml">
+            <search string="Prereservas por almacen">
+                <field name="preinvoice_number"/>
+                <field name="warehouse_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="salesperson_id"/>
+                <filter name="active" string="Activas" domain="[('reservation_state', '=', 'active')]"/>
+                <filter name="expiring" string="Proximas a vencer" domain="[('reservation_state', '=', 'expiring')]"/>
+                <filter name="expired" string="Vencidas" domain="[('reservation_state', '=', 'expired')]"/>
+                <separator/>
+                <filter name="group_warehouse" string="Almacen" context="{'group_by': 'warehouse_id'}"/>
+                <filter name="group_product" string="Producto" context="{'group_by': 'product_id'}"/>
+                <filter name="group_expiration" string="Vencimiento" context="{'group_by': 'reservation_expires_at:day'}"/>
+                <filter name="group_salesperson" string="Vendedor" context="{'group_by': 'salesperson_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ddpc_warehouse_prereservation_pivot" model="ir.ui.view">
+        <field name="name">doorandoor.warehouse.prereservation.pivot</field>
+        <field name="model">doorandoor.warehouse.prereservation</field>
+        <field name="arch" type="xml">
+            <pivot string="Prereservas por almacen">
+                <field name="warehouse_id" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="reserved_qty" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_ddpc_warehouse_prereservation_kanban" model="ir.ui.view">
+        <field name="name">doorandoor.warehouse.prereservation.kanban</field>
+        <field name="model">doorandoor.warehouse.prereservation</field>
+        <field name="arch" type="xml">
+            <kanban string="Prereservas por almacen" create="0" edit="0" delete="0"
+                    default_group_by="warehouse_id" quick_create="false"
+                    records_draggable="false" groups_draggable="false"
+                    default_order="reservation_expires_at asc">
+                <field name="warehouse_id"/>
+                <field name="preinvoice_number"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="reserved_qty"/>
+                <field name="product_uom_id"/>
+                <field name="reservation_expires_at"/>
+                <field name="hours_remaining"/>
+                <field name="reservation_state"/>
+                <field name="salesperson_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="border-start border-4 {{
+                            record.reservation_state.raw_value === 'expired' ? 'border-danger' :
+                            record.reservation_state.raw_value === 'expiring' ? 'border-warning' :
+                            'border-success'
+                        }}">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <strong class="fs-5">
+                                    <field name="preinvoice_number"/>
+                                </strong>
+                                <span t-attf-class="badge {{
+                                    record.reservation_state.raw_value === 'expired' ? 'text-bg-danger' :
+                                    record.reservation_state.raw_value === 'expiring' ? 'text-bg-warning' :
+                                    'text-bg-success'
+                                }}">
+                                    <field name="reservation_state"/>
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="fa fa-user me-1" title="Cliente"/>
+                                <field name="partner_id"/>
+                            </div>
+                            <div class="fw-bold text-primary mb-2">
+                                <i class="fa fa-cube me-1" title="Producto"/>
+                                <field name="product_id"/>
+                            </div>
+                            <div class="row g-2 small">
+                                <div class="col-6">
+                                    <span class="text-muted">Cantidad</span><br/>
+                                    <strong><field name="reserved_qty"/></strong>
+                                    <span class="ms-1"><field name="product_uom_id"/></span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted">Horas restantes</span><br/>
+                                    <strong><field name="hours_remaining" widget="float_time"/></strong>
+                                </div>
+                            </div>
+                            <div class="border-top mt-2 pt-2 small">
+                                <i class="fa fa-clock-o me-1" title="Vencimiento"/>
+                                <field name="reservation_expires_at"/>
+                            </div>
+                            <div class="text-muted small mt-1" t-if="record.salesperson_id.raw_value">
+                                <i class="fa fa-address-card-o me-1" title="Vendedor"/>
+                                <field name="salesperson_id"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_ddpc_warehouse_prereservations" model="ir.actions.act_window">
+        <field name="name">Prereservas por almacen</field>
+        <field name="res_model">doorandoor.warehouse.prereservation</field>
+        <field name="view_mode">kanban,list,pivot</field>
+        <field name="search_view_id" ref="view_ddpc_warehouse_prereservation_search"/>
+        <field name="context">{'search_default_group_warehouse': 1}</field>
+        <field name="groups_id" eval="[(4, ref('stock.group_stock_user')), (4, ref('base.group_system'))]"/>
+        <field name="help" type="html">
+            <p>Productos protegidos temporalmente por prefacturas confirmadas.</p>
+            <p>Esta vista es informativa y no autoriza reservas fisicas ni entregas.</p>
+        </field>
+    </record>
+</odoo>

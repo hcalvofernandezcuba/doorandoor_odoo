@@ -6,29 +6,38 @@
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_id']" position="after">
-                    <button
-                        name="action_open_ddpc_variant_selector"
-                        type="object"
-                        icon="fa-sliders"
-                        title="Configure Variant"
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_id']" position="before">
+                    <field
+                        name="ddpc_product_template_id"
+                        string="Producto"
+                        widget="ddpc_product_template_autosave"
+                        options="{'no_open': True}"
                         invisible="display_type not in (False, 'product')"/>
+                    <field name="ddpc_configurator_token" column_invisible="1" force_save="1"/>
+                    <field name="ddpc_selected_option_value_ids" column_invisible="1" force_save="1"/>
                 </xpath>
-
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_id']" position="attributes">
+                    <attribute name="column_invisible">1</attribute>
+                </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='price_unit']" position="after">
                     <field name="ddpc_base_price" string="Base Price" readonly="1" optional="hide"/>
                     <field name="ddpc_variant_extra_price" string="Variant Extra" readonly="1" optional="show"/>
                     <field name="ddpc_configured_price_unit" string="Configured Price" readonly="1" optional="show"/>
                 </xpath>
 
+                <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='product_id']" position="before">
+                    <field
+                        name="ddpc_product_template_id"
+                        string="Producto"
+                        widget="ddpc_product_template_autosave"
+                        options="{'no_open': True}"/>
+                    <field name="ddpc_configurator_token" invisible="1" force_save="1"/>
+                    <field name="ddpc_selected_option_value_ids" invisible="1" force_save="1"/>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='product_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='product_id']" position="after">
-                    <button
-                        name="action_open_ddpc_variant_selector"
-                        type="object"
-                        icon="fa-sliders"
-                        string="Configure Variant"
-                        class="oe_link"
-                        invisible="display_type not in (False, 'product')"/>
                     <group string="Variant Pricing" colspan="2">
                         <field name="ddpc_base_price" readonly="1"/>
                         <field name="ddpc_variant_extra_price" readonly="1"/>

@@ -1,8 +1,30 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
+
+    ddsn_supply_warehouse_id = fields.Many2one(
+        "stock.warehouse",
+        string="Almacén proveedor",
+        domain="[('company_id', '=', company_id)]",
+        help=(
+            "Almacén que aportará físicamente este producto. Si queda vacío, "
+            "se utiliza el almacén comercial de la cotización. Para dividir una "
+            "cantidad entre almacenes, utilice una línea por cada origen."
+        ),
+    )
+
+    ddsn_can_edit_commercial_price = fields.Boolean(
+        string="Puede editar precio comercial",
+        compute="_compute_ddsn_can_edit_commercial_price",
+    )
+
+    def _compute_ddsn_can_edit_commercial_price(self):
+        allowed = self.env.user.has_group("base.group_system")
+        for line in self:
+            line.ddsn_can_edit_commercial_price = allowed
 
     ddsn_available_qty = fields.Float(
         string="Available Stock",
@@ -58,6 +80,97 @@ class SaleOrderLine(models.Model):
         readonly=True,
         copy=False,
     )
+
+    def _ddsn_get_stock_control_product(self):
+        """Return the stored product whose stock supports this sale line.
+
+        A transformed product consumes one finished base product through its
+        BoM.  Other products control their own variant stock.  Special products
+        manufactured from raw materials are intentionally excluded here.
+        """
+        self.ensure_one()
+        product = self.product_id
+        if not product:
+            return product, 0.0, False
+
+        template = product.product_tmpl_id
+        product_kind = getattr(template, "ddsp_product_kind", False)
+        if product_kind == "special":
+            return self.env["product.product"], 0.0, False
+        if product_kind != "transformed":
+            return product, self.product_uom_qty, False
+
+        bom = self.env["mrp.bom"].search(
+            [
+                "|",
+                ("product_id", "=", product.id),
+                "&",
+                ("product_id", "=", False),
+                ("product_tmpl_id", "=", template.id),
+            ],
+            limit=1,
+        )
+        base_template = getattr(template, "ddsp_base_product_tmpl_id", False)
+        base_line = bom.bom_line_ids.filtered(
+            lambda item: not base_template or item.product_id.product_tmpl_id == base_template
+        )[:1]
+        if not bom or not base_line:
+            return product, self.product_uom_qty, False
+
+        required_in_bom_uom = (self.product_uom_qty / (bom.product_qty or 1.0)) * base_line.product_qty
+        required_qty = base_line.product_uom_id._compute_quantity(
+            required_in_bom_uom,
+            base_line.product_id.uom_id,
+        )
+        return base_line.product_id, required_qty, product
+
+    @api.onchange("product_id", "product_uom_qty")
+    def _onchange_ddsn_warn_insufficient_stock(self):
+        for line in self:
+            warehouse = line.order_id.warehouse_id
+            control_product, required_qty, transformed_product = line._ddsn_get_stock_control_product()
+            if (
+                not warehouse
+                or not warehouse.lot_stock_id
+                or not control_product
+                or not control_product.is_storable
+                or required_qty <= 0
+            ):
+                continue
+
+            available_qty = control_product.with_company(line.order_id.company_id).with_context(
+                location=warehouse.lot_stock_id.id
+            ).qty_available
+            if not transformed_product:
+                available_qty -= line._ddsn_get_committed_qty_for_display(warehouse=warehouse)
+                available_qty -= line._ddsn_get_reserved_qty_for_display(warehouse=warehouse)
+            if required_qty <= available_qty:
+                continue
+
+            transformed_detail = ""
+            if transformed_product:
+                transformed_detail = _("\nProducto transformado: %(product)s") % {
+                    "product": transformed_product.display_name,
+                }
+            return {
+                "warning": {
+                    "title": _("Alerta de inventario"),
+                    "message": _(
+                        "La cantidad solicitada supera la existencia disponible."
+                        "%(transformed_detail)s\nProducto controlado: %(product)s"
+                        "\nAlmacén: %(warehouse)s\nCantidad requerida: %(required).2f"
+                        "\nCantidad disponible: %(available).2f\n\nPuede continuar con la venta."
+                    )
+                    % {
+                        "transformed_detail": transformed_detail,
+                        "product": control_product.display_name,
+                        "warehouse": warehouse.display_name,
+                        "required": required_qty,
+                        "available": available_qty,
+                    },
+                    "type": "notification",
+                }
+            }
 
     @api.depends("product_id", "product_uom_qty", "order_id.warehouse_id", "order_id.company_id")
     def _compute_ddsn_stock_visibility(self):
@@ -180,6 +293,13 @@ class SaleOrderLine(models.Model):
 
         return " | ".join(chunks) or False
 
+    def ddsn_get_live_warehouse_stock_tooltip(self):
+        """Return a fresh warehouse snapshot whenever the user opens the tooltip."""
+        self.ensure_one()
+        return self._ddsn_get_warehouse_stock_text() or _(
+            "No hay información de existencias disponible."
+        )
+
     def _ddsn_get_warehouse_stock_text(self):
         self.ensure_one()
         product = self.product_id
@@ -246,14 +366,21 @@ class SaleOrderLine(models.Model):
         for reserved_move in reserved_moves:
             if not reserved_move._ddsn_has_active_reservation():
                 continue
-            reservation_warehouse = reserved_move.sudo().sale_order_id.warehouse_id
-            if warehouse and reservation_warehouse and reservation_warehouse != warehouse:
-                continue
-            reserved_qty += sum(
-                reserved_move.invoice_line_ids.filtered(
-                    lambda line: line.product_id == product and line.display_type in (False, "product")
-                ).mapped("quantity")
-            )
+            for reserved_line in reserved_move.invoice_line_ids.filtered(
+                lambda item: item.product_id and item.display_type in (False, "product")
+            ):
+                controlled_product, required_qty, _transformed = (
+                    reserved_line._ddsn_get_stock_control_product()
+                )
+                reservation_warehouse = (
+                    reserved_line.ddsn_supply_warehouse_id
+                    or reserved_move.sudo().sale_order_id.warehouse_id
+                )
+                if controlled_product != product:
+                    continue
+                if warehouse and reservation_warehouse != warehouse:
+                    continue
+                reserved_qty += required_qty
         return reserved_qty
 
     @api.onchange("product_id")
@@ -287,3 +414,53 @@ class SaleOrderLine(models.Model):
                 line.ddsn_bonus_source = False
             elif line.ddsn_bonus_source not in ("partner", "group"):
                 line.ddsn_bonus_source = "manual"
+
+    def write(self, vals):
+        if (
+            {"price_unit", "discount"}.intersection(vals)
+            and not self.env.context.get("ddsn_automatic_pricing")
+            and not self.env.user.has_group("base.group_system")
+        ):
+            raise ValidationError(
+                _("Solo un administrador de Ajustes puede modificar precios o descuentos.")
+            )
+        protected_product_fields = {
+            "product_id",
+            "name",
+            "product_uom_qty",
+            "product_uom",
+            "price_unit",
+            "discount",
+            "tax_id",
+            "analytic_distribution",
+            "display_type",
+        }
+        if protected_product_fields.intersection(vals):
+            protected_lines = self.filtered(
+                lambda line: line.order_id.state in ("sale", "done")
+            )
+            if protected_lines:
+                raise ValidationError(
+                    _("No se pueden modificar líneas de producto en una cotización confirmada. "
+                      "El documento está cerrado para edición.")
+                )
+        return super().write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        order_ids = {vals.get("order_id") for vals in vals_list if vals.get("order_id")}
+        locked_orders = self.env["sale.order"].browse(order_ids).filtered(
+            lambda order: order.state in ("sale", "done")
+        )
+        if locked_orders:
+            raise ValidationError(
+                _("No se pueden agregar productos a una cotización confirmada. Devuélvala a borrador primero.")
+            )
+        return super().create(vals_list)
+
+    def unlink(self):
+        if self.filtered(lambda line: line.order_id.state in ("sale", "done")):
+            raise ValidationError(
+                _("No se pueden eliminar productos de una cotización confirmada. Devuélvala a borrador primero.")
+            )
+        return super().unlink()

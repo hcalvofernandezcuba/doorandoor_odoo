@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddc_credit_authorization_list" model="ir.ui.view">
+        <field name="name">doorandoor.credit.authorization.list</field>
+        <field name="model">doorandoor.credit.authorization</field>
+        <field name="arch" type="xml">
+            <list string="Autorizaciones de credito" create="0" delete="0">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="invoice_id"/>
+                <field name="journal_id"/>
+                <field name="amount"/>
+                <field name="amount_company_currency" string="Credito usado" sum="Total usado"/>
+                <field name="amount_repaid" sum="Total pagado"/>
+                <field name="amount_due" sum="Total pendiente"/>
+                <field name="credit_available_before" optional="hide"/>
+                <field name="credit_available_after" optional="show"/>
+                <field name="expires_at"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'used'"
+                       decoration-warning="state == 'pending'"
+                       decoration-muted="state in ('cancelled', 'expired')"/>
+                <field name="accounting_state" widget="badge"
+                       decoration-success="accounting_state == 'paid'"
+                       decoration-warning="accounting_state == 'partial'"
+                       decoration-danger="accounting_state == 'active'"
+                       decoration-info="accounting_state == 'pending'"/>
+                <field name="financing_move_id" optional="show"/>
+                <field name="financing_line_id" optional="hide"/>
+                <field name="requested_by_id" optional="show"/>
+                <field name="used_by_id" optional="show"/>
+                <field name="telegram_delivery_state" widget="badge" optional="show"
+                       decoration-success="telegram_delivery_state == 'sent'"
+                       decoration-danger="telegram_delivery_state == 'failed'"/>
+                <field name="telegram_sent_at" optional="show"/>
+                <field name="telegram_message_id" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddc_credit_authorization_search" model="ir.ui.view">
+        <field name="name">doorandoor.credit.authorization.search</field>
+        <field name="model">doorandoor.credit.authorization</field>
+        <field name="arch" type="xml">
+            <search string="Creditos autorizados">
+                <field name="partner_id"/>
+                <field name="invoice_id"/>
+                <field name="journal_id"/>
+                <field name="financing_move_id"/>
+                <separator/>
+                <filter name="used" string="Utilizados" domain="[('state', '=', 'used')]"/>
+                <filter name="pending" string="Pendientes" domain="[('state', '=', 'pending')]"/>
+                <filter name="cancelled" string="Cancelados o vencidos"
+                        domain="[('state', 'in', ['cancelled', 'expired'])]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_partner" string="Cliente" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_invoice" string="Factura" context="{'group_by': 'invoice_id'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                    <filter name="group_journal" string="Diario" context="{'group_by': 'journal_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ddc_credit_authorization_pivot" model="ir.ui.view">
+        <field name="name">doorandoor.credit.authorization.pivot</field>
+        <field name="model">doorandoor.credit.authorization</field>
+        <field name="arch" type="xml">
+            <pivot string="Creditos autorizados por cliente">
+                <field name="partner_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="amount_company_currency" type="measure"/>
+                <field name="amount_repaid" type="measure"/>
+                <field name="amount_due" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_ddc_credit_authorization_graph" model="ir.ui.view">
+        <field name="name">doorandoor.credit.authorization.graph</field>
+        <field name="model">doorandoor.credit.authorization</field>
+        <field name="arch" type="xml">
+            <graph string="Saldo de credito por cliente" type="bar">
+                <field name="partner_id"/>
+                <field name="amount_due" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_ddc_credit_authorization" model="ir.actions.act_window">
+        <field name="name">Autorizaciones de credito</field>
+        <field name="res_model">doorandoor.credit.authorization</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_ddc_credit_authorization_search"/>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_ddc_authorized_credit_report"
+              name="Creditos autorizados"
+              parent="doorandoor_control_cobros.menu_ddc_reports"
+              action="action_ddc_credit_authorization"
+              groups="doorandoor_control_cobros.group_ddc_user"
+              sequence="17"/>
+
+    <menuitem id="menu_ddc_credit_authorization"
+              name="Autorizaciones de credito"
+              parent="doorandoor_control_cobros.menu_ddc_root"
+              action="action_ddc_credit_authorization"
+              groups="doorandoor_control_cobros.group_ddc_manager"
+              sequence="35"/>
+</odoo>

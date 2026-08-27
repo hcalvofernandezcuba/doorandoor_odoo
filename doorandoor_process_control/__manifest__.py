@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Process Control",
-    "version": "18.0.1.0.17",
+    "version": "18.0.2.4.0",
     "category": "Operations",
-    "summary": "18.0.1.0.17 - Retira override de modulo no instalado",
+    "summary": "18.0.2.4.0 - Actualización en tiempo real de recepciones de traslados internos entre almacenes",
     "description": """
 DoorAndDoor Process Control
 ===========================
@@ -35,6 +35,80 @@ Alcance inicial
 
 Historial resumido
 ------------------
+
+- 18.0.2.4.0
+  Implementa actualización en tiempo real de recepciones de traslados internos
+  entre almacenes. Agrega sistema de notificaciones vía bus.bus, widget JavaScript
+  para actualizaciones automáticas, dashboard de recepciones pendientes con
+  refresco automático, e indicadores visuales en el formulario de picking. Los
+  usuarios del almacén destino reciben notificaciones instantáneas cuando se
+  despachan traslados y las vistas se actualizan automáticamente sin recarga manual.
+
+- 18.0.2.3.1
+  Corrige el mensaje del chatter al validar un traslado interno: la recepción
+  del almacén destino aparece como un enlace legible y navegable, sin mostrar
+  etiquetas ni atributos HTML al usuario.
+
+- 18.0.2.3.0
+  Convierte los traslados directos entre almacenes en dos etapas controladas.
+  Al validar el despacho mueve únicamente la cantidad real a tránsito y crea
+  una recepción enlazada para el almacén destino. Las alertas permanecen sobre
+  esa recepción hasta su validación física y los parciales conservan backorder.
+
+- 18.0.2.2.0
+  Las vistas operativas y gerenciales muestran la prereserva en el almacén
+  proveedor elegido por la línea, no únicamente en el almacén comercial.
+  Los traslados liberados por pago conservan la trazabilidad nativa y alertas.
+
+- 18.0.2.1.0
+  Incorpora una fuente analitica unificada para separar prereservas comerciales
+  y reservas fisicas de entregas pagadas, con cantidades, saldos sin reservar,
+  valor comprometido, riesgo, cliente, vendedor, producto y almacen.
+
+- 18.0.2.0.4
+  Incorpora la fecha real de entrega tomada del picking y una vista grafica
+  para analizar cantidades pendientes y entregadas por estado.
+
+- 18.0.2.0.3
+  Incorpora el estado Entregado al tablero. Una entrega total permanece como
+  historial entregado; una parcial sigue Lista para entregar con su saldo y
+  abre el backorder nativo para completar la operacion.
+
+- 18.0.2.0.2
+  Agrega la acción Procesar entrega en lista y Kanban para abrir el picking
+  nativo ya liberado. No permite crear despachos paralelos y conserva el
+  requisito de factura totalmente pagada.
+
+- 18.0.2.0.1
+  Amplía la guía de Operaciones de Almacén con el paso a paso de recepciones,
+  entregas pagadas, entradas de fábrica y traslados; documenta responsables,
+  permisos, alertas, estados automáticos y resultados esperados.
+
+- 18.0.2.0.0
+  Incorpora Operaciones > Almacén con accesos simples a recepciones, entregas
+  pagadas, entradas de fábrica y traslados usando siempre stock.picking nativo.
+  Permite asignar almacenes a cada operador, muestra inicio y destino, y crea
+  actividades y notificaciones periódicas para el almacén receptor hasta que
+  el traslado se valide o cancele. La frecuencia y el escalamiento son
+  configurables por compañía.
+
+- 18.0.1.3.0
+  Agrega la cola operativa de entregas pendientes para facturas publicadas,
+  totalmente pagadas y con cantidades aún no entregadas. Incluye Kanban por
+  almacen, lista y pivote, distinguiendo preparación, producción y entrega.
+  Ambos Kanban son informativos, no admiten arrastre ni cambios manuales y se
+  recalculan directamente desde los estados oficiales del proceso.
+
+- 18.0.1.2.1
+  Agrega una vista Kanban como entrada principal de las prereservas, agrupada
+  por almacen y con tarjetas coloreadas por estado y vencimiento.
+
+- 18.0.1.2.0
+  Agrega una vista de solo lectura con las lineas prereservadas por prefacturas
+  confirmadas, vencimiento, almacen, cliente, producto y vendedor. Los usuarios
+  de Inventario acceden desde el menu raiz Operaciones o Inventario/Operaciones.
+  Administrador/Ajustes hereda por defecto el rol de gestor de Operaciones y
+  puede consultar todas las vistas operativas sin asignaciones adicionales.
 
 - 18.0.1.0.0
   Version inicial del modulo.
@@ -110,8 +184,9 @@ Historial resumido
   Se retira la sobreescritura de `stock_picking_batch.action_prepare_wave_for_picking_type` porque ese modulo no esta instalado en esta base.
   Esto restablece la actualizacion de `doorandoor_process_control` sin depender de un XML ID externo inexistente localmente.
     """,
-    "author": "Hanoi Calvo Fernandez for Doorandoor",
-    "website": "https://gestion.doorandoor.com",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
+    "website": "https://doorandoor.com",
     "license": "LGPL-3",
     "depends": [
         "mail",
@@ -125,16 +200,31 @@ Historial resumido
     "data": [
         "security/process_control_security.xml",
         "security/ir.model.access.csv",
+        "data/warehouse_alert_data.xml",
         "views/process_control_views.xml",
         "report/process_control_reports.xml",
         "views/backfill_wizard_views.xml",
         "views/res_config_settings_views.xml",
+        "views/res_users_views.xml",
         "views/sale_order_views.xml",
         "views/account_move_views.xml",
         "views/mrp_production_views.xml",
         "views/stock_picking_views.xml",
+        "views/warehouse_prereservation_views.xml",
+        "views/pending_delivery_views.xml",
+        "views/sales_reservation_analysis_views.xml",
+        "views/warehouse_operation_views.xml",
         "views/menu_views.xml",
+        "views/realtime_dashboard_views.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "doorandoor_process_control/static/src/js/realtime_picking_widget.js",
+            "doorandoor_process_control/static/src/js/realtime_dashboard.js",
+            "doorandoor_process_control/static/src/xml/realtime_picking_templates.xml",
+            "doorandoor_process_control/static/src/scss/realtime_picking.scss",
+        ],
+    },
     "installable": True,
     "application": True,
 }

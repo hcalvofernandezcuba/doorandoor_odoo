@@ -10,9 +10,49 @@
                     <button name="action_view_ddpc_process_flows" type="object" class="oe_stat_button" icon="fa-sitemap">
                         <field name="ddpc_process_flow_count" string="Processes" widget="statinfo"/>
                     </button>
+                    <button name="action_ddpc_open_transfer_receipt" type="object"
+                            class="oe_stat_button" icon="fa-sign-in"
+                            invisible="not ddpc_transfer_receipt_picking_id">
+                        <div class="o_stat_info"><span class="o_stat_text">Recepción destino</span></div>
+                    </button>
+                    <button name="action_ddpc_open_transfer_dispatch" type="object"
+                            class="oe_stat_button" icon="fa-sign-out"
+                            invisible="not ddpc_transfer_source_picking_id">
+                        <div class="o_stat_info"><span class="o_stat_text">Despacho origen</span></div>
+                    </button>
                 </xpath>
                 <xpath expr="//header" position="inside">
                     <button name="action_create_ddpc_process_flow" type="object" string="Crear proceso" groups="doorandoor_process_control.group_ddpc_user"/>
+                </xpath>
+                <xpath expr="//field[@name='origin']" position="after">
+                    <field name="ddpc_transfer_stage" readonly="1"
+                           invisible="not ddpc_transfer_stage"/>
+                    <field name="ddpc_transfer_target_location_id" readonly="1"
+                           invisible="not ddpc_transfer_stage"/>
+                    <field name="ddpc_transfer_origin_warehouse_id" readonly="1"
+                           invisible="not ddpc_transfer_stage"/>
+                    <field name="ddpc_transfer_source_picking_id" invisible="1"/>
+                    <field name="ddpc_transfer_receipt_picking_id" invisible="1"/>
+                    <field name="ddpc_realtime_status" readonly="1"
+                           invisible="not ddpc_transfer_stage"/>
+                    <field name="ddpc_last_activity_timestamp" readonly="1"
+                           invisible="not ddpc_transfer_stage"/>
+                </xpath>
+                <xpath expr="//sheet" position="inside">
+                    <div class="o_ddpc_realtime_status_panel" 
+                         invisible="not ddpc_transfer_stage"
+                         style="margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 4px; border-left: 4px solid #17a2b8;">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <strong>Estado en Tiempo Real:</strong>
+                                <span class="o_ddpc_status_text" t-esc="ddpc_realtime_status"/>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <small class="text-muted">Última actividad:</small>
+                                <div class="o_ddpc_last_activity" t-esc="ddpc_last_activity_timestamp"/>
+                            </div>
+                        </div>
+                    </div>
                 </xpath>
             </field>
         </record>

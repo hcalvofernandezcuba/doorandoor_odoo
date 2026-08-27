@@ -139,3 +139,67 @@ class DdfcBuilderProfile(models.Model):
         action["domain"] = [("ddfc_builder_id", "=", self.id)]
         action["context"] = {"default_ddfc_builder_id": self.id}
         return action
+
+    @api.model
+    def create_from_wizard(self):
+        """Abre el wizard para crear un constructor desde el flujo de ventas"""
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Crear Constructor",
+            "res_model": "ddfc.builder.profile.wizard",
+            "view_mode": "form",
+            "target": "new",
+        }
+
+    @api.model
+    def resolve_or_create_from_name(self, name, document=False):
+        """Resuelve un constructor por nombre o lo crea junto con su contacto."""
+        if not name:
+            return False
+
+        normalized_name = (name or "").strip()
+        if not normalized_name:
+            return False
+
+        builder = self.search([("name", "=ilike", normalized_name)], limit=1)
+        if builder:
+            return builder
+
+        partner = self.env["res.partner"].search(
+            [("name", "=ilike", normalized_name), ("active", "=", True)],
+            limit=1,
+        )
+        if partner and partner.ddfc_builder_id:
+            return partner.ddfc_builder_id
+
+        category = self.env["res.partner.category"].search(
+            [("name", "=", "Constructor")], limit=1
+        )
+        if not category:
+            category = self.env["res.partner.category"].create({"name": "Constructor"})
+
+        partner_vals = {
+            "name": normalized_name,
+            "is_company": True,
+            "company_type": "company",
+            "customer_rank": 1,
+            "supplier_rank": 1,
+            "category_id": [(4, category.id)],
+        }
+        partner = self.env["res.partner"].create(partner_vals)
+
+        builder_vals = {
+            "name": normalized_name,
+            "partner_id": partner.id,
+            "discount_active": True,
+            "ddfc_discount_for_new_process": True,
+        }
+        builder = self.create(builder_vals)
+
+        if document:
+            if document._name == "sale.order":
+                document.write({"ddfc_builder_id": builder.id})
+            elif document._name == "account.move":
+                document.write({"ddfc_builder_id": builder.id})
+
+        return builder

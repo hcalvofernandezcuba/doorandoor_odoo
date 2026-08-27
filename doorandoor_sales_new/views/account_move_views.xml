@@ -43,6 +43,14 @@
                         <field name="picking_count" string="Dispatches" widget="statinfo"/>
                     </button>
                     <button
+                        name="action_view_ddsn_supply_transfers"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-exchange"
+                        invisible="not ddsn_supply_transfer_count">
+                        <field name="ddsn_supply_transfer_count" string="Traslados internos" widget="statinfo"/>
+                    </button>
+                    <button
                         name="action_view_mrp_productions"
                         type="object"
                         class="oe_stat_button"
@@ -71,19 +79,53 @@
                 <xpath expr="//header/button[@name='action_post'][2]" position="replace">
                     <button
                         name="action_post"
-                        string="Crear factura"
-                        class="oe_highlight"
-                        type="object"
-                        invisible="not context.get('ddsn_preinvoice_mode')"/>
-                    <button
-                        name="action_post"
                         string="Confirmar"
                         class="oe_highlight"
                         type="object"
-                        invisible="context.get('ddsn_preinvoice_mode')"/>
+                        invisible="ddsn_is_preinvoice or state != 'draft'"/>
+                </xpath>
+
+                <xpath expr="//header/button[@name='button_draft']" position="attributes">
+                    <attribute name="groups">base.group_system</attribute>
+                </xpath>
+
+                <xpath expr="//sheet" position="attributes">
+                    <attribute name="readonly">state in ('posted', 'cancel') or (ddsn_is_preinvoice and ddsn_preinvoice_state == 'confirmed')</attribute>
                 </xpath>
 
                 <xpath expr="//header" position="inside">
+                    <field name="ddsn_is_preinvoice" invisible="1"/>
+                    <field name="ddsn_preinvoice_state" invisible="1"/>
+                    <field name="ddsn_preinvoice_number" invisible="1"/>
+                    <field name="ddsn_created_invoice_id" invisible="1"/>
+                    <button
+                        name="action_ddsn_change_supply_warehouse"
+                        type="object"
+                        string="Cambiar almacén proveedor"
+                        invisible="move_type != 'out_invoice' or state != 'draft' or not invoice_line_ids"/>
+                    <button
+                        name="action_ddsn_confirm_preinvoice"
+                        type="object"
+                        string="Confirmar prefactura"
+                        class="oe_highlight"
+                        invisible="not ddsn_is_preinvoice or ddsn_preinvoice_state != 'draft'"/>
+                    <button
+                        name="action_ddsn_create_invoice_from_preinvoice"
+                        type="object"
+                        string="Crear factura"
+                        class="oe_highlight"
+                        invisible="not ddsn_is_preinvoice or ddsn_preinvoice_state != 'confirmed' or ddsn_created_invoice_id"/>
+                    <button
+                        name="action_ddsn_create_invoice_from_preinvoice"
+                        type="object"
+                        string="Abrir factura"
+                        invisible="not ddsn_is_preinvoice or not ddsn_created_invoice_id"/>
+                    <button
+                        name="action_ddsn_reset_preinvoice_draft"
+                        type="object"
+                        string="Volver a borrador"
+                        groups="base.group_system"
+                        invisible="not ddsn_is_preinvoice or ddsn_preinvoice_state != 'confirmed' or ddsn_created_invoice_id"/>
                     <button
                         name="action_print_pdf"
                         type="object"
@@ -98,7 +140,7 @@
                         name="action_ddsn_renew_preinvoice_reservation"
                         type="object"
                         string="Renovar reserva"
-                        invisible="state != 'draft' or move_type not in ('out_invoice', 'out_refund') or ddsn_reservation_status != 'expired'"/>
+                        invisible="state != 'draft' or move_type not in ('out_invoice', 'out_refund') or not ddsn_is_preinvoice or ddsn_preinvoice_state != 'confirmed' or ddsn_reservation_status != 'expired'"/>
                     <field
                         name="ddsn_document_stage"
                         widget="statusbar"
@@ -112,9 +154,35 @@
                 </xpath>
 
                 <xpath expr="//h1/span[@invisible='name or name_placeholder or quick_edit_mode']" position="replace">
-                    <span invisible="name or name_placeholder or quick_edit_mode or move_type not in ('out_invoice', 'out_refund') or state != 'draft'">Prefactura</span>
-                    <span invisible="name or name_placeholder or quick_edit_mode or move_type not in ('out_invoice', 'out_refund') or state != 'posted'">Factura</span>
+                    <span invisible="name or name_placeholder or quick_edit_mode or move_type not in ('out_invoice', 'out_refund') or not ddsn_is_preinvoice">Prefactura</span>
+                    <span invisible="name or name_placeholder or quick_edit_mode or move_type not in ('out_invoice', 'out_refund') or ddsn_is_preinvoice">Factura</span>
                     <span invisible="name or name_placeholder or quick_edit_mode or move_type in ('out_invoice', 'out_refund')">Borrador</span>
+                </xpath>
+
+                <xpath expr="//h1/field[@name='name']" position="before">
+                    <field name="ddsn_preinvoice_number"
+                           placeholder="Nueva prefactura"
+                           readonly="1"
+                           invisible="not ddsn_is_preinvoice"/>
+                </xpath>
+                <xpath expr="//h1/field[@name='name']" position="attributes">
+                    <attribute name="invisible">ddsn_is_preinvoice</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="readonly">ddsn_is_preinvoice and ddsn_preinvoice_state == 'confirmed'</attribute>
+                </xpath>
+                <xpath expr="//field[@name='partner_shipping_id']" position="attributes">
+                    <attribute name="readonly">ddsn_is_preinvoice and ddsn_preinvoice_state == 'confirmed'</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_date']" position="attributes">
+                    <attribute name="readonly">ddsn_is_preinvoice and ddsn_preinvoice_state == 'confirmed'</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_payment_term_id']" position="attributes">
+                    <attribute name="readonly">ddsn_is_preinvoice and ddsn_preinvoice_state == 'confirmed'</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']" position="attributes">
+                    <attribute name="readonly">state != 'draft' or (ddsn_is_preinvoice and ddsn_preinvoice_state == 'confirmed')</attribute>
                 </xpath>
 
                 <xpath expr="//field[@name='partner_shipping_id']" position="after">
@@ -129,8 +197,25 @@
 
                 <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='quantity']" position="after">
                     <field name="ddsn_stock_display" string="Stock" readonly="1" optional="show"/>
-                    <field name="ddsn_warehouse_stock_html" string="Warehouses" widget="html" readonly="1" optional="show"/>
-                    <field name="ddsn_warehouse_stock_display" string="Warehouses Text" readonly="1" optional="hide"/>
+                    <field name="ddsn_warehouse_stock_display" string="Almacenes" widget="ddsn_stock_tooltip" readonly="1" optional="show"/>
+                    <field name="ddsn_warehouse_stock_html" string="Warehouses HTML" widget="html" readonly="1" optional="hide"/>
+                    <field name="ddsn_supply_warehouse_id" string="Almacén proveedor" optional="show"/>
+                    <field name="ddsn_supply_transfer_id" string="Traslado" readonly="1" optional="hide"/>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='price_unit']" position="before">
+                    <field name="ddsn_can_edit_commercial_price" column_invisible="True"/>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='price_unit']" position="attributes">
+                    <attribute name="readonly">not ddsn_can_edit_commercial_price</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='discount']" position="attributes">
+                    <attribute name="readonly">not ddsn_can_edit_commercial_price</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='price_unit']" position="attributes">
+                    <attribute name="readonly">not ddsn_can_edit_commercial_price</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='discount']" position="attributes">
+                    <attribute name="readonly">not ddsn_can_edit_commercial_price</attribute>
                 </xpath>
 
                 <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='product_id']" position="after">
@@ -138,6 +223,8 @@
                         <field name="ddsn_stock_display" readonly="1"/>
                         <field name="ddsn_warehouse_stock_html" readonly="1" widget="html"/>
                         <field name="ddsn_warehouse_stock_text" readonly="1" widget="text"/>
+                        <field name="ddsn_supply_warehouse_id"/>
+                        <field name="ddsn_supply_transfer_id" readonly="1"/>
                     </group>
                 </xpath>
 

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddc_account_payment_form" model="ir.ui.view">
+        <field name="name">account.payment.form.doorandoor.control.cobros</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+                    name="action_ddc_force_operational_sync"
+                    type="object"
+                    string="Forzar sincronización"
+                    class="btn-secondary"
+                    groups="base.group_system"
+                    invisible="not ddc_invoice_id"/>
+            </xpath>
+            <xpath expr="//field[@name='memo']" position="after">
+                <field
+                    name="ddc_invoice_id"
+                    options="{'no_create': True, 'no_create_edit': True}"
+                    invisible="payment_type != 'inbound' or partner_type != 'customer'"
+                    readonly="state != 'draft'"/>
+                <field
+                    name="ddc_credit_repayment_authorization_id"
+                    options="{'no_create': True, 'no_create_edit': True}"
+                    invisible="payment_type != 'inbound' or partner_type != 'customer'"
+                    readonly="state != 'draft'"/>
+                <field name="ddc_credit_repayment_invoice_id"
+                       invisible="not ddc_credit_repayment_authorization_id" readonly="1"/>
+                <field name="ddc_credit_repayment_due"
+                       invisible="not ddc_credit_repayment_authorization_id" readonly="1"/>
+                <field name="ddc_invoice_payment_state" invisible="not ddc_invoice_id" readonly="1"/>
+                <field name="ddc_invoice_residual" invisible="not ddc_invoice_id" readonly="1"/>
+                <field name="ddc_application_type" invisible="not ddc_invoice_id" readonly="1"/>
+                <field name="ddc_amount_to_apply" invisible="not ddc_invoice_id" readonly="1"/>
+                <field name="ddc_customer_credit_amount" invisible="not ddc_invoice_id or ddc_customer_credit_amount == 0" readonly="1"/>
+                <field name="ddc_reported_payer_id" invisible="not ddc_reported_payer_id" readonly="1"/>
+                <field name="ddc_invoice_currency_id" invisible="not ddc_invoice_id" readonly="1" groups="base.group_multi_currency"/>
+                <field name="ddc_control_id" invisible="not ddc_control_id" readonly="1"/>
+            </xpath>
+            <xpath expr="//notebook[@name='payment_notebook']" position="inside">
+                <page string="Documentos asociados" name="ddc_support_documents">
+                    <field
+                        name="ddc_support_attachment_ids"
+                        widget="many2many_binary"
+                        nolabel="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

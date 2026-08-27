@@ -1,0 +1,28 @@
+.ddpc_sale_style_configurator {
+    width: 92vw;
+    max-width: 62rem;
+
+    .ddpc_product_image img {
+        width: 100%;
+        max-width: 8rem;
+        min-height: 6rem;
+        object-fit: contain;
+        border: 1px solid #dee2e6;
+        border-radius: 0.35rem;
+        background: #fff;
+    }
+
+    .ddpc_multi_options .o_list_table,
+    .ddpc_single_options .o_list_table {
+        --table-bg: transparent;
+    }
+
+    .ddpc_multi_options .o_list_renderer,
+    .ddpc_single_options .o_list_renderer {
+        border: 0;
+    }
+
+    .ddpc_single_options .o_data_cell:last-child {
+        min-width: 15rem;
+    }
+}

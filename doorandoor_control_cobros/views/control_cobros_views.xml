@@ -12,6 +12,7 @@
                 <field name="payment_state"/>
                 <field name="invoice_payment_state"/>
                 <field name="move_id"/>
+                <field name="credit_authorization_id" optional="show"/>
                 <field name="payment_id"/>
                 <field name="partner_id"/>
                 <field name="journal_id"/>
@@ -32,12 +33,27 @@
                 <header>
                     <button name="action_print_control_report" type="object" string="Imprimir" class="btn-secondary"/>
                     <button name="action_report" type="object" string="Reportar" invisible="state != 'draft'"/>
-                    <button name="action_open_match_wizard" type="object" string="Asociar pago/factura" invisible="state == 'validated'"/>
-                    <button name="action_create_payment_entry" type="object" string="Crear pago contable" invisible="payment_id != False"/>
+                    <button name="action_open_match_wizard" type="object" string="Asociar pago/factura"
+                            groups="doorandoor_control_cobros.group_ddc_official_payment"
+                            invisible="state == 'validated'"/>
+                    <button name="action_create_payment_entry" type="object" string="Crear pago contable"
+                            groups="doorandoor_control_cobros.group_ddc_official_payment"
+                            invisible="payment_id != False or source_type == 'sales_report'"/>
                     <button name="action_mark_pending" type="object" string="Pasar a pendiente" invisible="state not in ('reported', 'draft', 'rejected')"/>
-                    <button name="action_review" type="object" string="Revisar" invisible="state not in ('reported', 'pending')"/>
-                    <button name="action_validate" type="object" string="Validar" invisible="state not in ('review', 'pending', 'reported')"/>
-                    <button name="action_reject" type="object" string="Rechazar" invisible="state not in ('review', 'pending', 'reported')"/>
+                    <button name="action_review" type="object" string="Revisar"
+                            groups="doorandoor_control_cobros.group_ddc_official_payment"
+                            invisible="state not in ('reported', 'pending')"/>
+                    <button name="action_validate" type="object" string="Validar"
+                            groups="doorandoor_control_cobros.group_ddc_official_payment"
+                            invisible="state not in ('review', 'pending', 'reported') or not payment_id"/>
+                    <button name="action_validate" type="object" string="Reparar conciliacion" class="btn-primary" invisible="not needs_reconciliation_repair"/>
+                    <button name="action_reject" type="object" string="Rechazar"
+                            groups="doorandoor_control_cobros.group_ddc_official_payment"
+                            invisible="state not in ('review', 'pending', 'reported')"/>
+                    <button name="action_ddc_force_operational_sync" type="object"
+                            string="Forzar sincronización" class="btn-secondary"
+                            groups="base.group_system" invisible="not move_id"/>
+                    <field name="needs_reconciliation_repair" invisible="1"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,reported,pending,review,validated,rejected"/>
                 </header>
                 <sheet>
@@ -47,7 +63,18 @@
                     <group>
                         <group>
                             <field name="move_id"/>
-                            <field name="payment_id"/>
+                            <field name="credit_authorization_id"
+                                   invisible="source_type != 'authorized_credit_repayment'"
+                                   readonly="state == 'validated'"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="credit_origin_invoice_id"
+                                   invisible="source_type != 'authorized_credit_repayment'"
+                                   readonly="1"/>
+                            <field name="payment_id"
+                                   groups="doorandoor_control_cobros.group_ddc_official_payment"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="payment_id" readonly="1"
+                                   groups="!doorandoor_control_cobros.group_ddc_official_payment"/>
                             <field name="matching_status" readonly="1"/>
                             <field name="payment_state" readonly="1"/>
                             <field name="invoice_payment_state" readonly="1"/>
@@ -60,6 +87,7 @@
                             <field name="validated_amount"/>
                             <field name="payment_reference"/>
                             <field name="source_type"/>
+                            <field name="credit_origin_control_id" invisible="source_type != 'customer_credit'"/>
                             <field name="is_unidentified" readonly="1"/>
                             <field name="is_partial" readonly="1"/>
                             <field name="sale_user_id"/>
@@ -74,6 +102,15 @@
                         </group>
                         <group>
                             <field name="currency_id" groups="base.group_multi_currency"/>
+                            <field name="credit_balance_before" invisible="source_type != 'customer_credit'"/>
+                            <field name="credit_applied_amount" invisible="source_type != 'customer_credit'"/>
+                            <field name="credit_balance_after" invisible="source_type != 'customer_credit'"/>
+                            <field name="authorized_credit_balance_before"
+                                   invisible="source_type != 'authorized_credit_repayment'"/>
+                            <field name="authorized_credit_applied_amount"
+                                   invisible="source_type != 'authorized_credit_repayment'"/>
+                            <field name="authorized_credit_balance_after"
+                                   invisible="source_type != 'authorized_credit_repayment'"/>
                         </group>
                     </group>
                     <notebook>
@@ -82,6 +119,9 @@
                         </page>
                         <page string="Identificacion">
                             <field name="identification_notes" placeholder="Usa este espacio para documentar pagos recibidos antes de identificar su factura o el pago contable real."/>
+                        </page>
+                        <page string="Documentos del pago" invisible="not payment_id">
+                            <field name="payment_support_attachment_ids" widget="many2many_binary" nolabel="1" readonly="1"/>
                         </page>
                         <page string="Rechazo">
                             <field name="rejection_reason" readonly="state != 'rejected'"/>

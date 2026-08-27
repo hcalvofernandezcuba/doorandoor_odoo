@@ -116,7 +116,10 @@
 
         <template id="report_invoice_document_signature" inherit_id="account.report_invoice_document">
             <xpath expr="//t[@t-set='layout_document_title']/span[@t-elif=&quot;o.move_type == 'out_invoice' and o.state == 'draft'&quot;]" position="replace">
-                <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">Prefactura</span>
+                <span t-elif="o.move_type == 'out_invoice' and o.ddsn_is_preinvoice">
+                    Prefactura <span t-field="o.ddsn_preinvoice_number"/>
+                </span>
+                <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">Borrador de factura</span>
             </xpath>
             <xpath expr="//div[hasclass('page')]" position="inside">
                 <div class="mt-2 pt-1">
@@ -147,11 +150,17 @@
                     </t>
                     <div class="row">
                         <div class="col-6">
+                            <t t-set="salesperson_history" t-value="o._ddsn_get_salesperson_history()"/>
                             <div style="margin-top: 12px; font-size: 10px;">
-                                <strong>Invoiced by</strong>
+                                <strong t-if="len(salesperson_history) &lt;= 1">Comercial</strong>
+                                <strong t-else="">Comercial inicial</strong>
                             </div>
                             <div style="border-top: 1px solid #000; margin-top: 18px; padding-top: 3px; min-height: 14px; font-size: 10px;">
-                                <span t-esc="(o.invoice_user_id or o.create_uid).name"/>
+                                <span t-esc="salesperson_history[0] if salesperson_history else (o.invoice_user_id or o.create_uid).name"/>
+                            </div>
+                            <div t-foreach="salesperson_history[1:]" t-as="salesperson_name" class="mt-1" style="font-size: 10px;">
+                                <strong>Cambio de comercial:</strong>
+                                <span t-esc="salesperson_name"/>
                             </div>
                         </div>
                         <div class="col-6 text-end">
@@ -172,11 +181,17 @@
                 <div class="mt-5 pt-4">
                     <div class="row">
                         <div class="col-6">
+                            <t t-set="salesperson_history" t-value="doc._ddsn_get_salesperson_history()"/>
                             <div style="margin-top: 30px;">
-                                <strong>Prepared by</strong>
+                                <strong t-if="len(salesperson_history) &lt;= 1">Comercial</strong>
+                                <strong t-else="">Comercial inicial</strong>
                             </div>
                             <div style="border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; min-height: 22px;">
-                                <span t-esc="(o.user_id or o.create_uid).name"/>
+                                <span t-esc="salesperson_history[0] if salesperson_history else (doc.user_id or doc.create_uid).name"/>
+                            </div>
+                            <div t-foreach="salesperson_history[1:]" t-as="salesperson_name" class="mt-1" style="font-size: 10px;">
+                                <strong>Cambio de comercial:</strong>
+                                <span t-esc="salesperson_name"/>
                             </div>
                         </div>
                         <div class="col-6 text-end">

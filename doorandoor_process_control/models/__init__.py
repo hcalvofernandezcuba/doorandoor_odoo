@@ -2,8 +2,12 @@ from . import process_flow
 from . import process_task
 from . import res_company
 from . import res_config_settings
+from . import res_users
 from . import sale_order
 from . import account_move
 from . import mrp_production
 from . import stock_picking
 from . import backfill_wizard
+from . import preinventory_reservation
+from . import sales_reservation_analysis
+from . import pending_delivery

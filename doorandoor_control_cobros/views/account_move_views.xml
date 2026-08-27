@@ -23,11 +23,10 @@
                     El cobro fue confirmado por Contabilidad y la factura ya puede reflejar su resultado final.
                 </div>
             </xpath>
-            <xpath expr="(//widget[@name='web_ribbon'])[2]" position="attributes">
-                <attribute name="title">Pago en revisión</attribute>
-                <attribute name="invisible">payment_state != 'in_payment' or move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') or ddc_payment_review_state != 'reviewing'</attribute>
-            </xpath>
             <xpath expr="(//widget[@name='web_ribbon'])[3]" position="before">
+                <widget name="web_ribbon" title="Pago en revisión"
+                    bg_color="text-bg-info"
+                    invisible="ddc_payment_review_state != 'reviewing' or move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
                 <widget name="web_ribbon" title="Pago parcial validado"
                     bg_color="text-bg-warning"
                     invisible="ddc_payment_review_state != 'partial' or move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
@@ -37,6 +36,16 @@
                 <widget name="web_ribbon" title="Pago validado"
                         bg_color="text-bg-success"
                         invisible="ddc_payment_review_state != 'validated' or payment_state == 'paid' or move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
+            </xpath>
+            <!--
+                Odoo pinta la cinta nativa "In Payment" con el estilo verde
+                predeterminado. En un diario controlado ese estado solo
+                representa un reporte comercial pendiente de validacion, no
+                un pago contable. Se oculta exclusivamente durante la revision
+                para que prevalezca la cinta azul "Pago en revisión".
+            -->
+            <xpath expr="(//widget[@name='web_ribbon'])[2]" position="attributes">
+                <attribute name="invisible">payment_state != 'in_payment' or ddc_collection_state == 'pending' or move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')</attribute>
             </xpath>
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button
@@ -70,6 +79,11 @@
                     <field name="ddc_total_pending" readonly="1"/>
                     <field name="ddc_total_rejected" readonly="1"/>
                     <field name="ddc_balance_pending" readonly="1"/>
+                    <field
+                        name="ddc_customer_credit_available"
+                        readonly="1"
+                        class="fw-bold text-success"
+                        invisible="ddc_customer_credit_available &lt;= 0"/>
                 </group>
             </xpath>
         </field>

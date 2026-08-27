@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddsl_product_label_wizard_inventory_items" model="ir.ui.view">
+        <field name="name">ddsl.product.label.wizard.inventory.items</field>
+        <field name="model">ddsl.product.label.wizard</field>
+        <field name="inherit_id" ref="doorandoor_stock_labels.view_ddsl_product_label_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='quantity']" position="before">
+                <div class="alert alert-success d-flex align-items-center" role="alert" colspan="2">
+                    <i class="fa fa-check-circle me-2" title="Opcion recomendada"/>
+                    <strong>IMPRESION RECOMENDADA POR LA EMPRESA: VARIANTES</strong>
+                </div>
+                <div class="o_ddsl_label_scope" colspan="2">
+                    <field name="label_scope" widget="radio" nolabel="1"/>
+                </div>
+                <group string="Control de impresión"
+                       invisible="label_scope == 'product'"
+                       colspan="2">
+                    <field name="selected_variant_count" readonly="1"/>
+                    <field name="batch_number"/>
+                    <field name="total_batches" readonly="1"/>
+                    <field name="batch_information" readonly="1" nolabel="1" colspan="2"/>
+                </group>
+                <group string="Variantes asociadas"
+                       invisible="label_scope == 'product'"
+                       colspan="2">
+                    <div class="o_row">
+                        <button name="action_select_all_variants"
+                                type="object"
+                                string="Marcar todas"
+                                class="btn-secondary"
+                                icon="fa-check-square-o"/>
+                        <button name="action_clear_variants"
+                                type="object"
+                                string="Desmarcar todas"
+                                class="btn-secondary"
+                                icon="fa-square-o"/>
+                    </div>
+                    <field name="variant_ids"
+                           nolabel="1"
+                           required="label_scope in ('variants', 'product_variants')"
+                           options="{'no_create': True, 'no_create_edit': True}">
+                        <list create="false" delete="true">
+                            <field name="display_name" string="Variante"/>
+                            <field name="default_code" string="Referencia interna" optional="show"/>
+                            <field name="barcode" string="Barcode" optional="show"/>
+                            <field name="product_template_attribute_value_ids"
+                                   string="Atributos"
+                                   widget="many2many_tags"
+                                   optional="show"/>
+                        </list>
+                    </field>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddc_customer_credit_list" model="ir.ui.view">
+        <field name="name">doorandoor.customer.credit.list</field>
+        <field name="model">doorandoor.customer.credit</field>
+        <field name="arch" type="xml">
+            <list string="Creditos disponibles de clientes" create="false" edit="false" delete="false"
+                  decoration-success="credit_state == 'available'"
+                  decoration-warning="credit_state == 'partial'">
+                <field name="partner_id"/>
+                <field name="payment_id"/>
+                <field name="origin_control_id"/>
+                <field name="payment_date"/>
+                <field name="journal_id"/>
+                <field name="original_amount" sum="Credito original"/>
+                <field name="applied_amount" sum="Total aplicado"/>
+                <field name="available_amount" sum="Saldo disponible"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="application_count"/>
+                <field name="credit_state" widget="badge"
+                       decoration-success="credit_state == 'available'"
+                       decoration-warning="credit_state == 'partial'"/>
+                <button name="action_open_accounting_move" type="object" string="Ver asiento" icon="fa-book"/>
+                <button name="action_open_credit_applications" type="object" string="Ver aplicaciones" icon="fa-list"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddc_customer_credit_search" model="ir.ui.view">
+        <field name="name">doorandoor.customer.credit.search</field>
+        <field name="model">doorandoor.customer.credit</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="payment_id"/>
+                <field name="accounting_move_id"/>
+                <field name="origin_control_id"/>
+                <filter string="Disponibles completos" name="available" domain="[('credit_state', '=', 'available')]"/>
+                <filter string="Consumidos parcialmente" name="partial" domain="[('credit_state', '=', 'partial')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Cliente" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Diario" name="group_journal" context="{'group_by': 'journal_id'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by': 'credit_state'}"/>
+                    <filter string="Mes" name="group_month" context="{'group_by': 'payment_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ddc_customer_credit_pivot" model="ir.ui.view">
+        <field name="name">doorandoor.customer.credit.pivot</field>
+        <field name="model">doorandoor.customer.credit</field>
+        <field name="arch" type="xml">
+            <pivot string="Analisis de creditos disponibles">
+                <field name="partner_id" type="row"/>
+                <field name="journal_id" type="col"/>
+                <field name="original_amount" type="measure"/>
+                <field name="applied_amount" type="measure"/>
+                <field name="available_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_ddc_customer_credit" model="ir.actions.act_window">
+        <field name="name">Creditos de clientes</field>
+        <field name="res_model">doorandoor.customer.credit</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="search_view_id" ref="view_ddc_customer_credit_search"/>
+        <field name="context">{'search_default_group_partner': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No existen creditos abiertos de clientes.</p>
+            <p>El saldo se obtiene directamente de los apuntes contables conciliables.</p>
+        </field>
+    </record>
+</odoo>

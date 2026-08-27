@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddsn_supply_warehouse_change_wizard_form" model="ir.ui.view">
+        <field name="name">ddsn.supply.warehouse.change.wizard.form</field>
+        <field name="model">ddsn.supply.warehouse.change.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cambiar almacén proveedor">
+                <group>
+                    <field name="company_id" invisible="1"/>
+                    <field name="sale_order_id" invisible="not sale_order_id"/>
+                    <field name="move_id" invisible="not move_id"/>
+                    <field name="sale_line_id" required="sale_order_id" invisible="not sale_order_id"/>
+                    <field name="move_line_id" required="move_id" invisible="not move_id"/>
+                    <field name="current_warehouse_id" readonly="1"/>
+                    <field name="new_warehouse_id" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="reason" placeholder="Ej.: coordinación logística con el almacén de destino"/>
+                </group>
+                <div class="alert alert-info" role="alert">
+                    La selección se conservará en cotización, prefactura y factura. Si ya existe una
+                    prereserva, su disponibilidad se validará nuevamente en el almacén seleccionado.
+                </div>
+                <footer>
+                    <button name="action_apply" type="object" string="Aplicar cambio" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Ficha de Cliente",
-    "version": "18.0.1.0.9",
+    "version": "18.0.1.1.9",
     "category": "Contacts",
-    "summary": "18.0.1.0.4 - Corrige visualización del campo constructor en facturas y completa acciones de dashboard",
+    "summary": "18.0.1.1.9 - Mantiene el descuento automático bajo el control administrativo de precios",
     "description": """
 DoorAndDoor Ficha de Cliente
 ============================
@@ -66,9 +66,36 @@ Historial resumido
   seleccion de constructores existentes. El descuento y los campos
   inferiores se aplican solo cuando el constructor fue creado en este
   proceso nuevo.
+
+- 18.0.1.1.0
+  Se añade un wizard para completar los datos del constructor al crearlo,
+  permitiendo llenar la información del contacto asociado y marcarlo
+  automáticamente con la etiqueta "Constructor" para que siempre quede
+  identificado como tal, aunque funcione como cliente normal del negocio.
+
+- 18.0.1.1.4
+  Se deja el módulo preparado para un flujo de versionado más riguroso,
+  registrando en la versión actual el resumen de cambios del desarrollo
+  del flujo de constructor para ventas y facturas.
+
+- 18.0.1.1.5
+  Se simplifica la interfaz del flujo de constructor dejando un único
+  campo de entrada visible para ventas y facturas, sin mostrar campos
+  redundantes del constructor en el formulario.
+
+- 18.0.1.1.6
+  Se deja visible solo la acción de crear constructor en factura y se
+  muestra el campo asociado únicamente cuando ya existe un constructor
+  enlazado al documento.
+
+- 18.0.1.1.7
+  Se aplica el mismo criterio en ventas para que el usuario vea solo la
+  acción de crear constructor y el campo asociado únicamente cuando ya
+  exista un constructor enlazado.
     """,
-    "author": "Hanoi Calvo Fernandez for Doorandoor",
-    "website": "https://gestion.doorandoor.com",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
+    "website": "https://doorandoor.com",
     "license": "LGPL-3",
     "depends": [
         "contacts",
@@ -81,6 +108,7 @@ Historial resumido
     "data": [
         "security/ir.model.access.csv",
         "views/builder_views.xml",
+        "views/builder_profile_wizard_views.xml",
         "views/res_partner_views.xml",
         "views/sale_order_views.xml",
         "views/account_move_views.xml",

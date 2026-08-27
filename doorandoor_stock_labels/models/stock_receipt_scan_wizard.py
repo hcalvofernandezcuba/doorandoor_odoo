@@ -72,14 +72,15 @@ class StockReceiptScanWizard(models.TransientModel):
             return self.env["ddsl.stock.receipt.scan.wizard.line"]
         return self.line_ids.filtered(lambda line: line.move_id == move)[:1]
 
-    def action_register_scan(self):
+    def action_register_scan(self, scanned_code=None):
         self.ensure_one()
-        if not self.scan_code:
+        code = (scanned_code or self.scan_code or "").strip()
+        if not code:
             raise UserError(_("Escanee o escriba un codigo antes de contar."))
-        line = self._ddsl_find_target_line(self.scan_code)
+        line = self._ddsl_find_target_line(code)
         if not line:
             raise UserError(
-                _("El codigo %s no coincide con ningun producto esperado en esta recepcion.") % self.scan_code
+                _("El codigo %s no coincide con ningun producto esperado en esta recepcion.") % code
             )
         line.counted_qty += 1.0
         self.scan_code = False

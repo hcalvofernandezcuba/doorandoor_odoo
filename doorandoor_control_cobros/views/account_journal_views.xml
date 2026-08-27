@@ -8,7 +8,17 @@
             <xpath expr="//sheet/notebook" position="before">
                 <group string="Control de cobros">
                     <field name="ddc_payment_flow"/>
-                    <field name="ddc_requires_payment_control"/>
+                    <field name="ddc_requires_payment_control" readonly="ddc_payment_flow == 'authorized_credit'"/>
+                    <field name="ddc_credit_parent_account_id"
+                           invisible="ddc_payment_flow != 'authorized_credit'"
+                           required="ddc_payment_flow == 'authorized_credit'"
+                           options="{'no_create': True, 'no_create_edit': True}"/>
+                    <div class="alert alert-info" role="status"
+                         invisible="ddc_payment_flow != 'authorized_credit'">
+                        Este diario aplica credito autorizado por gerencia. Cada cliente utiliza
+                        una subcuenta propia de la cuenta madre configurada arriba. Enviar dinero
+                        y Recibir dinero manualmente están bloqueados; se usa solo desde facturas.
+                    </div>
                 </group>
             </xpath>
         </field>

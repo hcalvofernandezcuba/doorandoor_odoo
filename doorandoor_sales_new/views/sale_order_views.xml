@@ -8,23 +8,41 @@
             <field name="priority">110</field>
             <field name="arch" type="xml">
                 <xpath expr="//header" position="inside">
+                    <!-- Botón para crear prefactura manualmente desde cotización confirmada -->
                     <button
                         name="action_ddsn_register_quote"
                         type="object"
-                        string="Validar cotización"
+                        string="Crear Prefactura"
                         class="btn-primary"
-                        invisible="state not in ('draft', 'sent') or ddsn_quote_registered"/>
+                        invisible="state not in ('sale', 'done') or ddsn_preinvoice_move_id"/>
                     <button
                         name="action_view_ddsn_preinvoice"
                         type="object"
-                        string="Abrir prefactura"
+                        string="Abrir Prefactura"
                         invisible="not ddsn_preinvoice_move_id"/>
                     <field name="ddsn_quote_registered" invisible="1"/>
                     <field name="ddsn_preinvoice_move_id" invisible="1"/>
+                    <button
+                        name="action_ddsn_change_supply_warehouse"
+                        type="object"
+                        string="Cambiar almacén proveedor"
+                        invisible="state == 'cancel' or not order_line"/>
                 </xpath>
 
                 <xpath expr="//h1/field[@name='name']" position="attributes">
                     <attribute name="readonly">1</attribute>
+                </xpath>
+
+                <xpath expr="//sheet" position="attributes">
+                    <attribute name="readonly">state in ('sale', 'done')</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']" position="attributes">
+                    <attribute name="readonly">state in ('sale', 'done')</attribute>
+                </xpath>
+
+                <xpath expr="//header/button[@name='action_draft']" position="attributes">
+                    <attribute name="groups">base.group_system</attribute>
                 </xpath>
 
                 <xpath expr="//header/field[@name='state']" position="before">
@@ -76,15 +94,32 @@
                 </xpath>
                 <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_qty']" position="after">
                     <field name="ddsn_stock_display" string="Stock" readonly="1"/>
-                    <field name="ddsn_warehouse_stock_display" string="Warehouses" readonly="1"/>
+                    <field name="ddsn_warehouse_stock_display" string="Almacenes" widget="ddsn_stock_tooltip" readonly="1"/>
+                    <field name="ddsn_supply_warehouse_id" string="Almacén proveedor" optional="show"/>
                     <field name="ddsn_warehouse_stock_html" string="Warehouses HTML" widget="html" optional="hide" readonly="1"/>
                     <field name="ddsn_bonus_percent" string="Bonus %" optional="show" readonly="1"/>
                     <field name="ddsn_bonus_source" string="Bonus Source" optional="hide" readonly="1"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/list/field[@name='price_unit']" position="before">
+                    <field name="ddsn_can_edit_commercial_price" column_invisible="True"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/list/field[@name='price_unit']" position="attributes">
+                    <attribute name="readonly">not ddsn_can_edit_commercial_price</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/list/field[@name='discount']" position="attributes">
+                    <attribute name="readonly">not ddsn_can_edit_commercial_price</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="attributes">
+                    <attribute name="readonly">not ddsn_can_edit_commercial_price</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form//field[@name='discount']" position="attributes">
+                    <attribute name="readonly">not ddsn_can_edit_commercial_price</attribute>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="after">
                     <group string="Stock Visibility" colspan="2">
                         <field name="ddsn_stock_display" readonly="1"/>
                         <field name="ddsn_warehouse_stock_text" readonly="1" widget="text"/>
+                        <field name="ddsn_supply_warehouse_id"/>
                     </group>
                 </xpath>
                 <xpath expr="//field[@name='tax_totals']" position="replace">

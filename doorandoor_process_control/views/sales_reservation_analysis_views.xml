@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddpc_sales_reservation_analysis_list" model="ir.ui.view">
+        <field name="name">doorandoor.sales.reservation.analysis.list</field>
+        <field name="model">doorandoor.sales.reservation.analysis</field>
+        <field name="arch" type="xml">
+            <list string="Reservas y prereservas" create="0" edit="0" delete="0">
+                <field name="reservation_type" widget="badge"/>
+                <field name="reservation_state" widget="badge"/>
+                <field name="document_ref"/>
+                <field name="warehouse_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="requested_qty" sum="Solicitado"/>
+                <field name="reserved_qty" sum="Reservado"/>
+                <field name="pending_reservation_qty" sum="Sin reservar"/>
+                <field name="product_uom_id"/>
+                <field name="committed_value" sum="Valor comprometido"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="reservation_date"/>
+                <field name="reservation_expires_at" optional="show"/>
+                <field name="salesperson_id" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddpc_sales_reservation_analysis_search" model="ir.ui.view">
+        <field name="name">doorandoor.sales.reservation.analysis.search</field>
+        <field name="model">doorandoor.sales.reservation.analysis</field>
+        <field name="arch" type="xml">
+            <search string="Reservas y prereservas">
+                <field name="document_ref"/><field name="warehouse_id"/><field name="partner_id"/>
+                <field name="product_id"/><field name="salesperson_id"/>
+                <filter name="pre" string="Prereservas" domain="[('reservation_type','=','pre_reservation')]"/>
+                <filter name="stock" string="Reservas físicas" domain="[('reservation_type','=','stock_reservation')]"/>
+                <filter name="risk" string="En riesgo" domain="[('reservation_state','in',['expiring','expired','partial','waiting'])]"/>
+                <separator/>
+                <filter name="group_type" string="Tipo" context="{'group_by':'reservation_type'}"/>
+                <filter name="group_state" string="Estado" context="{'group_by':'reservation_state'}"/>
+                <filter name="group_warehouse" string="Almacén" context="{'group_by':'warehouse_id'}"/>
+                <filter name="group_product" string="Producto" context="{'group_by':'product_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ddpc_sales_reservation_analysis_pivot" model="ir.ui.view">
+        <field name="name">doorandoor.sales.reservation.analysis.pivot</field>
+        <field name="model">doorandoor.sales.reservation.analysis</field>
+        <field name="arch" type="xml">
+            <pivot string="Reservas y prereservas">
+                <field name="reservation_type" type="row"/>
+                <field name="reservation_state" type="row"/>
+                <field name="warehouse_id" type="col"/>
+                <field name="reserved_qty" type="measure"/>
+                <field name="pending_reservation_qty" type="measure"/>
+                <field name="committed_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_ddpc_sales_reservation_analysis_graph" model="ir.ui.view">
+        <field name="name">doorandoor.sales.reservation.analysis.graph</field>
+        <field name="model">doorandoor.sales.reservation.analysis</field>
+        <field name="arch" type="xml">
+            <graph string="Reservas y prereservas" type="bar">
+                <field name="reservation_state"/>
+                <field name="reserved_qty" type="measure"/>
+                <field name="pending_reservation_qty" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_ddpc_sales_reservation_analysis" model="ir.actions.act_window">
+        <field name="name">Reservas y prereservas</field>
+        <field name="res_model">doorandoor.sales.reservation.analysis</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_ddpc_sales_reservation_analysis_search"/>
+    </record>
+</odoo>

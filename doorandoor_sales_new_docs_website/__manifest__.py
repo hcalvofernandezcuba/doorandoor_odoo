@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New Docs Website",
-    "version": "18.0.1.0.3",
+    "version": "18.0.1.3.0",
     "category": "Website",
-    "summary": "Publish DoorAndDoor Sales New Markdown docs on the website",
+    "summary": "18.0.1.3.0 - Publica capacitación de cobros, inventarios y conteo móvil",
     "description": """
 DoorAndDoor Sales New Docs Website
 ==================================
@@ -19,8 +19,20 @@ Objetivo:
 Incluye las guias informativas usadas para capacitacion de usuarios
 despues de cada mejora operativa importante del modulo principal,
 incluyendo reglas de reserva temporal, stock visible y documentos operativos.
+Publica las guias integrales de pruebas del proyecto y de configuracion de
+productos normales, variantes, Transformados, Especiales y plantillas maestras.
+La guia de pruebas consolida la secuencia vigente de producto, venta, pago,
+fabricacion, credito, documentos, inventario y despacho.
+
+18.0.1.3.0
+------------
+Publica tres guias operativas independientes para la capacitacion: cobros y
+pagos controlados, ciclo integral de inventarios y conteo fisico mediante
+hanger o movil. Las guias quedan visibles en el indice del website y describen
+roles, pasos, resultados esperados y controles de cada operacion.
     """,
-    "author": "Hanoi Calvo Fernández (doorandoor)",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
     "website": "https://doorandoor.com",
     "depends": [
         "website",

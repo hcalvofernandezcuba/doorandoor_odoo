@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Tax State",
-    "version": "18.0.1.0.2",
+    "version": "18.0.1.0.3",
     "category": "Accounting",
-    "summary": "State-based sales tax mapping by company for multi-company flows",
+    "summary": "18.0.1.0.3 - Incorpora identidad corporativa de doorandoor a los impuestos por estado",
     "description": """
 DoorAndDoor Tax State
 =====================
@@ -45,7 +45,8 @@ Control de versiones
   Los vendedores normales reciben permiso de solo lectura sobre reglas y tasas de impuesto por estado.
   Esto permite crear cotizaciones y ventas sin requerir perfil de `Contabilidad/Administrador`, manteniendo la edicion de esas reglas solo en contabilidad.
     """,
-    "author": "Hanoi Calvo Fernandez (doorandoor)",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
     "website": "https://doorandoor.com",
     "depends": [
         "account",

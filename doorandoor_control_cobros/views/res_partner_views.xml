@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_ddc_advance_account" model="ir.ui.view">
+        <field name="name">res.partner.form.ddc.advance.account</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='property_account_receivable_id']" position="after">
+                <field name="ddc_advance_account_id"
+                       string="Cuenta de pagos anticipados"
+                       groups="account.group_account_manager"
+                       options="{'no_create': True, 'no_create_edit': True}"/>
+                <field name="ddc_credit_currency_id" invisible="1"/>
+                <field name="ddc_authorized_credit_limit"
+                       string="Credito autorizado por gerencia"
+                       widget="monetary"
+                       options="{'currency_field': 'ddc_credit_currency_id'}"
+                       groups="base.group_system"/>
+                <field name="ddc_authorized_credit_limit"
+                       string="Credito autorizado por gerencia"
+                       widget="monetary"
+                       readonly="1"
+                       options="{'currency_field': 'ddc_credit_currency_id'}"
+                       groups="doorandoor_control_cobros.group_ddc_official_payment,!base.group_system"/>
+                <field name="ddc_authorized_credit_used"
+                       string="Credito utilizado"
+                       readonly="1"
+                       groups="base.group_system"/>
+                <field name="ddc_authorized_credit_used"
+                       string="Credito utilizado"
+                       readonly="1"
+                       groups="doorandoor_control_cobros.group_ddc_official_payment,!base.group_system"/>
+                <field name="ddc_authorized_credit_available"
+                       string="Credito disponible"
+                       readonly="1"
+                       groups="base.group_system"/>
+                <field name="ddc_authorized_credit_available"
+                       string="Credito disponible"
+                       readonly="1"
+                       groups="doorandoor_control_cobros.group_ddc_official_payment,!base.group_system"/>
+                <field name="ddc_credit_financing_account_id"
+                       string="Subcuenta de credito autorizado"
+                       readonly="1"
+                       groups="base.group_system"
+                       options="{'no_create': True, 'no_create_edit': True}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

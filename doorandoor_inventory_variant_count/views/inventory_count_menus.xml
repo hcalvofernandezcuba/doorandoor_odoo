@@ -1,0 +1,7 @@
+<odoo>
+    <menuitem id="menu_inventory_count_root" name="Physical Counts" sequence="55" groups="doorandoor_inventory_variant_count.group_inventory_count_user"/>
+    <menuitem id="menu_inventory_count_sessions" name="Count Sessions" parent="menu_inventory_count_root" action="action_inventory_count_session" sequence="10"/>
+    <menuitem id="menu_inventory_count_import" name="Import Item Counts" parent="menu_inventory_count_root" action="action_inventory_count_item_lines" sequence="20"/>
+    <menuitem id="menu_inventory_count_config" name="Configuration" parent="menu_inventory_count_root" sequence="90" groups="doorandoor_inventory_variant_count.group_inventory_count_manager"/>
+    <menuitem id="menu_product_count_items" name="Variant Count Items" parent="menu_inventory_count_config" action="action_product_count_item" sequence="10"/>
+</odoo>

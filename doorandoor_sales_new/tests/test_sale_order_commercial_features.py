@@ -146,6 +146,51 @@ class TestSaleOrderCommercialFeatures(TransactionCase):
         self.assertEqual(sale_order.ddsn_flow_stage, "invoiced")
         self.assertEqual(sale_order.ddsn_invoice_move_id, preinvoice)
 
+    def test_posting_linked_fiscal_invoice_confirms_sale_without_delivery(self):
+        sale_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "warehouse_id": self.warehouse.id,
+                "order_line": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": self.product.id,
+                            "name": self.product.display_name,
+                            "product_uom_qty": 1.0,
+                            "price_unit": 50.0,
+                        },
+                    )
+                ],
+            }
+        )
+        invoice = self.env["account.move"].create(
+            {
+                "move_type": "out_invoice",
+                "partner_id": self.partner.id,
+                "sale_order_id": sale_order.id,
+                "invoice_line_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": self.product.id,
+                            "name": self.product.display_name,
+                            "quantity": 1.0,
+                            "price_unit": 50.0,
+                        },
+                    )
+                ],
+            }
+        )
+
+        invoice.action_post()
+
+        self.assertEqual(sale_order.state, "sale")
+        self.assertEqual(sale_order.ddsn_flow_stage, "invoiced")
+        self.assertFalse(sale_order.picking_ids)
+
     def test_sale_order_line_shows_net_stock_after_active_preinvoice_reservation(self):
         self.env["stock.quant"]._update_available_quantity(
             self.product,

@@ -1,8 +1,32 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
+
+    ddsn_supply_warehouse_id = fields.Many2one(
+        "stock.warehouse",
+        string="Almacén proveedor",
+        domain="[('company_id', '=', company_id)]",
+        help="Almacén donde se prereserva el producto y desde el cual se solicitará el traslado.",
+    )
+    ddsn_supply_transfer_id = fields.Many2one(
+        "stock.picking",
+        string="Traslado de abastecimiento",
+        copy=False,
+        readonly=True,
+    )
+
+    ddsn_can_edit_commercial_price = fields.Boolean(
+        string="Puede editar precio comercial",
+        compute="_compute_ddsn_can_edit_commercial_price",
+    )
+
+    def _compute_ddsn_can_edit_commercial_price(self):
+        allowed = self.env.user.has_group("base.group_system")
+        for line in self:
+            line.ddsn_can_edit_commercial_price = allowed
 
     ddsn_available_qty = fields.Float(
         string="Available Stock",
@@ -55,6 +79,92 @@ class AccountMoveLine(models.Model):
         copy=False,
         readonly=True,
     )
+
+    def _ddsn_get_stock_control_product(self):
+        self.ensure_one()
+        product = self.product_id
+        if not product:
+            return product, 0.0, False
+
+        template = product.product_tmpl_id
+        product_kind = getattr(template, "ddsp_product_kind", False)
+        if product_kind == "special":
+            return self.env["product.product"], 0.0, False
+        if product_kind != "transformed":
+            return product, self.quantity, False
+
+        bom = self.env["mrp.bom"].search(
+            [
+                "|",
+                ("product_id", "=", product.id),
+                "&",
+                ("product_id", "=", False),
+                ("product_tmpl_id", "=", template.id),
+            ],
+            limit=1,
+        )
+        base_template = getattr(template, "ddsp_base_product_tmpl_id", False)
+        base_line = bom.bom_line_ids.filtered(
+            lambda item: not base_template or item.product_id.product_tmpl_id == base_template
+        )[:1]
+        if not bom or not base_line:
+            return product, self.quantity, False
+
+        required_in_bom_uom = (self.quantity / (bom.product_qty or 1.0)) * base_line.product_qty
+        required_qty = base_line.product_uom_id._compute_quantity(
+            required_in_bom_uom,
+            base_line.product_id.uom_id,
+        )
+        return base_line.product_id, required_qty, product
+
+    @api.onchange("product_id", "quantity")
+    def _onchange_ddsn_warn_insufficient_stock(self):
+        for line in self:
+            move = line.move_id
+            warehouse = move.sale_order_id.warehouse_id
+            control_product, required_qty, transformed_product = line._ddsn_get_stock_control_product()
+            if (
+                not warehouse
+                or not warehouse.lot_stock_id
+                or not control_product
+                or not control_product.is_storable
+                or required_qty <= 0
+            ):
+                continue
+
+            available_qty = control_product.with_company(move.company_id).with_context(
+                location=warehouse.lot_stock_id.id
+            ).qty_available
+            if not transformed_product:
+                available_qty -= line._ddsn_get_committed_qty_for_display(warehouse=warehouse)
+                available_qty -= line._ddsn_get_quote_reserved_qty_for_display(warehouse=warehouse)
+            if required_qty <= available_qty:
+                continue
+
+            transformed_detail = ""
+            if transformed_product:
+                transformed_detail = _("\nProducto transformado: %(product)s") % {
+                    "product": transformed_product.display_name,
+                }
+            return {
+                "warning": {
+                    "title": _("Alerta de inventario"),
+                    "message": _(
+                        "La cantidad solicitada supera la existencia disponible."
+                        "%(transformed_detail)s\nProducto controlado: %(product)s"
+                        "\nAlmacén: %(warehouse)s\nCantidad requerida: %(required).2f"
+                        "\nCantidad disponible: %(available).2f\n\nPuede continuar con la venta."
+                    )
+                    % {
+                        "transformed_detail": transformed_detail,
+                        "product": control_product.display_name,
+                        "warehouse": warehouse.display_name,
+                        "required": required_qty,
+                        "available": available_qty,
+                    },
+                    "type": "notification",
+                }
+            }
 
     @api.depends("product_id", "quantity", "move_id.company_id", "move_id.sale_order_id.warehouse_id")
     def _compute_ddsn_stock_visibility(self):
@@ -137,14 +247,21 @@ class AccountMoveLine(models.Model):
         for reserved_move in reserved_moves:
             if not reserved_move._ddsn_has_active_reservation():
                 continue
-            reservation_warehouse = reserved_move.sudo().sale_order_id.warehouse_id
-            if warehouse and reservation_warehouse and reservation_warehouse != warehouse:
-                continue
-            reserved_qty += sum(
-                reserved_move.invoice_line_ids.filtered(
-                    lambda line: line.product_id == product and line.display_type in (False, "product")
-                ).mapped("quantity")
-            )
+            for reserved_line in reserved_move.invoice_line_ids.filtered(
+                lambda item: item.product_id and item.display_type in (False, "product")
+            ):
+                controlled_product, required_qty, _transformed = (
+                    reserved_line._ddsn_get_stock_control_product()
+                )
+                reservation_warehouse = (
+                    reserved_line.ddsn_supply_warehouse_id
+                    or reserved_move.sudo().sale_order_id.warehouse_id
+                )
+                if controlled_product != product:
+                    continue
+                if warehouse and reservation_warehouse != warehouse:
+                    continue
+                reserved_qty += required_qty
         return reserved_qty
 
     def _ddsn_get_warehouse_stock_display(self):
@@ -172,6 +289,13 @@ class AccountMoveLine(models.Model):
             chunks.append(f"{warehouse_label}: {qty:.2f}")
 
         return " | ".join(chunks) or False
+
+    def ddsn_get_live_warehouse_stock_tooltip(self):
+        """Return current stock by warehouse without modifying reservations."""
+        self.ensure_one()
+        return self._ddsn_get_warehouse_stock_text() or _(
+            "No hay información de existencias disponible."
+        )
 
     def _ddsn_get_warehouse_stock_html(self):
         self.ensure_one()
@@ -253,3 +377,80 @@ class AccountMoveLine(models.Model):
             lines.append(f"{warehouse_label}: {qty:.2f}")
 
         return "\n".join(lines) or False
+
+    def write(self, vals):
+        if (
+            {"price_unit", "discount"}.intersection(vals)
+            and not self.env.context.get("ddsn_automatic_pricing")
+            and not self.env.user.has_group("base.group_system")
+        ):
+            raise ValidationError(
+                _("Solo un administrador de Ajustes puede modificar precios o descuentos.")
+            )
+        # Restringir solamente la edicion comercial de la linea. Odoo necesita
+        # escribir campos tecnicos y calculados despues de contabilizar (por
+        # ejemplo durante conciliaciones, impuestos y enlaces de fulfillment).
+        protected_product_fields = {
+            "product_id",
+            "name",
+            "quantity",
+            "product_uom_id",
+            "price_unit",
+            "discount",
+            "tax_ids",
+            "account_id",
+            "analytic_distribution",
+            "display_type",
+        }
+        if protected_product_fields.intersection(vals):
+            protected_lines = self.filtered(
+                lambda line: (
+                    line.move_id.state in ("posted", "cancel")
+                    or (
+                        line.move_id.ddsn_is_preinvoice
+                        and line.move_id.ddsn_preinvoice_state == "confirmed"
+                    )
+                )
+                and line.move_id.is_invoice(include_receipts=True)
+            )
+            if protected_lines:
+                raise ValidationError(
+                    _("No se pueden modificar líneas de producto en una factura confirmada. "
+                      "El documento está cerrado para edición.")
+                )
+        return super().write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        move_ids = {vals.get("move_id") for vals in vals_list if vals.get("move_id")}
+        locked_moves = self.env["account.move"].browse(move_ids).filtered(
+            lambda move: move.is_invoice(include_receipts=True)
+            and (
+                move.state in ("posted", "cancel")
+                or (
+                    move.ddsn_is_preinvoice
+                    and move.ddsn_preinvoice_state == "confirmed"
+                )
+            )
+        )
+        if locked_moves:
+            raise ValidationError(
+                _("No se pueden agregar líneas a una factura o prefactura confirmada.")
+            )
+        return super().create(vals_list)
+
+    def unlink(self):
+        if self.filtered(
+            lambda line: line.move_id.is_invoice(include_receipts=True)
+            and (
+                line.move_id.state in ("posted", "cancel")
+                or (
+                    line.move_id.ddsn_is_preinvoice
+                    and line.move_id.ddsn_preinvoice_state == "confirmed"
+                )
+            )
+        ):
+            raise ValidationError(
+                _("No se pueden eliminar líneas de una factura o prefactura confirmada.")
+            )
+        return super().unlink()

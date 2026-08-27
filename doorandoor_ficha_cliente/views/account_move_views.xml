@@ -9,12 +9,18 @@
             <field name="priority">130</field>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                    <button name="ddfc_action_open_builder_wizard"
+                            type="object"
+                            string="Crear Constructor"
+                            class="oe_link"
+                            invisible="move_type not in ('out_invoice', 'out_refund')"/>
                     <field
                         name="ddfc_builder_id"
-                        domain="[('id', '=', False)]"
-                        options="{'no_open': True, 'no_create_edit': False}"
-                        context="{'default_ddfc_discount_for_new_process': True}"
-                        invisible="move_type not in ('out_invoice', 'out_refund')"/>
+                        invisible="not ddfc_builder_id or move_type not in ('out_invoice', 'out_refund')"
+                        readonly="1"/>
+                    <field
+                        name="ddfc_pricing_source"
+                        invisible="1"/>
                 </xpath>
             </field>
         </record>
@@ -27,12 +33,15 @@
             <field name="priority">80</field>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='partner_id']" position="after">
+                    <button name="ddfc_action_open_builder_wizard"
+                            type="object"
+                            string="Crear Constructor"
+                            class="oe_link"
+                            invisible="move_type in ('out_invoice', 'out_refund')"/>
                     <field
                         name="ddfc_builder_id"
-                        domain="[('id', '=', False)]"
-                        options="{'no_open': True, 'no_create_edit': False}"
-                        context="{'default_ddfc_discount_for_new_process': True}"
-                        invisible="move_type in ('out_invoice', 'out_refund')"/>
+                        invisible="not ddfc_builder_id or move_type in ('out_invoice', 'out_refund')"
+                        readonly="1"/>
                 </xpath>
             </field>
         </record>

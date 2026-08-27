@@ -1,0 +1,223 @@
+.o_ddpc_realtime_widget {
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+    }
+    
+    .o_ddpc_realtime_status {
+        font-size: 1.1em;
+        margin-bottom: 0.5rem;
+        
+        &.text-warning {
+            color: #ffc107 !important;
+        }
+        
+        &.text-success {
+            color: #28a745 !important;
+        }
+        
+        &.text-info {
+            color: #17a2b8 !important;
+        }
+        
+        &.text-danger {
+            color: #dc3545 !important;
+        }
+    }
+    
+    .o_ddpc_stage_badge {
+        font-size: 0.9em;
+        padding: 0.25em 0.5em;
+        
+        &.badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        &.badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        &.badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+    }
+    
+    .o_ddpc_last_update {
+        font-size: 0.85em;
+        font-style: italic;
+    }
+    
+    .o_ddpc_connection_status {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.9em;
+        
+        &.show {
+            display: block !important;
+        }
+    }
+    
+    .o_ddpc_refresh_manual {
+        transition: all 0.2s ease;
+        
+        &:hover {
+            transform: rotate(180deg);
+        }
+        
+        &:active {
+            transform: rotate(360deg);
+        }
+    }
+}
+
+// Dashboard de recepciones en tiempo real
+.o_ddpc_realtime_dashboard {
+    .o_kanban_view {
+        background-color: #f8f9fa;
+    }
+    
+    .o_ddpc_picking_card {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .o_kanban_card_header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 0.75rem;
+            
+            .o_kanban_card_header_title {
+                strong {
+                    color: white;
+                    font-size: 1.1em;
+                }
+            }
+            
+            .o_kanban_card_header_right {
+                .badge {
+                    font-size: 0.85em;
+                    padding: 0.3em 0.6em;
+                }
+            }
+        }
+        
+        .o_kanban_card_content {
+            padding: 1rem;
+            
+            .o_ddpc_realtime_status {
+                font-size: 1em;
+                padding: 0.5rem;
+                border-radius: 4px;
+                background-color: #e9ecef;
+                margin-bottom: 0.5rem;
+            }
+            
+            .o_ddpc_last_update {
+                font-size: 0.8em;
+                color: #6c757d;
+            }
+        }
+        
+        .o_kanban_card_footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 0.75rem;
+            border-radius: 0 0 8px 8px;
+            
+            .o_kanban_card_manage_button_group {
+                display: flex;
+                gap: 0.5rem;
+                justify-content: flex-end;
+                
+                .btn {
+                    font-size: 0.9em;
+                    padding: 0.4em 0.8em;
+                }
+            }
+        }
+    }
+    
+    // Indicador de actualización
+    .o_ddpc_refresh_indicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    }
+}
+
+// Panel de estado en tiempo real en formulario
+.o_ddpc_realtime_status_panel {
+    animation: fadeIn 0.5s ease;
+    
+    .o_ddpc_status_text {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .o_ddpc_last_activity {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+}
+
+// Animaciones
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.o_ddpc_updating {
+    animation: pulse 1s infinite;
+}

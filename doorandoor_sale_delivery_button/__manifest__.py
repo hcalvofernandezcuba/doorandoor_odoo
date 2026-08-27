@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'DoorAndDoor - Botón de Entrega desde Ventas',
-    'version': '18.0.1.0.2',
+    'version': '18.0.1.1.0',
     'category': 'Sales/Inventory',
-    'summary': 'Permite al gestor de ventas navegar directamente al picking de entrega desde el pedido de venta confirmado',
+    'summary': '18.0.1.1.0 - Cierra toda creación y procesamiento de entregas sin pago total',
     'description': """
 DoorAndDoor - Botón de Entrega desde Ventas
 ============================================
+
+Version 18.0.1.1.0
+------------------
+La entrega exige una factura fiscal publicada y totalmente pagada. La regla se
+comprueba al abrir o crear la entrega y al crear, confirmar o reservar el
+picking, cerrando tambien las rutas manuales desde Inventario.
 
 Este módulo agrega un botón "Entregar" en el formulario de pedidos de venta confirmados,
 permitiendo al gestor de ventas:
@@ -37,7 +43,9 @@ Características:
 
 Autor: DoorAndDoor Team
     """,
-    'author': 'Hanoi Calvo Fernandez https://gestion.doorandoor.com',
+    'author': 'Hanoi Calvo',
+    'maintainer': 'doorandoor',
+    'website': 'https://doorandoor.com',
     'depends': ['sale', 'stock', 'sale_stock'],
     'data': [
         'security/ir.model.access.csv',

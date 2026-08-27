@@ -135,8 +135,8 @@ class TestInvoiceToSaleOrder(TransactionCase):
 
         move.action_post()
 
-        self.assertTrue(move.sale_order_id, "La factura debe generar un pedido de venta en borrador.")
-        self.assertEqual(move.sale_order_id.state, "draft")
+        self.assertTrue(move.sale_order_id, "La factura debe generar un pedido de venta interno.")
+        self.assertEqual(move.sale_order_id.state, "sale")
         self.assertEqual(len(move.sale_order_id.order_line), 1)
         self.assertEqual(len(move.fulfillment_line_ids), 1)
 
@@ -354,6 +354,33 @@ class TestInvoiceToSaleOrder(TransactionCase):
         self.assertFalse(fulfillment_line.picking_id, "No debe crearse picking con pago parcial.")
         self.assertEqual(fulfillment_line.qty_sent_stock, 0.0)
         self.assertEqual(fulfillment_line.state, "ready_stock")
+
+    def test_full_release_confirms_generated_sale_before_creating_delivery(self):
+        warehouse = self.env["stock.warehouse"].search(
+            [("company_id", "=", self.env.company.id)],
+            limit=1,
+        )
+        self.env["stock.quant"]._update_available_quantity(
+            self.stock_product,
+            warehouse.lot_stock_id,
+            4.0,
+        )
+        move = self._create_stock_invoice()
+        move.action_post()
+
+        # Simulate a legacy invoice whose generated commercial order remained
+        # technically in draft before this regression fix.
+        self.env.cr.execute(
+            "UPDATE sale_order SET state = 'draft' WHERE id = %s",
+            [move.sale_order_id.id],
+        )
+        move.sale_order_id.invalidate_recordset(["state"])
+
+        move._ddsn_apply_release_for_amount(move.amount_total)
+
+        self.assertEqual(move.sale_order_id.state, "sale")
+        self.assertTrue(move.fulfillment_line_ids.picking_id)
+        self.assertEqual(len(move.fulfillment_line_ids.picking_id), 1)
 
     def test_manual_inventory_adjustment_cannot_reduce_below_released_qty(self):
         warehouse = self.env["stock.warehouse"].search(

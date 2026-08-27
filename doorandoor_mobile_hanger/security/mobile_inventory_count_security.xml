@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="doorandoor_process_control.group_ddpc_warehouse_operator" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('doorandoor_inventory_variant_count.group_inventory_count_user'))]"/>
+    </record>
+</odoo>

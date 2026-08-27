@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Purchase Fixed Warehouse",
-    "version": "18.0.1.0.4",
+    "version": "18.0.1.0.5",
     "category": "Purchases/Inventory",
-    "summary": "18.0.1.0.4 - Ajusta en Inventario el reporte Recepciones por almacen",
+    "summary": "18.0.1.0.5 - Incorpora identidad corporativa de doorandoor a compras por almacén",
     "description": """
 DoorAndDoor Purchase Fixed Warehouse
 ===================================
@@ -34,7 +34,8 @@ Historial resumido
 - 18.0.1.0.4
   Se ajusta el reporte de inventario con el nombre `Recepciones por almacen`, ubicado bajo Inventario, filtrado a recepciones validadas y orientado a mostrar por dia los productos y las cantidades recibidas por almacen.
     """,
-    "author": "Hanoi Calvo Fernandez (doorandoor)",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
     "website": "https://doorandoor.com",
     "depends": [
         "purchase_stock",

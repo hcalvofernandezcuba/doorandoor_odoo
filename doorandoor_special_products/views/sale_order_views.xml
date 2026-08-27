@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_add_special_from_master_ddsp" model="ir.ui.view">
+        <field name="name">sale.order.form.ddsp.add.special.from.master</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority">131</field>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_ddsp_special_from_master"
+                        type="object"
+                        string="Agregar producto especial"
+                        class="btn-secondary"
+                        invisible="state not in ('draft', 'sent')"
+                        groups="sales_team.group_sale_salesman"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form_exclude_transformed_products_ddsp" model="ir.ui.view">
+        <field name="name">sale.order.form.ddsp.exclude.transformed.products</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="doorandoor_product_config.view_order_form_template_only_ddpc"/>
+        <field name="priority">130</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']" position="attributes">
+                <attribute name="domain">[('sale_ok', '=', True), ('ddsp_is_special', '=', False), ('ddsp_is_manufacturing_template', '=', False)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='product_template_id']" position="attributes">
+                <attribute name="domain">[('sale_ok', '=', True), ('ddsp_is_special', '=', False), ('ddsp_is_manufacturing_template', '=', False)]</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

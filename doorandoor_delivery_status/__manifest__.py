@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'DoorAndDoor - Estado de Entrega en Picking',
-    'version': '18.0.1.0.8',
+    'version': '18.0.1.0.9',
     'category': 'Inventory/Sales',
-    'summary': 'Muestra cantidad pedida, entregada y pendiente en las líneas de movimiento de entregas',
+    'summary': '18.0.1.0.9 - Incorpora identidad corporativa de doorandoor al estado de entregas',
     'description': """
 DoorAndDoor - Estado de Entrega en Picking
 ===========================================
@@ -30,7 +30,8 @@ Características:
 
 Autor: DoorAndDoor Team
     """,
-    'author': 'DoorAndDoor',
+    'author': 'Hanoi Calvo',
+    'maintainer': 'doorandoor',
     'website': 'https://doorandoor.com',
     'depends': [
         'doorandoor_sale_delivery_button',

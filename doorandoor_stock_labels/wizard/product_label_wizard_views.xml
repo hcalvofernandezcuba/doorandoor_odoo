@@ -8,6 +8,14 @@
                 <form string="Labels de productos">
                     <group>
                         <field name="product_tmpl_id"/>
+                        <field
+                            name="product_label_code"
+                            placeholder="Ejemplo: MIAMI-001"/>
+                        <field name="effective_label_code" readonly="1"/>
+                        <field name="uses_automatic_label_code" invisible="1"/>
+                        <div class="alert alert-warning" role="alert" colspan="2" invisible="not uses_automatic_label_code">
+                            Este producto no tiene un codigo propio para labels. Se usara automaticamente el codigo mostrado arriba. Si deseas un codigo comercial especifico, escribelo en el campo "Codigo de producto para label".
+                        </div>
                         <field name="warehouse_id"/>
                         <field name="quantity"/>
                     </group>

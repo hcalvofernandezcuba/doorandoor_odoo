@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_ddsl_zebra_4x6_portrait" model="report.paperformat">
+        <field name="name">DoorAndDoor Zebra 4x6 - 1 Label Vertical</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_width">102</field>
+        <field name="page_height">152</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">76</field>
+    </record>
+</odoo>

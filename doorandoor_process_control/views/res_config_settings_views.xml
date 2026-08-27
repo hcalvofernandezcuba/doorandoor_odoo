@@ -19,6 +19,21 @@
                                 <field name="ddpc_color_done"/>
                             </setting>
                         </block>
+                        <block title="Alertas de traslados">
+                            <setting string="Frecuencia de recordatorios"
+                                     help="Horas entre avisos mientras el almacén destino no confirme la recepción.">
+                                <field name="ddpc_transfer_alert_interval_hours"/>
+                            </setting>
+                            <setting string="Escalamiento por demora"
+                                     help="Horas posteriores a la fecha programada para mostrar la alerta como vencida.">
+                                <field name="ddpc_transfer_overdue_hours"/>
+                            </setting>
+                            <setting string="Mercancía en tránsito"
+                                     help="Ubicación temporal entre el despacho del origen y la recepción física del destino. Si queda vacía, DoorAndDoor la crea automáticamente.">
+                                <field name="ddpc_transfer_transit_location_id"
+                                       options="{'no_create': True, 'no_create_edit': True}"/>
+                            </setting>
+                        </block>
                     </app>
                 </xpath>
             </field>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddsp_special_product_wizard_form" model="ir.ui.view">
+        <field name="name">ddsp.special.product.wizard.form</field>
+        <field name="model">ddsp.special.product.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Crear producto transformado">
+                <div class="alert alert-info" role="alert">
+                    El nuevo producto conservara la combinacion base y aplicara un valor excepcional. Su LDM se validara automaticamente al crear el producto.
+                </div>
+                <group>
+                    <group string="Producto transformado">
+                        <field name="invoice_line_id" invisible="not invoice_line_id"/>
+                        <field name="sale_order_line_id" invisible="not sale_order_line_id"/>
+                        <field name="base_product_id"/>
+                        <field name="base_product_tmpl_id" invisible="1"/>
+                        <field name="name"/>
+                        <field name="default_code"/>
+                        <field name="price_unit" readonly="1"
+                               help="Precio base mas el adicional configurado por Administracion en la variante."/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                    <group string="Valor fuera de estandar">
+                        <field name="available_attribute_ids" invisible="1"/>
+                        <field name="special_attribute_id" required="1" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="special_value" required="1" placeholder="Escriba el valor excepcional"/>
+                        <field name="width" invisible="1"/>
+                        <field name="height" invisible="1"/>
+                        <field name="special_notes" placeholder="Describe medidas, materiales, color, diseno y cualquier instruccion de transformacion."/>
+                        <field name="production_instructions" placeholder="Indique cortes, armado, acabado, tolerancias y controles requeridos."/>
+                    </group>
+                </group>
+                <group string="Lista de materiales">
+                    <div class="alert alert-info" role="alert">
+                        La LDM consume una unidad del producto terminado base para desarmarla y aplicar las transformaciones solicitadas.
+                    </div>
+                    <field name="base_bom_id" invisible="1"/>
+                    <field name="copy_base_operations" invisible="1"/>
+                    <field name="component_line_ids" nolabel="1">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="product_qty"/>
+                            <field name="product_uom_id"/>
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button name="action_create_special_product" type="object" string="Crear producto y LDM" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

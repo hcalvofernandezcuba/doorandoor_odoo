@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Produccion Almacen",
-    "version": "18.0.1.0.4",
+    "version": "18.0.1.0.5",
     "category": "Manufacturing",
-    "summary": "Warehouse origin and destination flow for manufacturing orders",
+    "summary": "18.0.1.0.5 - Incorpora identidad corporativa de doorandoor a producción y almacén",
     "description": """
 DoorAndDoor Produccion Almacen
 ==============================
@@ -53,7 +53,8 @@ Historial resumido
   Se documenta de forma explicita la compatibilidad objetivo con Odoo Community Edition 18.
   Tambien se deja asentado que los errores de integracion y los ajustes correctivos forman parte del proceso normal de evolucion del modulo.
     """,
-    "author": "Hanoi Calvo Fernández (doorandoor)",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
     "website": "https://doorandoor.com",
     "license": "LGPL-3",
     "depends": [

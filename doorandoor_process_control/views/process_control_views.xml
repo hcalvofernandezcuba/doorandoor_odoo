@@ -445,15 +445,15 @@
             <field name="name">Prefacturas</field>
             <field name="res_model">account.move</field>
             <field name="view_mode">list,form</field>
-            <field name="domain">[('move_type', '=', 'out_invoice'), ('state', '=', 'draft')]</field>
-            <field name="context">{'default_move_type': 'out_invoice', 'ddsn_preinvoice_mode': True}</field>
+            <field name="domain">[('move_type', '=', 'out_invoice'), ('ddsn_is_preinvoice', '=', True)]</field>
+            <field name="context">{'default_move_type': 'out_invoice', 'default_ddsn_is_preinvoice': True, 'default_ddsn_preinvoice_state': 'draft', 'ddsn_preinvoice_mode': True}</field>
         </record>
 
         <record id="action_ddpc_facturas" model="ir.actions.act_window">
             <field name="name">Facturas</field>
             <field name="res_model">account.move</field>
             <field name="view_mode">list,form</field>
-            <field name="domain">[('move_type', '=', 'out_invoice')]</field>
+            <field name="domain">[('move_type', '=', 'out_invoice'), ('ddsn_is_preinvoice', '=', False)]</field>
             <field name="context">{'default_move_type': 'out_invoice'}</field>
         </record>
 

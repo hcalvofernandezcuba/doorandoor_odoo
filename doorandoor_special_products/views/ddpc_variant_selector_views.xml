@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddpc_variant_selector_form_ddsp_special" model="ir.ui.view">
+        <field name="name">ddpc.variant.selector.form.ddsp.special</field>
+        <field name="model">ddpc.variant.selector</field>
+        <field name="inherit_id" ref="doorandoor_product_config.view_ddpc_variant_selector_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//separator" position="after">
+                <field name="ddsp_can_create_special" invisible="1"/>
+                <div class="alert alert-warning" role="alert" invisible="not ddsp_can_create_special">
+                    <field name="ddsp_declare_special" class="fw-bold"/>
+                    <span class="ms-2">Use esta opcion para medidas excepcionales que no deben agregarse al catalogo normal.</span>
+                </div>
+                <group string="Producto transformado" invisible="not ddsp_declare_special">
+                    <group string="Medidas fuera de estandar">
+                        <field name="ddsp_width" required="ddsp_declare_special"/>
+                        <field name="ddsp_height" required="ddsp_declare_special"/>
+                    </group>
+                    <group string="Guia de produccion">
+                        <field name="ddsp_special_notes" required="ddsp_declare_special"/>
+                        <field name="ddsp_production_instructions" required="ddsp_declare_special"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

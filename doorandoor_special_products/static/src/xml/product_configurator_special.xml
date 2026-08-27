@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="doorandoor_special_products.ProductConfiguratorSpecial"
+       t-inherit="sale.ProductConfiguratorDialog"
+       t-inherit-mode="extension">
+        <xpath expr="//t[@t-set-slot='footer']" position="before">
+            <div t-if="state.ddspAllowSpecial" class="alert alert-warning mt-3 mb-0 text-start">
+                <div class="form-check">
+                    <input id="ddsp_declare_special"
+                           type="checkbox"
+                           class="form-check-input"
+                           t-att-checked="state.ddspDeclareSpecial"
+                           t-on-change="ddspToggleSpecial"/>
+                    <label for="ddsp_declare_special" class="form-check-label fw-bold">
+                        Declarar como producto transformado
+                    </label>
+                </div>
+                <div t-if="state.ddspDeclareSpecial" class="row g-3 mt-1">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Variantes que cambian</label>
+                        <div class="table-responsive bg-white border rounded">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                    <tr><th>Modificar</th><th>Atributo</th><th>Nuevo valor transformado</th></tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="ddspAvailableAttributes" t-as="attribute" t-key="attribute.id">
+                                        <tr t-if="state.ddspSpecialChanges[attribute.id]">
+                                            <td>
+                                                <input type="checkbox" class="form-check-input"
+                                                       t-model="state.ddspSpecialChanges[attribute.id].selected"/>
+                                            </td>
+                                            <td class="fw-semibold" t-out="attribute.name"/>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm"
+                                                       placeholder="Escriba el valor solicitado"
+                                                       t-att-disabled="!state.ddspSpecialChanges[attribute.id].selected"
+                                                       t-model="state.ddspSpecialChanges[attribute.id].value"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Especificaciones de transformacion</label>
+                        <textarea class="form-control" rows="2" t-model="state.ddspSpecialNotes"/>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Instrucciones de fabricación</label>
+                        <textarea class="form-control" rows="2" t-model="state.ddspProductionInstructions"/>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+    <t t-name="doorandoor_special_products.ProductConfiguratorSpecialHideCommonValues"
+       t-inherit="sale.Product"
+       t-inherit-mode="extension">
+        <xpath expr="//t[@t-foreach='this.props.attribute_lines']" position="attributes">
+            <attribute name="t-if">!(this.env.ddspIsSpecial &amp;&amp; this.env.ddspIsSpecial())</attribute>
+        </xpath>
+    </t>
+</templates>

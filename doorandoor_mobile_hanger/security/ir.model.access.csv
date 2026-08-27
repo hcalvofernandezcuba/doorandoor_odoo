@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddmh_document_scan_operator,access.ddmh.document.scan.operator,model_doorandoor_hanger_document_scan,doorandoor_process_control.group_ddpc_warehouse_operator,1,1,1,1
+access_ddmh_document_scan_system,access.ddmh.document.scan.system,model_doorandoor_hanger_document_scan,base.group_system,1,1,1,1
+access_ddmh_count_session_system,access.ddmh.count.session.system,doorandoor_inventory_variant_count.model_inventory_count_session,base.group_system,1,1,1,1
+access_ddmh_count_line_system,access.ddmh.count.line.system,doorandoor_inventory_variant_count.model_inventory_count_line,base.group_system,1,1,1,1
+access_ddmh_count_item_line_system,access.ddmh.count.item.line.system,doorandoor_inventory_variant_count.model_inventory_count_item_line,base.group_system,1,1,1,1

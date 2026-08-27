@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_ddsp_special_product" model="ir.sequence">
+        <field name="name">Producto transformado DoorAndDoor</field>
+        <field name="code">ddsp.special.product</field>
+        <field name="prefix">ESP-%(year)s-</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+    <record id="seq_ddsp_special_product_barcode" model="ir.sequence">
+        <field name="name">Barcode EAN producto personalizado DoorAndDoor</field>
+        <field name="code">ddsp.special.product.barcode</field>
+        <field name="padding">10</field>
+        <field name="number_next">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

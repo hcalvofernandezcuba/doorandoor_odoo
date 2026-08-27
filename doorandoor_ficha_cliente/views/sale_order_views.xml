@@ -8,13 +8,15 @@
             <field name="priority">120</field>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='partner_id']" position="after">
+                    <button name="ddfc_action_open_builder_wizard"
+                            type="object"
+                            string="Crear Constructor"
+                            class="oe_link"
+                            invisible="false"/>
                     <field
                         name="ddfc_builder_id"
-                        domain="[('id', '=', False)]"
-                        options="{'no_open': True, 'no_create_edit': False}"
-                        context="{'default_ddfc_discount_for_new_process': True}"/>
-                    <field name="ddfc_builder_discount_percent" invisible="not ddfc_builder_discount_for_new_process"/>
-                    <field name="ddfc_pricing_source" invisible="not ddfc_builder_discount_for_new_process"/>
+                        invisible="not ddfc_builder_id"
+                        readonly="1"/>
                 </xpath>
             </field>
         </record>

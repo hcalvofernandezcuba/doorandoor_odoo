@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_list_ddpc_warehouse_operations" model="ir.ui.view">
+        <field name="name">stock.picking.list.ddpc.warehouse.operations</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <list string="Operaciones de almacén" create="0" delete="0"
+                  decoration-success="state == 'done'"
+                  decoration-warning="ddpc_transfer_alert_active"
+                  decoration-muted="state == 'cancel'">
+                <field name="priority" widget="priority" optional="show"/>
+                <field name="name"/>
+                <field name="ddpc_operation_category" widget="badge"/>
+                <field name="ddpc_source_warehouse_id"/>
+                <field name="ddpc_dest_warehouse_id"/>
+                <field name="ddpc_transfer_stage" widget="badge" optional="show"/>
+                <field name="ddpc_transfer_source_picking_id" optional="hide"/>
+                <field name="ddpc_transfer_receipt_picking_id" optional="hide"/>
+                <field name="partner_id" string="Proveedor / Cliente"/>
+                <field name="location_id" optional="hide"/>
+                <field name="location_dest_id" optional="hide"/>
+                <field name="origin"/>
+                <field name="scheduled_date"/>
+                <field name="user_id" optional="show"/>
+                <field name="state" widget="badge"/>
+                <field name="ddpc_transfer_next_alert_at" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_picking_kanban_ddpc_warehouse_operations" model="ir.ui.view">
+        <field name="name">stock.picking.kanban.ddpc.warehouse.operations</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <kanban string="Operaciones de almacén" create="0" quick_create="false"
+                    default_group_by="state" records_draggable="false" groups_draggable="false">
+                <field name="name"/>
+                <field name="ddpc_operation_category"/>
+                <field name="ddpc_source_warehouse_id"/>
+                <field name="ddpc_dest_warehouse_id"/>
+                <field name="partner_id"/>
+                <field name="origin"/>
+                <field name="scheduled_date"/>
+                <field name="state"/>
+                <field name="ddpc_transfer_alert_active"/>
+                <field name="ddpc_transfer_stage"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="border-start border-4 {{record.ddpc_transfer_alert_active.raw_value ? 'border-warning' : record.state.raw_value === 'done' ? 'border-success' : 'border-primary'}}">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong class="fs-5"><field name="name"/></strong>
+                                <field name="state" widget="badge"/>
+                            </div>
+                            <div class="mb-1"><field name="ddpc_operation_category" widget="badge"/></div>
+                            <div t-if="record.ddpc_transfer_stage.raw_value" class="mb-1"><field name="ddpc_transfer_stage" widget="badge"/></div>
+                            <div><i class="fa fa-building-o me-1" title="Almacén de inicio"/><field name="ddpc_source_warehouse_id"/></div>
+                            <div><i class="fa fa-arrow-right me-1" title="Hacia"/><field name="ddpc_dest_warehouse_id"/></div>
+                            <div t-if="record.partner_id.raw_value" class="mt-2"><i class="fa fa-user me-1" title="Contacto"/><field name="partner_id"/></div>
+                            <div class="small text-muted mt-2"><field name="origin"/></div>
+                            <div class="small text-muted"><field name="scheduled_date"/></div>
+                            <div t-if="record.ddpc_transfer_alert_active.raw_value" class="alert alert-warning py-1 px-2 mt-2 mb-0" role="status">
+                                Recepción pendiente
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_picking_search_ddpc_warehouse_operations" model="ir.ui.view">
+        <field name="name">stock.picking.search.ddpc.warehouse.operations</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <search string="Operaciones de almacén">
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="partner_id"/>
+                <field name="ddpc_source_warehouse_id"/>
+                <field name="ddpc_dest_warehouse_id"/>
+                <filter name="pending" string="Pendientes" domain="[('state','not in',('done','cancel'))]"/>
+                <filter name="alerted" string="Con alerta" domain="[('ddpc_transfer_alert_active','=',True)]"/>
+                <separator/>
+                <filter name="group_source" string="Almacén de inicio" context="{'group_by':'ddpc_source_warehouse_id'}"/>
+                <filter name="group_dest" string="Almacén de destino" context="{'group_by':'ddpc_dest_warehouse_id'}"/>
+                <filter name="group_state" string="Estado" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddpc_warehouse_receipts" model="ir.actions.act_window">
+        <field name="name">Recepciones</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('state','!=','cancel'), '|', ('picking_type_code','=','incoming'), ('ddpc_transfer_stage','=','receipt')]</field>
+        <field name="search_view_id" ref="view_picking_search_ddpc_warehouse_operations"/>
+        <field name="context">{'search_default_pending': 1, 'search_default_group_dest': 1}</field>
+    </record>
+
+    <record id="action_ddpc_warehouse_transfers" model="ir.actions.act_window">
+        <field name="name">Traslados</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('ddpc_operation_category','=','transfer')]</field>
+        <field name="search_view_id" ref="view_picking_search_ddpc_warehouse_operations"/>
+        <field name="context">{'search_default_pending': 1, 'search_default_group_state': 1}</field>
+    </record>
+
+    <record id="action_ddpc_factory_entries" model="ir.actions.act_window">
+        <field name="name">Entradas de fábrica</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('ddpc_operation_category','=','factory_entry')]</field>
+        <field name="search_view_id" ref="view_picking_search_ddpc_warehouse_operations"/>
+        <field name="context">{'search_default_pending': 1, 'search_default_group_dest': 1}</field>
+    </record>
+
+    <record id="action_ddpc_warehouse_receipts_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/><field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_picking_kanban_ddpc_warehouse_operations"/><field name="act_window_id" ref="action_ddpc_warehouse_receipts"/>
+    </record>
+    <record id="action_ddpc_warehouse_receipts_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/><field name="view_mode">list</field>
+        <field name="view_id" ref="view_picking_list_ddpc_warehouse_operations"/><field name="act_window_id" ref="action_ddpc_warehouse_receipts"/>
+    </record>
+    <record id="action_ddpc_warehouse_transfers_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/><field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_picking_kanban_ddpc_warehouse_operations"/><field name="act_window_id" ref="action_ddpc_warehouse_transfers"/>
+    </record>
+    <record id="action_ddpc_warehouse_transfers_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/><field name="view_mode">list</field>
+        <field name="view_id" ref="view_picking_list_ddpc_warehouse_operations"/><field name="act_window_id" ref="action_ddpc_warehouse_transfers"/>
+    </record>
+    <record id="action_ddpc_factory_entries_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/><field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_picking_kanban_ddpc_warehouse_operations"/><field name="act_window_id" ref="action_ddpc_factory_entries"/>
+    </record>
+    <record id="action_ddpc_factory_entries_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/><field name="view_mode">list</field>
+        <field name="view_id" ref="view_picking_list_ddpc_warehouse_operations"/><field name="act_window_id" ref="action_ddpc_factory_entries"/>
+    </record>
+</odoo>

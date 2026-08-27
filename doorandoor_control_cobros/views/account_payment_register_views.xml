@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_register_form_ddc" model="ir.ui.view">
+        <field name="name">account.payment.register.form.ddc.waiting</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='line_ids']" position="after">
+                <field name="ddc_sales_report_mode" invisible="1"/>
+                <field name="ddc_authorized_credit_mode" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='journal_id']" position="after">
+                <div class="alert alert-info mt-2" role="status" invisible="not ddc_sales_report_mode">
+                    <strong>En espera de pago.</strong>
+                    Este diario es controlado. Ventas solo notificara el saldo pendiente a Control de Cobros;
+                    no se creara un pago ni un asiento contable.
+                </div>
+                <group string="Autorizacion del cliente"
+                       invisible="not ddc_authorized_credit_mode">
+                    <field name="ddc_credit_available" readonly="1"/>
+                    <field name="ddc_credit_authorization_id" readonly="1"/>
+                    <button name="action_send_ddc_credit_code"
+                            type="object"
+                            string="Enviar codigo de 6 digitos"
+                            class="btn-secondary"/>
+                    <field name="ddc_credit_authorization_code"
+                           placeholder="000000"
+                           required="ddc_authorized_credit_mode and ddc_credit_authorization_id"/>
+                    <div class="alert alert-warning" role="status">
+                        Sin el codigo correcto, vigente y correspondiente a esta factura e importe,
+                        Odoo no creara el asiento ni liquidara la factura.
+                    </div>
+                </group>
+            </xpath>
+
+            <xpath expr="//field[@name='payment_method_line_id']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode</attribute>
+                <attribute name="required">not ddc_sales_report_mode</attribute>
+            </xpath>
+            <xpath expr="//label[@for='amount']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode</attribute>
+            </xpath>
+            <xpath expr="//div[@name='amount_div']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode</attribute>
+            </xpath>
+            <xpath expr="//field[@name='payment_date']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode</attribute>
+            </xpath>
+            <xpath expr="//field[@name='communication']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode or not can_edit_wizard or (can_group_payments and not group_payment)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_bank_id']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode or not show_partner_bank_account or not can_edit_wizard or (can_group_payments and not group_payment)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='group_payment']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode or not can_group_payments</attribute>
+            </xpath>
+
+            <xpath expr="//footer/button[@name='action_create_payments' and @invisible='total_payments_amount == 1']" position="before">
+                <button string="Enviar a espera de pago"
+                        name="action_create_payments"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="not ddc_sales_report_mode"/>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_create_payments' and @invisible='total_payments_amount == 1']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode or total_payments_amount == 1</attribute>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_create_payments' and @invisible='total_payments_amount != 1']" position="attributes">
+                <attribute name="invisible">ddc_sales_report_mode or total_payments_amount != 1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

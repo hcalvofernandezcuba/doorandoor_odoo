@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Stock Labels",
-    "version": "18.0.1.0.43",
+    "version": "18.0.1.0.50",
     "category": "Inventory",
-    "summary": "18.0.1.0.43 - Corrige filtro de lineas de factura para labels documentales",
+    "summary": "18.0.1.0.50 - Label Zebra vertical de 4x6 pulgadas, uno por hoja completa",
     "description": """
 DoorAndDoor Stock Labels
 ========================
+
+Version 18.0.1.0.47
+-------------------
+
+Renderiza cada módulo del Code128 con tres píxeles para conservar el ancho y
+la separación de las barras al convertir el reporte a PDF e imprimirlo. Evita
+que las cámaras móviles reciban líneas mezcladas por reducción subpíxel.
 
 Este modulo agrega una primera version de etiquetas para recepcion de
 inventario en DoorAndDoor.
@@ -34,6 +41,21 @@ Alcance inicial
 
 Historial resumido
 ------------------
+
+- 18.0.1.0.50
+  Ajusta el reporte al rollo Zebra real de 4 pulgadas de ancho por 6 de alto.
+  El contenido se mantiene vertical y se distribuye de arriba hacia abajo para
+  ocupar todo el espacio disponible, con un único label ampliado por página.
+
+- 18.0.1.0.49
+  Define un papel PDF real de 4x6 pulgadas en orientación vertical para Zebra.
+  Los labels de producto se amplían al ancho útil y se imprimen hasta dos por
+  hoja, sin rotación horizontal ni escalado desde un formato A4.
+
+- 18.0.1.0.48
+  El conteo de recepciones acepta el barcode detectado directamente por el
+  lector móvil, incrementa una unidad de la variante esperada y limpia el campo
+  para la siguiente lectura sin depender de guardar manualmente el wizard.
 
 - 18.0.1.0.24
   Continúa el autoserie diario por producto y actualiza manuales de uso y pruebas.
@@ -102,9 +124,22 @@ Historial resumido
   Corrige la deteccion de lineas validas en `Labels de factura` para esta base Odoo CE 18.
   Ahora el wizard incluye lineas con `display_type = product`, evitando que facturas validas queden sin payloads y muestren error falso.
 
+- 18.0.1.0.45
+  `Labels de productos` deja de bloquear plantillas sin Codigo de producto,
+  referencia interna o barcode. Se reutiliza el codigo de la variante unica
+  cuando existe y, como ultimo respaldo, se genera una referencia estable
+  `DDSL-P<id>` para poder imprimir el label sin alterar el producto.
+
+- 18.0.1.0.46
+  El asistente muestra y permite editar `Codigo de producto para label`.
+  Cuando esta vacio presenta una advertencia clara y una vista previa del
+  codigo automatico que se imprimira, evitando depender de conocimiento
+  previo del usuario.
+
     """,
-    "author": "Hanoi Calvo Fernandez for Doorandoor",
-    "website": "https://gestion.doorandoor.com",
+    "author": "Hanoi Calvo",
+    "maintainer": "doorandoor",
+    "website": "https://doorandoor.com",
     "depends": [
         "stock",
         "product",
@@ -121,6 +156,7 @@ Historial resumido
         "views/account_move_views.xml",
         "views/mrp_production_views.xml",
         "views/stock_picking_views.xml",
+        "report/label_paperformat.xml",
         "report/document_label_report.xml",
         "report/product_label_report.xml",
         "report/stock_label_report.xml",

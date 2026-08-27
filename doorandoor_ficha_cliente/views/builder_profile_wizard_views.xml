@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Vista del wizard -->
+        <record id="view_ddfc_builder_profile_wizard_form" model="ir.ui.view">
+            <field name="name">ddfc.builder.profile.wizard.form</field>
+            <field name="model">ddfc.builder.profile.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Completar Datos del Constructor">
+                    <group>
+                        <group string="Datos del Constructor">
+                            <field name="builder_name"/>
+                            <field name="builder_code"/>
+                            <field name="builder_phone"/>
+                            <field name="builder_mobile"/>
+                            <field name="builder_email"/>
+                            <field name="builder_city"/>
+                            <field name="builder_state_id"/>
+                            <field name="builder_country_id"/>
+                        </group>
+                        <group string="Contacto Asociado">
+                            <field name="partner_name"/>
+                            <field name="partner_phone"/>
+                            <field name="partner_mobile"/>
+                            <field name="partner_email"/>
+                            <field name="partner_city"/>
+                            <field name="partner_state_id"/>
+                            <field name="partner_country_id"/>
+                            <field name="partner_street"/>
+                            <field name="partner_website"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="builder_notes" placeholder="Referencia comercial, garantía, observaciones operativas..."/>
+                    </group>
+                    <group>
+                        <field name="builder_category_id" readonly="1"/>
+                    </group>
+                    <footer>
+                        <button name="action_create_builder" type="object" string="Crear Constructor" class="btn-primary"/>
+                        <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Acción del wizard -->
+        <record id="action_ddfc_builder_profile_wizard" model="ir.actions.act_window">
+            <field name="name">Crear Constructor</field>
+            <field name="res_model">ddfc.builder.profile.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>
