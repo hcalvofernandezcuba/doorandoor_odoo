@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="sequence_ddfc_production_need" model="ir.sequence"><field name="name">Necesidad de producción</field><field name="code">ddfc.production.need</field><field name="prefix">NEC/%(year)s/</field><field name="padding">5</field></record>
+    <record id="sequence_ddfc_daily_plan" model="ir.sequence"><field name="name">Plan diario de producción</field><field name="code">ddfc.daily.plan</field><field name="prefix">PLAN/%(year)s/</field><field name="padding">4</field></record>
+    <record id="sequence_ddfc_machining_handoff" model="ir.sequence"><field name="name">Vale Maquinado a Ensamblaje</field><field name="code">ddfc.machining.handoff</field><field name="prefix">ME/%(year)s/</field><field name="padding">5</field></record>
+</odoo>

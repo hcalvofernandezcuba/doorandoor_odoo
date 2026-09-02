@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_machining_handoff">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="handoff">
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-family:Arial,sans-serif; font-size:11px; color:#20252b;">
+                        <t t-set="document_title" t-value="'Vale Maquinado → Ensamblaje'"/>
+                        <t t-set="document_reference" t-value="handoff.name"/>
+                        <t t-call="doorandoor_fabrica_control.ddfc_report_header"/>
+                        <table style="width:100%; margin-bottom:14px; border-collapse:collapse;" class="table table-sm table-bordered">
+                            <tr><td><strong>Orden de fabricación</strong><br/><span t-field="handoff.production_id"/></td><td><strong>Producto de la OF</strong><br/><span t-field="handoff.product_id"/></td><td><strong>Cantidad OF</strong><br/><span t-field="handoff.product_qty"/> <span t-field="handoff.product_uom_id"/></td></tr>
+                            <tr><td><strong>Tipo de origen</strong><br/><span t-field="handoff.origin_type"/></td><td colspan="2"><strong>Documento origen de la OF</strong><br/><span t-field="handoff.origin_document"/></td></tr>
+                            <tr t-if="handoff.origin_type == 'replenishment'"><td colspan="3"><strong>Solicitud o transferencia de reposición</strong><br/><span t-field="handoff.replenishment_reference"/></td></tr>
+                        </table>
+                        <table style="width:100%; margin-bottom:16px; border-collapse:separate; border-spacing:6px;"><tr>
+                            <td style="width:48%; padding:12px; border:1px solid #777;"><strong>ENTREGA: MAQUINADO</strong><br/><span t-field="handoff.machining_workorder_id"/><br/><span t-field="handoff.delivered_by_id"/><br/><span t-field="handoff.delivered_at"/></td>
+                            <td style="width:4%; text-align:center; font-size:24px;">→</td>
+                            <td style="width:48%; padding:12px; border:2px solid #c59b19; background:#fff9e6;"><strong>RECIBE: ENSAMBLAJE</strong><br/><span t-field="handoff.reception_workorder_id"/><br/><span t-field="handoff.received_by_id"/><br/><span t-field="handoff.received_at"/></td>
+                        </tr></table>
+                        <table style="width:100%; border-collapse:collapse;" class="table table-sm table-bordered">
+                            <thead style="background:#e9edf1;"><tr><th>Parte o producto</th><th>Descripción</th><th style="text-align:right;">Entregado</th><th style="text-align:right;">Rechazado Maq.</th><th style="text-align:right;">Aceptado Ens.</th><th style="text-align:right;">Rechazado Ens.</th><th>UdM</th></tr></thead>
+                            <tbody><tr t-foreach="handoff.line_ids" t-as="line"><td><span t-field="line.product_id"/></td><td><span t-field="line.description"/></td><td style="text-align:right;"><span t-field="line.delivered_qty"/></td><td style="text-align:right;"><span t-field="line.rejected_qty"/></td><td style="text-align:right;"><span t-field="line.received_qty"/></td><td style="text-align:right;"><span t-field="line.receipt_rejected_qty"/></td><td><span t-field="line.product_uom_id"/></td></tr></tbody>
+                        </table>
+                        <div t-if="handoff.notes" style="margin-top:12px; padding:9px; border:1px solid #d9dde2;"><strong>Observaciones:</strong><br/><span t-field="handoff.notes"/></div>
+                        <table style="width:100%; margin-top:60px;"><tr><td style="width:42%; text-align:center; border-top:1px solid #333; padding-top:5px;">Entregado por Maquinado<br/>Nombre y firma</td><td style="width:16%;"></td><td style="width:42%; text-align:center; border-top:1px solid #333; padding-top:5px;">Recibido por Ensamblaje<br/>Nombre y firma</td></tr></table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    <record id="action_report_ddfc_machining_handoff" model="ir.actions.report">
+        <field name="name">Vale Maquinado a Ensamblaje</field>
+        <field name="model">ddfc.machining.handoff</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_fabrica_control.report_machining_handoff</field>
+        <field name="report_file">doorandoor_fabrica_control.report_machining_handoff</field>
+        <field name="binding_model_id" ref="model_ddfc_machining_handoff"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Vale Maquinado-Ensamblaje - %s' % object.name</field>
+    </record>
+</odoo>

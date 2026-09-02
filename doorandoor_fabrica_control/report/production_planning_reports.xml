@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="ddfc_report_header">
+        <div style="border-bottom:3px solid #c59b19; padding-bottom:10px; margin-bottom:16px;">
+            <table style="width:100%; border:0; table-layout:fixed;">
+                <tr>
+                    <td style="width:68%; vertical-align:middle;">
+                        <div style="font-size:24px; font-weight:700; color:#20252b;">DOOR AND DOOR</div>
+                        <div style="font-size:10px; color:#666; letter-spacing:1px;">CONTROL DE PRODUCCIÓN Y ALMACÉN</div>
+                    </td>
+                    <td style="width:32%; text-align:right; vertical-align:middle;">
+                        <div style="font-size:18px; font-weight:700;" t-out="document_title"/>
+                        <div style="font-size:11px; color:#555;" t-out="document_reference"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="report_daily_plan">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="plan"><t t-call="web.basic_layout"><div class="page" style="font-family:Arial,sans-serif; font-size:11px; color:#20252b;">
+            <t t-set="document_title" t-value="'Plan general diario'"/><t t-set="document_reference" t-value="plan.name"/><t t-call="doorandoor_fabrica_control.ddfc_report_header"/>
+            <table style="width:100%; margin-bottom:16px; background:#f4f5f7; border:1px solid #d9dde2;" cellpadding="8"><tr>
+                <td><strong>Fecha de producción</strong><br/><span t-field="plan.plan_date"/></td>
+                <td><strong>Centro productor</strong><br/><span t-field="plan.production_warehouse_id"/></td>
+                <td><strong>Corte cerrado</strong><br/><span t-field="plan.snapshot_at"/></td>
+                <td><strong>Impreso por</strong><br/><span t-out="user.name"/></td>
+            </tr></table>
+            <t t-foreach="plan.line_ids.mapped('warehouse_id')" t-as="warehouse">
+                <h3 style="margin:18px 0 6px; padding:7px 10px; background:#e9edf1; color:#20252b; border-left:4px solid #c59b19; font-size:14px;">Solicitado por: <span t-field="warehouse.name"/></h3>
+                <table style="width:100%; border-collapse:collapse;" class="table table-sm table-bordered"><thead style="background:#eceff2;"><tr><th style="width:34%;">Producto a fabricar</th><th style="width:25%;">Documento origen</th><th style="width:12%; text-align:right;">Solicitado</th><th style="width:12%; text-align:right;">Aprobado</th><th style="width:17%;">OF</th></tr></thead><tbody>
+                    <tr t-foreach="plan.line_ids.filtered(lambda l: l.warehouse_id == warehouse)" t-as="line"><td><span t-field="line.product_id"/></td><td><span t-field="line.source_document"/></td><td style="text-align:right;"><span t-field="line.requested_qty"/> <span t-field="line.product_uom_id"/></td><td style="text-align:right;"><span t-field="line.approved_qty"/></td><td><span t-field="line.production_id"/></td></tr>
+                </tbody></table>
+            </t>
+            <h3 style="margin:20px 0 6px; padding:7px 10px; background:#c59b19; color:#20252b; font-size:14px;">Consolidado de todos los almacenes</h3>
+            <table style="width:100%; border-collapse:collapse;" class="table table-sm table-bordered"><thead style="background:#f7f0d8;"><tr><th style="width:70%;">Producto</th><th style="width:30%; text-align:right;">Total aprobado</th></tr></thead><tbody><tr t-foreach="plan.line_ids.mapped('product_id')" t-as="product"><td><span t-field="product.name"/></td><td style="text-align:right;"><span t-out="sum(plan.line_ids.filtered(lambda l: l.product_id == product).mapped('approved_qty'))"/> <span t-field="product.uom_id"/></td></tr></tbody></table>
+            <table style="width:100%; margin-top:55px;"><tr><td style="width:42%; text-align:center; border-top:1px solid #333; padding-top:5px;">Responsable de planificación</td><td style="width:16%;"></td><td style="width:42%; text-align:center; border-top:1px solid #333; padding-top:5px;">Responsable de fábrica</td></tr></table>
+        </div></t></t></t>
+    </template>
+    <record id="action_report_ddfc_daily_plan" model="ir.actions.report"><field name="name">Plan general diario</field><field name="model">ddfc.daily.plan</field><field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_fabrica_control.report_daily_plan</field><field name="report_file">doorandoor_fabrica_control.report_daily_plan</field><field name="print_report_name">'Plan diario - %s' % object.name</field></record>
+
+    <template id="report_material_request">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="plan"><t t-call="web.basic_layout"><div class="page" style="font-family:Arial,sans-serif; font-size:11px; color:#20252b;">
+            <t t-set="document_title" t-value="'Requerimiento de materiales'"/><t t-set="document_reference" t-value="plan.name"/><t t-call="doorandoor_fabrica_control.ddfc_report_header"/>
+            <table style="width:100%; margin-bottom:16px; border-collapse:separate; border-spacing:6px;"><tr>
+                <td style="width:33%; padding:10px; border:1px solid #d9dde2; background:#f4f5f7;"><strong>SOLICITAR DESDE</strong><br/><span t-field="plan.production_warehouse_id"/><br/><span t-field="plan.production_warehouse_id.lot_stock_id"/></td>
+                <td style="width:34%; padding:10px; border:2px solid #c59b19; background:#fff9e6;"><strong>ENTREGAR A FÁBRICA</strong><br/>Equipo de Producción<br/><span t-field="plan.material_destination_location_id"/></td>
+                <td style="width:33%; padding:10px; border:1px solid #d9dde2; background:#f4f5f7;"><strong>SOLICITADO POR</strong><br/>Equipo de Producción<br/><strong>Corte:</strong> <span t-field="plan.snapshot_at"/><br/><strong>Impreso por:</strong> <span t-out="user.name"/></td>
+            </tr></table>
+            <table style="width:100%; border-collapse:collapse;" class="table table-sm table-bordered"><thead style="background:#e9edf1;"><tr><th style="width:48%; color:#20252b; border-top:2px solid #c59b19;">Parte o pieza</th><th style="width:14%; text-align:right; color:#20252b; border-top:2px solid #c59b19;">Requerido</th><th style="width:14%; text-align:right; color:#20252b; border-top:2px solid #c59b19;">Disponible</th><th style="width:14%; text-align:right; color:#20252b; border-top:2px solid #c59b19;">Faltante</th><th style="width:10%; color:#20252b; border-top:2px solid #c59b19;">UdM</th></tr></thead><tbody><tr t-foreach="plan.component_line_ids" t-as="line"><td><span t-field="line.product_id"/></td><td style="text-align:right;"><span t-field="line.required_qty"/></td><td style="text-align:right;"><span t-field="line.available_qty"/></td><td style="text-align:right;"><span t-field="line.shortage_qty"/></td><td><span t-field="line.product_uom_id"/></td></tr></tbody></table>
+            <h3 style="margin:20px 0 7px; padding:7px 10px; background:#e9edf1; color:#20252b; border-left:4px solid #c59b19; font-size:14px;">Separación de materiales por orden</h3>
+            <t t-foreach="plan.line_ids.filtered(lambda l: l.production_id)" t-as="order_line">
+                <table style="width:100%; margin:10px 0 4px; background:#f7f0d8; border:1px solid #d9dde2;" cellpadding="6"><tr><td><strong>OF:</strong> <span t-field="order_line.production_id"/></td><td><strong>Origen:</strong> <span t-field="order_line.source_document"/></td><td><strong>Para:</strong> <span t-field="order_line.warehouse_id"/></td></tr></table>
+                <table style="width:100%; border-collapse:collapse;" class="table table-sm table-bordered"><thead style="background:#f4f5f7;"><tr><th style="width:65%; color:#20252b;">Parte o pieza</th><th style="width:20%; text-align:right; color:#20252b;">Cantidad</th><th style="width:15%; color:#20252b;">UdM</th></tr></thead><tbody><tr t-foreach="order_line.order_component_line_ids" t-as="part"><td><span t-field="part.product_id"/></td><td style="text-align:right;"><span t-field="part.required_qty"/></td><td><span t-field="part.product_uom_id"/></td></tr></tbody></table>
+            </t>
+            <div style="margin-top:14px; padding:9px; border-left:4px solid #c59b19; background:#fff9e6;"><strong>Importante:</strong> este documento solicita la preparación. El inventario se descuenta únicamente cuando Almacén valida la entrega física a Fábrica.</div>
+            <table style="width:100%; margin-top:55px;"><tr><td style="width:42%; text-align:center; border-top:1px solid #333; padding-top:5px;">Solicitado por Producción</td><td style="width:16%;"></td><td style="width:42%; text-align:center; border-top:1px solid #333; padding-top:5px;">Preparado por Almacén</td></tr></table>
+        </div></t></t></t>
+    </template>
+    <record id="action_report_ddfc_material_request" model="ir.actions.report"><field name="name">Requerimiento de materiales</field><field name="model">ddfc.daily.plan</field><field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_fabrica_control.report_material_request</field><field name="report_file">doorandoor_fabrica_control.report_material_request</field><field name="print_report_name">'Requerimiento - %s' % object.name</field></record>
+
+    <template id="report_material_delivery">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="plan"><t t-call="web.basic_layout"><div class="page" style="font-family:Arial,sans-serif; font-size:11px; color:#20252b;">
+            <t t-set="document_title" t-value="'Vale de salida a fábrica'"/><t t-set="document_reference" t-value="plan.material_picking_id.name or plan.name"/><t t-call="doorandoor_fabrica_control.ddfc_report_header"/>
+            <table style="width:100%; margin-bottom:12px;"><tr><td style="width:65%;"><strong>Plan:</strong> <span t-field="plan.name"/><br/><strong>Fecha de producción:</strong> <span t-field="plan.plan_date"/><br/><strong>Solicitado por:</strong> Equipo de Producción<br/><strong>Impreso por:</strong> <span t-out="user.name"/></td><td style="width:35%; text-align:center;"><div t-field="plan.material_picking_id.name" t-options="{'widget':'barcode','width':500,'height':80,'img_style':'width:240px;height:38px'}"/></td></tr></table>
+            <table style="width:100%; margin-bottom:16px; border-collapse:separate; border-spacing:6px;"><tr>
+                <td style="width:48%; padding:12px; border:1px solid #777;"><strong>DE: ALMACÉN QUE ENTREGA</strong><br/><span t-field="plan.production_warehouse_id"/><br/><span t-field="plan.material_picking_id.location_id"/></td>
+                <td style="width:4%; text-align:center; font-size:24px;">→</td>
+                <td style="width:48%; padding:12px; border:2px solid #c59b19; background:#fff9e6;"><strong>PARA: FÁBRICA / PRODUCCIÓN</strong><br/>Equipo de Producción<br/><span t-field="plan.material_picking_id.location_dest_id"/></td>
+            </tr></table>
+            <table style="width:100%; border-collapse:collapse;" class="table table-sm table-bordered"><thead style="background:#e9edf1;"><tr><th style="width:66%; color:#20252b; border-top:2px solid #c59b19;">Parte o pieza a entregar</th><th style="width:18%; text-align:right; color:#20252b; border-top:2px solid #c59b19;">Cantidad</th><th style="width:16%; color:#20252b; border-top:2px solid #c59b19;">UdM</th></tr></thead><tbody><tr t-foreach="plan.material_picking_id.move_ids" t-as="move"><td><span t-field="move.product_id"/></td><td style="text-align:right;"><span t-field="move.product_uom_qty"/></td><td><span t-field="move.product_uom"/></td></tr></tbody></table>
+            <table style="width:100%; margin-top:60px;"><tr><td style="width:42%; text-align:center; border-top:1px solid #333; padding-top:5px;">Entregado por Almacén<br/>Nombre, firma, fecha y hora</td><td style="width:16%;"></td><td style="width:42%; text-align:center; border-top:1px solid #333; padding-top:5px;">Recibido por Fábrica<br/>Nombre, firma, fecha y hora</td></tr></table>
+        </div></t></t></t>
+    </template>
+    <record id="action_report_ddfc_material_delivery" model="ir.actions.report"><field name="name">Vale de salida a fábrica</field><field name="model">ddfc.daily.plan</field><field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_fabrica_control.report_material_delivery</field><field name="report_file">doorandoor_fabrica_control.report_material_delivery</field><field name="print_report_name">'Vale salida fabrica - %s' % object.name</field></record>
+
+    <record id="paperformat_ddfc_order_label_3x1" model="report.paperformat">
+        <field name="name">DoorAndDoor OF 2x1 pulgadas</field><field name="default" eval="False"/><field name="format">custom</field>
+        <field name="page_width">51</field><field name="page_height">25</field><field name="orientation">Portrait</field>
+        <field name="margin_top">1</field><field name="margin_bottom">1</field><field name="margin_left">1</field><field name="margin_right">1</field>
+        <field name="header_line" eval="False"/><field name="header_spacing">0</field><field name="dpi">96</field>
+    </record>
+    <template id="report_order_labels">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="plan"><t t-foreach="plan.line_ids.filtered(lambda l: l.production_id)" t-as="line"><t t-foreach="range(line.label_copies)" t-as="unit_index">
+            <div class="page" t-att-style="'width:49mm; height:23mm; overflow:hidden; font-family:Arial,sans-serif; color:#20252b; padding:0; margin:0; page-break-after:%s;' % ('auto' if line_last and unit_index_last else 'always')">
+                <table style="width:100%; height:100%; table-layout:fixed; border-collapse:collapse;">
+                    <tr style="height:7mm;">
+                        <td colspan="2" style="vertical-align:middle; padding:0.6mm 0.8mm; border-bottom:1px solid #333; background:#fff;">
+                            <div style="max-height:5.8mm; overflow:hidden; font-size:6.5px; font-weight:700; line-height:1.15; color:#000; word-wrap:break-word;" t-out="line.product_id.display_name"/>
+                        </td>
+                    </tr>
+                    <tr style="height:16mm;">
+                        <td style="width:62%; vertical-align:top; border-right:1px solid #333; padding:0.8mm 0.7mm;">
+                            <div style="font-size:11px; font-weight:700; line-height:1; margin-bottom:1.1mm;"><span t-field="line.production_id.name"/></div>
+                            <div style="font-size:5.2px; line-height:1.4; margin-top:0.7mm; white-space:nowrap; overflow:hidden;"><strong>Origen:</strong> <span t-field="line.source_document"/></div>
+                            <div style="font-size:5.2px; line-height:1.4; margin-top:0.7mm; white-space:nowrap; overflow:hidden;"><strong>Destino:</strong> <span t-field="line.warehouse_id"/></div>
+                        </td>
+                        <td style="width:38%; text-align:center; vertical-align:middle; padding:0.35mm;">
+                            <div style="font-size:7px; font-weight:700; color:#000;">Unidad <span t-out="unit_index + 1"/>/<span t-out="line.label_copies"/></div>
+                            <div style="height:8.5mm; overflow:hidden; margin-bottom:0.4mm;" t-field="line.production_id.name" t-options="{'widget':'barcode','symbology':'Code128','width':290,'height':57,'img_style':'display:block;width:18.4mm;height:8.2mm'}"/>
+                            <div style="font-size:5px; line-height:1;"><span t-field="plan.name"/></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </t></t></t></t>
+    </template>
+    <record id="action_report_ddfc_order_labels" model="ir.actions.report"><field name="name">Etiquetas OF 2x1</field><field name="model">ddfc.daily.plan</field><field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_fabrica_control.report_order_labels</field><field name="report_file">doorandoor_fabrica_control.report_order_labels</field><field name="paperformat_id" ref="paperformat_ddfc_order_label_3x1"/><field name="print_report_name">'Etiquetas OF - %s' % object.name</field></record>
+</odoo>

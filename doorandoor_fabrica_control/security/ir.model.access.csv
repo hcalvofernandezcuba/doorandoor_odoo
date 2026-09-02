@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddfc_production_need_user,access.ddfc.production.need.user,model_ddfc_production_need,mrp.group_mrp_user,1,1,1,0
+access_ddfc_daily_plan_user,access.ddfc.daily.plan.user,model_ddfc_daily_plan,mrp.group_mrp_user,1,1,1,0
+access_ddfc_daily_plan_line_user,access.ddfc.daily.plan.line.user,model_ddfc_daily_plan_line,mrp.group_mrp_user,1,1,1,0
+access_ddfc_daily_plan_component_user,access.ddfc.daily.plan.component.user,model_ddfc_daily_plan_component,mrp.group_mrp_user,1,1,1,0
+access_ddfc_daily_plan_order_component_user,access.ddfc.daily.plan.order.component.user,model_ddfc_daily_plan_order_component,mrp.group_mrp_user,1,1,1,0
+access_ddfc_machining_handoff_user,access.ddfc.machining.handoff.user,model_ddfc_machining_handoff,mrp.group_mrp_user,1,1,1,0
+access_ddfc_machining_handoff_manager,access.ddfc.machining.handoff.manager,model_ddfc_machining_handoff,mrp.group_mrp_manager,1,1,1,1
+access_ddfc_machining_handoff_line_user,access.ddfc.machining.handoff.line.user,model_ddfc_machining_handoff_line,mrp.group_mrp_user,1,1,1,0
+access_ddfc_machining_handoff_line_manager,access.ddfc.machining.handoff.line.manager,model_ddfc_machining_handoff_line,mrp.group_mrp_manager,1,1,1,1
