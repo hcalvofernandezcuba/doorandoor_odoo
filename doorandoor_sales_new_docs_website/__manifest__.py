@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New Docs Website",
-    "version": "18.0.1.3.0",
+    "version": "18.0.1.3.1",
     "category": "Website",
-    "summary": "18.0.1.3.0 - Publica capacitación de cobros, inventarios y conteo móvil",
+    "summary": "18.0.1.3.1 - Publica la guía del flujo de fabricación",
     "description": """
 DoorAndDoor Sales New Docs Website
 ==================================
@@ -24,6 +24,11 @@ productos normales, variantes, Transformados, Especiales y plantillas maestras.
 La guia de pruebas consolida la secuencia vigente de producto, venta, pago,
 fabricacion, credito, documentos, inventario y despacho.
 
+18.0.1.3.1
+------------
+Publica la guia de usuario para validar la fabricacion por venta y reposicion,
+con el recorrido de demostracion y las decisiones pendientes del cliente.
+
 18.0.1.3.0
 ------------
 Publica tres guias operativas independientes para la capacitacion: cobros y
@@ -37,6 +42,7 @@ roles, pasos, resultados esperados y controles de cada operacion.
     "depends": [
         "website",
         "doorandoor_sales_new",
+        "doorandoor_fabrica_control",
     ],
     "data": [
         "data/website_menu.xml",

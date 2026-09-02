@@ -8,19 +8,19 @@ from odoo.http import request
 
 
 class DoorAndDoorSalesNewDocsController(http.Controller):
-    _DOCS_MODULE_DIR = Path(__file__).resolve().parents[2] / "doorandoor_sales_new"
-    _DOCS_DIR = _DOCS_MODULE_DIR / "docs"
+    _ADDONS_DIR = Path(__file__).resolve().parents[2]
     _DOCS_ROUTE = "/doorandoor-sales-new/docs"
     _PUBLISHED_DOCS = [
-        "GUIA_CAPACITACION_COBROS_PAGOS.md",
-        "GUIA_CAPACITACION_INVENTARIOS.md",
-        "GUIA_CONTEO_HANGER_MOVIL.md",
-        "GUIA_PRUEBAS_FLUJOS_DOORANDOOR.md",
-        "GUIA_CONFIGURACION_PRODUCTOS_DOORANDOOR.md",
-        "presentation_and_training_guide.md",
-        "invoice_sale_fulfillment_flow_explained.md",
-        "payment_release_stock_mrp_delivery_flow_explained.md",
-        "pickup_order_flow_explained.md",
+        ("doorandoor_sales_new", "GUIA_CAPACITACION_COBROS_PAGOS.md"),
+        ("doorandoor_sales_new", "GUIA_CAPACITACION_INVENTARIOS.md"),
+        ("doorandoor_sales_new", "GUIA_CONTEO_HANGER_MOVIL.md"),
+        ("doorandoor_sales_new", "GUIA_PRUEBAS_FLUJOS_DOORANDOOR.md"),
+        ("doorandoor_sales_new", "GUIA_CONFIGURACION_PRODUCTOS_DOORANDOOR.md"),
+        ("doorandoor_sales_new", "presentation_and_training_guide.md"),
+        ("doorandoor_sales_new", "invoice_sale_fulfillment_flow_explained.md"),
+        ("doorandoor_sales_new", "payment_release_stock_mrp_delivery_flow_explained.md"),
+        ("doorandoor_sales_new", "pickup_order_flow_explained.md"),
+        ("doorandoor_fabrica_control", "GUIA_USUARIO_FLUJO_FABRICACION.md"),
     ]
 
     def _slugify(self, value):
@@ -166,16 +166,13 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
 
     def _get_published_doc_paths(self):
         paths = []
-        for filename in self._PUBLISHED_DOCS:
-            path = self._DOCS_DIR / filename
+        for module_name, filename in self._PUBLISHED_DOCS:
+            path = self._ADDONS_DIR / module_name / "docs" / filename
             if path.exists():
                 paths.append(path)
         return paths
 
     def _get_doc_files(self):
-        if not self._DOCS_DIR.exists():
-            return []
-
         docs = []
         for path in self._get_published_doc_paths():
             text = path.read_text(encoding="utf-8")
@@ -192,7 +189,10 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
                 }
             )
 
-        order_map = {name: index for index, name in enumerate(self._PUBLISHED_DOCS)}
+        order_map = {
+            filename: index
+            for index, (_module_name, filename) in enumerate(self._PUBLISHED_DOCS)
+        }
         docs.sort(key=lambda doc: (order_map.get(doc["filename"], len(self._PUBLISHED_DOCS)), doc["title"].lower()))
         return docs
 
