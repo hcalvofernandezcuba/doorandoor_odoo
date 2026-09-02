@@ -45,11 +45,11 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <strong>Estado en Tiempo Real:</strong>
-                                <span class="o_ddpc_status_text" t-esc="ddpc_realtime_status"/>
+                                <field name="ddpc_realtime_status" class="o_ddpc_status_text" readonly="1"/>
                             </div>
                             <div class="col-md-4 text-right">
                                 <small class="text-muted">Última actividad:</small>
-                                <div class="o_ddpc_last_activity" t-esc="ddpc_last_activity_timestamp"/>
+                                <field name="ddpc_last_activity_timestamp" class="o_ddpc_last_activity" readonly="1"/>
                             </div>
                         </div>
                     </div>

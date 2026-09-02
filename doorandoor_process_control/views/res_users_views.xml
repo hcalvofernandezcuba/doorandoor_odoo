@@ -12,7 +12,8 @@
                         <field name="ddpc_default_warehouse_id"/>
                     </group>
                     <div class="alert alert-info" role="alert">
-                        El usuario verá las recepciones, entregas y traslados de estos almacenes.
+                        El usuario recibirá las notificaciones y verá las operaciones de estos almacenes.
+                        Los usuarios de Administración/Ajustes reciben notificaciones de todos los almacenes.
                     </div>
                 </page>
             </xpath>
@@ -25,8 +26,9 @@
         <field name="inherit_id" ref="stock.view_warehouse"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet/group" position="inside">
-                <group string="Operadores DoorAndDoor" groups="base.group_system">
-                    <field name="ddpc_operator_user_ids" widget="many2many_tags"/>
+                <group string="Notificaciones DoorAndDoor" groups="base.group_system">
+                    <field name="ddpc_operator_user_ids" widget="many2many_tags"
+                           domain="[('share', '=', False), ('active', '=', True)]"/>
                 </group>
             </xpath>
         </field>

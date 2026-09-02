@@ -1,8 +1,12 @@
 from datetime import timedelta
+import logging
 
 from markupsafe import Markup
 
 from odoo import _, api, fields, models
+
+
+_logger = logging.getLogger(__name__)
 
 
 class StockPicking(models.Model):
@@ -190,39 +194,63 @@ class StockPicking(models.Model):
 
     def _ddpc_transfer_alert_users(self):
         self.ensure_one()
-        users = self.ddpc_dest_warehouse_id.ddpc_operator_user_ids.filtered("active")
-        if not users and self.user_id:
-            users = self.user_id
-        if not users:
-            users = self.env.ref(
-                "doorandoor_process_control.group_ddpc_manager"
-            ).users.filtered("active")
+        warehouse_users = self.ddpc_dest_warehouse_id.ddpc_operator_user_ids
+        admin_users = self.env.ref("base.group_system").users
+        users = (warehouse_users | admin_users).filtered(
+            lambda user: user.active and not user.share and user.partner_id
+        )
+        if not warehouse_users and self.user_id:
+            users |= self.user_id.filtered(
+                lambda user: user.active and not user.share and user.partner_id
+            )
         return users
 
     def _ddpc_broadcast_picking_update(self, event_type, extra_data=None):
-        """
-        Envía actualización en tiempo real a usuarios del almacén destino usando bus.bus
-        para permitir actualización automática de vistas de recepciones.
-        """
+        """Send an Odoo 18 native toast to destination warehouse operators and trigger record update."""
         self.ensure_one()
         target_users = self._ddpc_transfer_alert_users()
-        message = {
-            'type': 'picking_update',
-            'event': event_type,
-            'picking_id': self.id,
-            'picking_name': self.name,
-            'stage': self.ddpc_transfer_stage,
-            'state': self.state,
-            'source_warehouse': self.ddpc_source_warehouse_id.display_name if self.ddpc_source_warehouse_id else '',
-            'dest_warehouse': self.ddpc_dest_warehouse_id.display_name if self.ddpc_dest_warehouse_id else '',
-            'timestamp': fields.Datetime.now().isoformat(),
-            **(extra_data or {})
-        }
+        _logger.info(
+            "DDPC realtime notification event=%s picking=%s warehouse=%s users=%s",
+            event_type,
+            self.name,
+            self.ddpc_dest_warehouse_id.display_name,
+            target_users.mapped("login"),
+        )
+        if event_type == "transfer_dispatched":
+            title = _("Traslado despachado")
+            message = _("El traslado %s fue despachado hacia %s.") % (
+                self.name,
+                self.ddpc_dest_warehouse_id.display_name,
+            )
+            notification_type = "warning"
+        else:
+            title = _("Recepcion de traslado completada")
+            message = _("La recepcion %s fue validada por %s.") % (
+                self.name,
+                (extra_data or {}).get("validated_by", self.env.user.display_name),
+            )
+            notification_type = "success"
         for user in target_users:
-            self.env['bus.bus']._sendone(
+            # Enviar notificación toast nativa
+            self.env["bus.bus"]._sendone(
                 user.partner_id,
-                'doorandoor.picking.update',
-                message
+                "simple_notification",
+                {
+                    "title": title,
+                    "message": message,
+                    "type": notification_type,
+                    "sticky": event_type == "transfer_dispatched",
+                },
+            )
+            # Enviar mensaje de actualización de registro para refrescar vistas
+            self.env["bus.bus"]._sendone(
+                user.partner_id,
+                "record_update",
+                {
+                    "model": "stock.picking",
+                    "res_id": self.id,
+                    "fields": ["ddpc_realtime_status", "ddpc_last_activity_timestamp", "state", "ddpc_transfer_stage"],
+                },
             )
 
     def _ddpc_close_transfer_receipt_alerts(self):

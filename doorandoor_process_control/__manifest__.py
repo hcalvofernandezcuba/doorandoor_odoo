@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Process Control",
-    "version": "18.0.2.4.0",
+    "version": "18.0.2.4.3",
     "category": "Operations",
-    "summary": "18.0.2.4.0 - Actualización en tiempo real de recepciones de traslados internos entre almacenes",
+    "summary": "18.0.2.4.3 - Avisos por almacén, administradores globales y refresco en Odoo 18",
     "description": """
 DoorAndDoor Process Control
 ===========================
@@ -35,6 +35,21 @@ Alcance inicial
 
 Historial resumido
 ------------------
+
+- 18.0.2.4.3
+  Envía los avisos a los operadores configurados en el almacén destino y a
+  todos los usuarios de Administración/Ajustes. Sustituye el listener legado
+  por un servicio compatible con Odoo 18 y registra los destinatarios enviados.
+
+- 18.0.2.4.2
+  Implementa actualización automática de vistas usando mensajes record_update
+  del bus.bus nativo. Los operarios ven los cambios en tiempo real sin recargar
+  la página manualmente. Las notificaciones toast se muestran instantáneamente
+  y las vistas de listas/kanban se refrescan automáticamente.
+
+- 18.0.2.4.1
+  Corrige las notificaciones instantaneas de inventario usando el canal nativo
+  de Odoo 18 y adapta el tablero de traslados a la sintaxis kanban vigente.
 
 - 18.0.2.4.0
   Implementa actualización en tiempo real de recepciones de traslados internos
@@ -219,10 +234,7 @@ Historial resumido
     ],
     "assets": {
         "web.assets_backend": [
-            "doorandoor_process_control/static/src/js/realtime_picking_widget.js",
-            "doorandoor_process_control/static/src/js/realtime_dashboard.js",
-            "doorandoor_process_control/static/src/xml/realtime_picking_templates.xml",
-            "doorandoor_process_control/static/src/scss/realtime_picking.scss",
+            "doorandoor_process_control/static/src/js/record_update_listener.js",
         ],
     },
     "installable": True,

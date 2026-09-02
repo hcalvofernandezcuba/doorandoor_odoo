@@ -7,19 +7,26 @@
             <field name="model">stock.picking</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_dashboard o_ddpc_realtime_dashboard" create="false" 
-                        default_group_by="ddpc_dest_warehouse_id" 
-                        js_class="doorandoor_process_control.RealtimeDashboard">
+                        default_group_by="ddpc_dest_warehouse_id">
+                    <field name="name"/>
+                    <field name="ddpc_transfer_stage"/>
+                    <field name="ddpc_source_warehouse_id"/>
+                    <field name="ddpc_dest_warehouse_id"/>
+                    <field name="ddpc_realtime_status"/>
+                    <field name="ddpc_last_activity_timestamp"/>
+                    <field name="scheduled_date"/>
+                    <field name="state"/>
                     <templates>
-                        <t t-name="kanban-box">
-                            <div class="oe_kanban_card oe_kanban_global_click o_ddpc_picking_card">
+                        <t t-name="card">
+                            <div class="o_ddpc_picking_card">
                                 <div class="o_kanban_card_header">
                                     <div class="o_kanban_card_header_title">
                                         <strong><t t-esc="record.name.value"/></strong>
                                     </div>
                                     <div class="o_kanban_card_header_right">
                                         <span class="badge badge-pill o_ddpc_stage_badge"
-                                              t-att-class="record.ddpc_transfer_stage.value === 'dispatch' ? 'badge-warning' : 'badge-info'">
-                                            <t t-esc="record.ddpc_transfer_stage.value === 'dispatch' ? 'Despacho' : 'Recepción'"/>
+                                              t-att-class="record.ddpc_transfer_stage.raw_value === 'dispatch' ? 'text-bg-warning' : 'text-bg-info'">
+                                            <t t-esc="record.ddpc_transfer_stage.raw_value === 'dispatch' ? 'Despacho' : 'Recepción'"/>
                                         </span>
                                     </div>
                                 </div>
@@ -28,13 +35,13 @@
                                         <div class="col-6">
                                             <small class="text-muted">Origen:</small>
                                             <div class="font-weight-bold">
-                                                <t t-esc="record.ddpc_source_warehouse_id.value or record.location_id.warehouse_id.value or '-'"/>
+                                                <field name="ddpc_source_warehouse_id"/>
                                             </div>
                                         </div>
                                         <div class="col-6">
                                             <small class="text-muted">Destino:</small>
                                             <div class="font-weight-bold">
-                                                <t t-esc="record.ddpc_dest_warehouse_id.value or record.location_dest_id.warehouse_id.value or '-'"/>
+                                                <field name="ddpc_dest_warehouse_id"/>
                                             </div>
                                         </div>
                                     </div>
@@ -42,7 +49,7 @@
                                         <div class="col-12">
                                             <small class="text-muted">Estado en tiempo real:</small>
                                             <div class="o_ddpc_realtime_status font-weight-bold"
-                                                 t-att-class="record.state.value === 'done' ? 'text-success' : 'text-warning'">
+                                                 t-att-class="record.state.raw_value === 'done' ? 'text-success' : 'text-warning'">
                                                 <t t-esc="record.ddpc_realtime_status.value or record.state.value"/>
                                             </div>
                                         </div>
@@ -59,22 +66,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row mt-2">
-                                        <div class="col-12">
-                                            <small class="text-muted">Movimientos:</small>
-                                            <div>
-                                                <t t-esc="record.move_ids_without_package_count.value"/> movimientos
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="o_kanban_card_footer">
                                     <div class="o_kanban_card_manage_button_group">
-                                        <button class="btn btn-sm btn-primary o_ddpc_open_picking" type="button">
+                                        <button class="btn btn-sm btn-primary" type="open" name="open_record">
                                             <i class="fa fa-eye"/> Ver
                                         </button>
-                                        <t t-if="record.ddpc_transfer_stage.value === 'receipt' and record.state.value !== 'done'">
-                                            <button class="btn btn-sm btn-success o_ddpc_validate_receipt" type="button">
+                                        <t t-if="record.ddpc_transfer_stage.raw_value === 'receipt' and record.state.raw_value !== 'done'">
+                                            <button class="btn btn-sm btn-success" type="object" name="button_validate">
                                                 <i class="fa fa-check"/> Validar Recepción
                                             </button>
                                         </t>
@@ -91,7 +90,7 @@
         <record id="action_stock_picking_realtime_dashboard" model="ir.actions.act_window">
             <field name="name">Recepciones de Traslados en Tiempo Real</field>
             <field name="res_model">stock.picking</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">kanban,list,form</field>
             <field name="domain">[
                 ('ddpc_transfer_stage', 'in', ['dispatch', 'receipt']),
                 ('state', 'not in', ['done', 'cancel'])
@@ -114,7 +113,7 @@
         <!-- Item de menú para el Dashboard -->
         <menuitem id="menu_realtime_transfer_dashboard"
                   name="Recepciones en Tiempo Real"
-                  parent="doorandoor_process_control.menu_warehouse_operations"
+                  parent="doorandoor_process_control.menu_ddpc_warehouse_root"
                   action="action_stock_picking_realtime_dashboard"
                   sequence="10"
                   groups="stock.group_stock_user"/>
