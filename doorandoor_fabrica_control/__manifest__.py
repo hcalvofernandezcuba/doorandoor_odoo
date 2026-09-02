@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Fabrica Control",
-    "version": "18.0.1.5.0",
+    "version": "18.0.1.5.1",
     "category": "Manufacturing",
-    "summary": "18.0.1.5.0 - Vale auditable de Maquinado a Ensamblaje con documento origen",
+    "summary": "18.0.1.5.1 - Instalación limpia segura del control de planificación",
     "description": """
 DoorAndDoor Fabrica Control
 ===========================
@@ -20,6 +20,14 @@ y reposicion del stock vendido por cada almacen.
 
 Historial de desarrollo
 -----------------------
+
+18.0.1.5.1 - Instalación limpia segura
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Evita consultar las líneas de planes históricos antes de que su tabla exista
+  durante una instalación inicial del módulo.
+- Conserva sin cambios la migración de planes en bases donde la tabla ya está
+  creada.
 
 18.0.1.5.0 - Vale de entrega de Maquinado a Ensamblaje
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

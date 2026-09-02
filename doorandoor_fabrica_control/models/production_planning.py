@@ -118,6 +118,12 @@ class DdfcDailyPlan(models.Model):
 
     def init(self):
         """Lock historical plans that already captured request lines."""
+        self.env.cr.execute("SELECT to_regclass(%s)", ["ddfc_daily_plan_line"])
+        if not self.env.cr.fetchone()[0]:
+            # During a clean installation Odoo may initialize this model before
+            # creating the table of its line model. There are no historical
+            # plans to migrate in that case.
+            return
         self.env.cr.execute(
             """
             UPDATE ddfc_daily_plan AS plan
