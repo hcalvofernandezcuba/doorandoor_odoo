@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddtg_notification_list" model="ir.ui.view"><field name="name">doorandoor.telegram.notification.list</field><field name="model">doorandoor.telegram.notification</field>
+        <field name="arch" type="xml"><list decoration-success="state == 'sent'" decoration-danger="state == 'error'">
+            <field name="create_date"/><field name="user_id"/><field name="event_type"/><field name="document_name"/><field name="message" optional="hide"/><field name="attempt_count"/><field name="sent_at"/><field name="state" widget="badge"/>
+        </list></field></record>
+    <record id="view_ddtg_notification_form" model="ir.ui.view"><field name="name">doorandoor.telegram.notification.form</field><field name="model">doorandoor.telegram.notification</field>
+        <field name="arch" type="xml"><form string="Notificación Telegram"><header>
+            <button name="action_send_now" string="Enviar ahora" type="object" class="btn-primary" invisible="state in ('sent', 'cancel')"/>
+            <button name="action_retry" string="Reintentar" type="object" invisible="state != 'error'"/>
+            <button name="action_open_document" string="Abrir documento" type="object" invisible="not res_model or not res_id"/>
+            <field name="state" widget="statusbar"/>
+        </header><sheet><group><group><field name="bot_id"/><field name="link_id"/><field name="user_id" readonly="1"/><field name="event_type"/></group><group><field name="document_name"/><field name="res_model"/><field name="res_id"/><field name="attempt_count"/><field name="next_attempt_at"/><field name="sent_at"/><field name="telegram_message_id"/></group></group><field name="message"/><field name="last_error" readonly="1" invisible="not last_error"/></sheet></form></field></record>
+    <record id="view_ddtg_message_list" model="ir.ui.view"><field name="name">doorandoor.telegram.message.list</field><field name="model">doorandoor.telegram.message</field>
+        <field name="arch" type="xml"><list><field name="create_date"/><field name="direction"/><field name="user_id"/><field name="telegram_chat_id"/><field name="telegram_message_id"/><field name="text"/></list></field></record>
+    <record id="action_ddtg_notification" model="ir.actions.act_window"><field name="name">Mis notificaciones</field><field name="res_model">doorandoor.telegram.notification</field><field name="view_mode">list,form</field><field name="domain">[('user_id', '=', uid)]</field></record>
+    <record id="action_ddtg_notification_all" model="ir.actions.act_window"><field name="name">Cola de notificaciones</field><field name="res_model">doorandoor.telegram.notification</field><field name="view_mode">list,form</field></record>
+    <record id="action_ddtg_message_all" model="ir.actions.act_window"><field name="name">Historial de mensajes</field><field name="res_model">doorandoor.telegram.message</field><field name="view_mode">list</field></record>
+</odoo>

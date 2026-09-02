@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddtg_bot_user,ddtg.bot.user,model_doorandoor_telegram_bot,base.group_user,1,0,0,0
+access_ddtg_bot_manager,ddtg.bot.manager,model_doorandoor_telegram_bot,doorandoor_telegram_integration.group_ddtg_manager,1,1,1,1
+access_ddtg_link_user,ddtg.link.user,model_doorandoor_telegram_user_link,base.group_user,1,1,0,0
+access_ddtg_link_manager,ddtg.link.manager,model_doorandoor_telegram_user_link,doorandoor_telegram_integration.group_ddtg_manager,1,1,1,1
+access_ddtg_activation_manager,ddtg.activation.manager,model_doorandoor_telegram_activation,doorandoor_telegram_integration.group_ddtg_manager,1,1,1,1
+access_ddtg_notification_user,ddtg.notification.user,model_doorandoor_telegram_notification,base.group_user,1,0,0,0
+access_ddtg_notification_manager,ddtg.notification.manager,model_doorandoor_telegram_notification,doorandoor_telegram_integration.group_ddtg_manager,1,1,1,1
+access_ddtg_message_user,ddtg.message.user,model_doorandoor_telegram_message,base.group_user,1,0,0,0
+access_ddtg_message_manager,ddtg.message.manager,model_doorandoor_telegram_message,doorandoor_telegram_integration.group_ddtg_manager,1,1,1,1
+access_ddtg_update_manager,ddtg.update.manager,model_doorandoor_telegram_update,doorandoor_telegram_integration.group_ddtg_manager,1,0,0,1
+access_ddtg_link_wizard,ddtg.link.wizard,model_doorandoor_telegram_link_wizard,base.group_user,1,1,1,1

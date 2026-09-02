@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddtg_link_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.telegram.link.wizard.form</field>
+        <field name="model">doorandoor.telegram.link.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Vincular mi Telegram">
+                <group>
+                    <field name="user_id"/>
+                    <field name="company_id" invisible="1"/>
+                    <field name="bot_id" readonly="activation_url"/>
+                    <field name="validity_minutes"/>
+                </group>
+                <div class="alert alert-info" role="alert" invisible="activation_url">
+                    Odoo generará un enlace personal de un solo uso. No lo comparta con otra persona.
+                </div>
+                <group invisible="not activation_url">
+                    <field name="activation_url" widget="url"/>
+                    <field name="expires_at"/>
+                    <field name="activation_id" invisible="1"/>
+                </group>
+                <div class="alert alert-warning" role="alert" invisible="not activation_url">
+                    Abra el enlace antes de su vencimiento y pulse Iniciar dentro de Telegram.
+                </div>
+                <footer>
+                    <button name="action_generate_link" string="Generar enlace seguro" type="object" class="btn-primary" invisible="activation_url"/>
+                    <button name="action_open_telegram" string="Abrir Telegram" type="object" class="btn-primary" invisible="not activation_url"/>
+                    <button string="Cerrar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_ddtg_link_wizard" model="ir.actions.act_window">
+        <field name="name">Vincular mi Telegram</field>
+        <field name="res_model">doorandoor.telegram.link.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

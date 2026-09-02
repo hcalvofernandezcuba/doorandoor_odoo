@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_ddtg_root" name="Telegram DoorAndDoor" sequence="75" groups="base.group_user"/>
+    <menuitem id="menu_ddtg_link" name="Vincular mi Telegram" parent="menu_ddtg_root" action="action_ddtg_link_wizard" sequence="10" groups="base.group_user"/>
+    <menuitem id="menu_ddtg_my_link" name="Mi cuenta Telegram" parent="menu_ddtg_root" action="action_ddtg_user_link" sequence="20" groups="base.group_user"/>
+    <menuitem id="menu_ddtg_my_notifications" name="Mis notificaciones" parent="menu_ddtg_root" action="action_ddtg_notification" sequence="30" groups="base.group_user"/>
+    <menuitem id="menu_ddtg_configuration" name="Administración" parent="menu_ddtg_root" sequence="80" groups="doorandoor_telegram_integration.group_ddtg_manager"/>
+    <menuitem id="menu_ddtg_bots" name="Bots" parent="menu_ddtg_configuration" action="action_ddtg_bot" sequence="10"/>
+    <menuitem id="menu_ddtg_links" name="Usuarios vinculados" parent="menu_ddtg_configuration" action="action_ddtg_user_link_all" sequence="20"/>
+    <menuitem id="menu_ddtg_queue" name="Cola de notificaciones" parent="menu_ddtg_configuration" action="action_ddtg_notification_all" sequence="30"/>
+    <menuitem id="menu_ddtg_messages" name="Historial de mensajes" parent="menu_ddtg_configuration" action="action_ddtg_message_all" sequence="40"/>
+</odoo>
