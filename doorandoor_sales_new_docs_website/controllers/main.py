@@ -10,17 +10,9 @@ from odoo.http import request
 class DoorAndDoorSalesNewDocsController(http.Controller):
     _ADDONS_DIR = Path(__file__).resolve().parents[2]
     _DOCS_ROUTE = "/doorandoor-sales-new/docs"
-    _PUBLISHED_DOCS = [
-        ("doorandoor_sales_new", "GUIA_CAPACITACION_COBROS_PAGOS.md"),
-        ("doorandoor_sales_new", "GUIA_CAPACITACION_INVENTARIOS.md"),
-        ("doorandoor_sales_new", "GUIA_CONTEO_HANGER_MOVIL.md"),
-        ("doorandoor_sales_new", "GUIA_PRUEBAS_FLUJOS_DOORANDOOR.md"),
-        ("doorandoor_sales_new", "GUIA_CONFIGURACION_PRODUCTOS_DOORANDOOR.md"),
-        ("doorandoor_sales_new", "presentation_and_training_guide.md"),
-        ("doorandoor_sales_new", "invoice_sale_fulfillment_flow_explained.md"),
-        ("doorandoor_sales_new", "payment_release_stock_mrp_delivery_flow_explained.md"),
-        ("doorandoor_sales_new", "pickup_order_flow_explained.md"),
-        ("doorandoor_fabrica_control", "GUIA_USUARIO_FLUJO_FABRICACION.md"),
+    _PRIORITY_DOCS = [
+        ("doorandoor_inventory_variant_count", "GUIA_OPERATIVA_DIARIA_INVENTARIO.md"),
+        ("doorandoor_fabrica_control", "GUIA_OPERATIVA_DIARIA_FABRICACION.md"),
     ]
 
     def _slugify(self, value):
@@ -44,7 +36,7 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
         def _replace(match):
             label = match.group("label")
             target = match.group("target").strip()
-            doc_match = re.search(r"/addons/doorandoor_sales_new/docs/([^/)]+\.md)(?::\d+)?$", target)
+            doc_match = re.search(r"(?:^|/)([^/)]+\.md)(?::\d+)?$", target)
             if doc_match:
                 filename = doc_match.group(1)
                 slug = docs_slug_map.get(filename)
@@ -165,12 +157,14 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
         return self._render_simple_markdown(text)
 
     def _get_published_doc_paths(self):
-        paths = []
-        for module_name, filename in self._PUBLISHED_DOCS:
-            path = self._ADDONS_DIR / module_name / "docs" / filename
-            if path.exists():
-                paths.append(path)
-        return paths
+        """Publish every Markdown file in lowercase docs/ of DoorAndDoor modules."""
+        return sorted(
+            path
+            for module_dir in self._ADDONS_DIR.glob("doorandoor_*")
+            if module_dir.is_dir()
+            for path in (module_dir / "docs").glob("*.md")
+            if path.is_file()
+        )
 
     def _get_doc_files(self):
         docs = []
@@ -184,16 +178,23 @@ class DoorAndDoorSalesNewDocsController(http.Controller):
                     "name": path.stem,
                     "title": title,
                     "slug": slug,
+                    "module": path.parent.parent.name,
                     "path": path,
                     "summary": self._extract_summary(text),
                 }
             )
 
-        order_map = {
-            filename: index
-            for index, (_module_name, filename) in enumerate(self._PUBLISHED_DOCS)
+        priority_map = {
+            (module_name, filename): index
+            for index, (module_name, filename) in enumerate(self._PRIORITY_DOCS)
         }
-        docs.sort(key=lambda doc: (order_map.get(doc["filename"], len(self._PUBLISHED_DOCS)), doc["title"].lower()))
+        docs.sort(
+            key=lambda doc: (
+                priority_map.get((doc["module"], doc["filename"]), len(self._PRIORITY_DOCS)),
+                doc["module"],
+                doc["title"].lower(),
+            )
+        )
         return docs
 
     def _extract_summary(self, text):

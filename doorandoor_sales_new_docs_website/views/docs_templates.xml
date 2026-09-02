@@ -7,23 +7,22 @@
                     <div class="container py-5">
                         <div class="row align-items-center g-4">
                             <div class="col-lg-8">
-                                <span class="o_ddsn_docs_eyebrow">DoorAndDoor Sales New</span>
-                                <h1 class="display-5 fw-bold mt-3 mb-3">Documentacion del proyecto</h1>
+                                <span class="o_ddsn_docs_eyebrow">Manuales operativos DoorAndDoor</span>
+                                <h1 class="display-5 fw-bold mt-3 mb-3">Guías de trabajo diario</h1>
                                 <p class="lead mb-0">
-                                    Esta seccion publica una seleccion de archivos Markdown informativos del modulo
-                                    para que el equipo pueda actualizar la documentacion desde el mismo repositorio de desarrollo.
+                                    Procedimientos vigentes de Inventario, Fabricación, Cobros, Ventas y Entregas,
+                                    publicados directamente desde las guías Markdown de cada módulo.
                                 </p>
                                 <p class="mt-3 mb-0 opacity-75">
-                                    Incluye guias de capacitacion sobre fulfillment, reservas temporales de prefactura,
-                                    stock neto visible, reglas operativas de inventario y uso de documentos impresos con codigo de barras
-                                    para el equipo DoorAndDoor.
+                                    Comience por las guías operativas diarias de Inventario y Fabricación. Los demás
+                                    documentos amplían configuración, capacitación y recorridos de comprobación.
                                 </p>
                             </div>
                             <div class="col-lg-4">
                                     <div class="o_ddsn_docs_panel">
                                     <div class="o_ddsn_docs_panel_label">Fuente</div>
-                                    <div class="o_ddsn_docs_panel_value">`addons/doorandoor_sales_new/docs`</div>
-                                    <div class="o_ddsn_docs_panel_note">Solo se publican guias informativas seleccionadas. Los documentos internos de planificacion y control quedan fuera del website.</div>
+                                    <div class="o_ddsn_docs_panel_value">`addons/*/docs`</div>
+                                    <div class="o_ddsn_docs_panel_note">Regla permanente: todo archivo .md colocado en la carpeta lowercase docs/ de un módulo doorandoor_* se publica automáticamente. No coloque allí información privada.</div>
                                 </div>
                             </div>
                         </div>
@@ -39,6 +38,7 @@
                                         <div class="o_ddsn_docs_card_label">Documento</div>
                                         <h2 class="h4 mt-2 mb-3" t-out="doc['title']"/>
                                         <p class="mb-0" t-out="doc['summary']"/>
+                                        <div class="small text-muted mt-3" t-out="doc['module']"/>
                                     </div>
                                 </a>
                             </div>
@@ -74,7 +74,7 @@
                             <div class="col-lg-9">
                                 <article class="o_ddsn_docs_article">
                                     <header class="mb-4">
-                                        <div class="o_ddsn_docs_article_label">DoorAndDoor Sales New</div>
+                                        <div class="o_ddsn_docs_article_label">Manual operativo DoorAndDoor</div>
                                         <h1 class="display-6 fw-bold mt-2 mb-0" t-out="doc['title']"/>
                                     </header>
                                     <div class="o_ddsn_docs_content" t-out="doc_html"/>

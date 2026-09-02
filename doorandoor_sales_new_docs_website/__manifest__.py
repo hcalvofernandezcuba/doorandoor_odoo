@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New Docs Website",
-    "version": "18.0.1.3.1",
+    "version": "18.0.1.5.0",
     "category": "Website",
-    "summary": "18.0.1.3.1 - Publica la guía del flujo de fabricación",
+    "summary": "18.0.1.5.0 - Publicación automática desde docs/ de cada módulo DoorAndDoor",
     "description": """
 DoorAndDoor Sales New Docs Website
 ==================================
 
-Este modulo publica en el website la documentacion Markdown del proyecto
-`doorandoor_sales_new` leyendo directamente los archivos del directorio `docs`.
+Este modulo publica en el website la documentacion Markdown operativa de los
+modulos DoorAndDoor leyendo directamente sus archivos del directorio `docs`.
 
 Objetivo:
 - mantener la documentacion en el mismo repositorio
@@ -23,6 +23,24 @@ Publica las guias integrales de pruebas del proyecto y de configuracion de
 productos normales, variantes, Transformados, Especiales y plantillas maestras.
 La guia de pruebas consolida la secuencia vigente de producto, venta, pago,
 fabricacion, credito, documentos, inventario y despacho.
+
+18.0.1.5.0
+------------
+Establece como regla permanente la publicación automática de todos los archivos
+Markdown ubicados directamente en la carpeta lowercase `docs/` de cada módulo
+`doorandoor_*`. El índice identifica el módulo fuente, conserva primero las
+guías operativas diarias y deja de requerir cambios Python para agregar nuevos
+manuales. La portada advierte que el contenido de `docs/` es público.
+
+18.0.1.4.0
+------------
+Publica como documentos principales dos manuales de operación diaria: Inventario
+incluye recepción con hanger, traslados, entradas de fábrica, entregas, conteo
+móvil auditable y labels por variantes; Fabricación incluye corte y plan diario,
+materiales por OF, operaciones encadenadas, vale auditable de Maquinado a
+Ensamblaje, etiquetas unitarias y cierre de turno. Actualiza la portada para
+presentar documentación de varios módulos y amplía la resolución de enlaces
+Markdown entre sus guías.
 
 18.0.1.3.1
 ------------
@@ -43,6 +61,8 @@ roles, pasos, resultados esperados y controles de cada operacion.
         "website",
         "doorandoor_sales_new",
         "doorandoor_fabrica_control",
+        "doorandoor_inventory_variant_count",
+        "doorandoor_mobile_hanger",
     ],
     "data": [
         "data/website_menu.xml",
