@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New Docs Website",
-    "version": "18.0.1.5.1",
+    "version": "18.0.1.5.2",
     "category": "Website",
-    "summary": "18.0.1.5.1 - Compatibilidad durante la recarga del website documental",
+    "summary": "18.0.1.5.2 - Documentación móvil sin dependencia operativa obligatoria",
     "description": """
 DoorAndDoor Sales New Docs Website
 ==================================
@@ -23,6 +23,13 @@ Publica las guias integrales de pruebas del proyecto y de configuracion de
 productos normales, variantes, Transformados, Especiales y plantillas maestras.
 La guia de pruebas consolida la secuencia vigente de producto, venta, pago,
 fabricacion, credito, documentos, inventario y despacho.
+
+18.0.1.5.2
+------------
+Permite publicar las guías Markdown de Mobile Hanger desde su carpeta `docs/`
+sin exigir que el módulo operativo esté instalado. El website solo lee archivos
+del código y no necesita cargar los modelos ni grupos de seguridad del módulo
+documentado.
 
 18.0.1.5.1
 ------------
@@ -69,7 +76,6 @@ roles, pasos, resultados esperados y controles de cada operacion.
         "doorandoor_sales_new",
         "doorandoor_fabrica_control",
         "doorandoor_inventory_variant_count",
-        "doorandoor_mobile_hanger",
     ],
     "data": [
         "data/website_menu.xml",
