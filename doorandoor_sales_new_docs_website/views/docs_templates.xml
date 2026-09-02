@@ -38,7 +38,7 @@
                                         <div class="o_ddsn_docs_card_label">Documento</div>
                                         <h2 class="h4 mt-2 mb-3" t-out="doc['title']"/>
                                         <p class="mb-0" t-out="doc['summary']"/>
-                                        <div class="small text-muted mt-3" t-out="doc['module']"/>
+                                        <div t-if="doc.get('module')" class="small text-muted mt-3" t-out="doc['module']"/>
                                     </div>
                                 </a>
                             </div>

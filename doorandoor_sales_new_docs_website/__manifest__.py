@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New Docs Website",
-    "version": "18.0.1.5.0",
+    "version": "18.0.1.5.1",
     "category": "Website",
-    "summary": "18.0.1.5.0 - Publicación automática desde docs/ de cada módulo DoorAndDoor",
+    "summary": "18.0.1.5.1 - Compatibilidad durante la recarga del website documental",
     "description": """
 DoorAndDoor Sales New Docs Website
 ==================================
@@ -23,6 +23,13 @@ Publica las guias integrales de pruebas del proyecto y de configuracion de
 productos normales, variantes, Transformados, Especiales y plantillas maestras.
 La guia de pruebas consolida la secuencia vigente de producto, venta, pago,
 fabricacion, credito, documentos, inventario y despacho.
+
+18.0.1.5.1
+------------
+Mantiene el índice compatible con el controlador anterior durante el intervalo
+entre la actualización del módulo y el reinicio coordinado del servicio en
+pruebas. El nombre del módulo fuente se muestra solo cuando el controlador ya
+entrega ese dato, evitando un error HTTP 500 durante la transición.
 
 18.0.1.5.0
 ------------
