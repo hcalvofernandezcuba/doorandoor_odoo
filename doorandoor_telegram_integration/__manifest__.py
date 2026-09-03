@@ -1,11 +1,18 @@
 {
     "name": "DoorAndDoor Telegram Integration",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.1.0",
     "category": "Productivity/Discuss",
-    "summary": "18.0.1.0.0 - Vinculación segura de usuarios Odoo con Telegram",
+    "summary": "18.0.1.1.0 - Habilita la instalación y configuración separada por ambiente",
     "description": """
 DoorAndDoor Telegram Integration
 ================================
+
+18.0.1.1.0 - Habilitación para instalación
+------------------------------------------------
+
+- Habilita la instalación del módulo en Odoo 18.
+- Mantiene bots y webhooks separados para Local, Pruebas y Producción.
+- Permite preparar la instancia sin incorporar tokens al código fuente.
 
 18.0.1.0.0 - Fundación de la integración
 ------------------------------------------------
@@ -38,7 +45,7 @@ DoorAndDoor Telegram Integration
         "wizard/telegram_link_wizard_views.xml",
         "views/telegram_menus.xml",
     ],
-    "installable": False,
+    "installable": True,
     "application": True,
     "auto_install": False,
 }
