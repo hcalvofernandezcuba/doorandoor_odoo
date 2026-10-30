@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddco_office_sales,doorandoor.commercial.office.sales,model_doorandoor_commercial_office,sales_team.group_sale_salesman,1,0,0,0
+access_ddco_office_accountant,doorandoor.commercial.office.accountant,model_doorandoor_commercial_office,account.group_account_manager,1,1,1,1
+access_ddco_office_system,doorandoor.commercial.office.system,model_doorandoor_commercial_office,base.group_system,1,1,1,1

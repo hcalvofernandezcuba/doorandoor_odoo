@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_delivery_document_receipt_destination"
+              inherit_id="stock.report_delivery_document">
+        <xpath expr="//table[@name='stock_move_line_table']" position="before">
+            <t t-set="ddwm_operator_rows" t-value="o._ddwm_operator_location_rows()"/>
+            <table class="table table-sm mt32" t-if="ddwm_operator_rows"
+                   name="ddwm_operator_location_table">
+                <thead><tr>
+                    <th><strong>ITEM</strong></th>
+                    <th><strong t-if="o.picking_type_code == 'incoming'">Destino sugerido</strong><strong t-else="">Recoger en</strong></th>
+                    <th><strong>Ubicación operativa</strong></th>
+                    <th><strong>Labels / disponibilidad</strong></th>
+                </tr></thead>
+                <tbody>
+                    <tr t-foreach="ddwm_operator_rows" t-as="row">
+                        <td><span t-esc="row['product'].display_name"/><br/><small>Cantidad: <t t-esc="row['quantity']"/></small></td>
+                        <td><span t-esc="row['position']"/><br/><small><t t-esc="row['warehouse']"/> · <t t-esc="row['kind']"/></small></td>
+                        <td><span t-esc="row['location']"/></td>
+                        <td>
+                            <span t-if="row['labels']" t-esc="', '.join(row['labels'])"/>
+                            <span t-else=""><t t-esc="row['available']"/> disponibles</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <t t-set="ddwm_destination_rows"
+               t-value="o._ddwm_receipt_destination_rows()"/>
+            <table class="table table-sm mt32"
+                   t-if="ddwm_destination_rows"
+                   name="ddwm_receipt_destination_table">
+                <thead>
+                    <tr>
+                        <th><strong>ITEM recibido</strong></th>
+                        <th><strong>Lote / tipo</strong></th>
+                        <th><strong>Ubicación física</strong></th>
+                        <th><strong>Labels</strong></th>
+                        <th class="text-end"><strong>Cantidad</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="ddwm_destination_rows" t-as="row">
+                        <td><span t-esc="row['product'].display_name"/></td>
+                        <td>
+                            <span t-esc="row['batch']"/>
+                            <br/><small t-esc="row['destination_type']"/>
+                        </td>
+                        <td><span t-esc="row['position']"/></td>
+                        <td><span t-esc="', '.join(row['labels'])"/></td>
+                        <td class="text-end"><span t-esc="row['quantity']"/></td>
+                    </tr>
+                </tbody>
+            </table>
+        </xpath>
+    </template>
+</odoo>

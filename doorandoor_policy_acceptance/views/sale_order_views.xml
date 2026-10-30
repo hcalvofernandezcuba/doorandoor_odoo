@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_order_form_policy_acceptance" model="ir.ui.view">
+        <field name="name">sale.order.form.policy.acceptance</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority">180</field>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ddpa_open_signature" type="object" string="Firmar políticas" class="btn-primary" invisible="state not in ('draft','sent') or ddpa_policy_status == 'Vigente'"/>
+                <button name="action_ddpa_send_signature_email" type="object" string="Enviar políticas por correo" invisible="state not in ('draft','sent') or ddpa_policy_status == 'Vigente' or ddpa_customer_email_missing"/>
+                <button name="action_ddpa_open_customer" type="object" string="Completar datos del cliente" class="btn-primary" invisible="state not in ('draft','sent') or not ddpa_customer_email_missing"/>
+                <field name="ddpa_customer_email_missing" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="ddpa_policy_status" readonly="1"/>
+                <field name="ddpa_policy_valid_until" readonly="1" invisible="not ddpa_policy_valid_until"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

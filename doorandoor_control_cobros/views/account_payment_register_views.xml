@@ -13,7 +13,9 @@
             <xpath expr="//field[@name='journal_id']" position="after">
                 <div class="alert alert-info mt-2" role="status" invisible="not ddc_sales_report_mode">
                     <strong>En espera de pago.</strong>
-                    Este diario es controlado. Ventas solo notificara el saldo pendiente a Control de Cobros;
+                    Este diario es controlado. Ventas notificara a Control de Cobros el siguiente importe:
+                    <strong><field name="ddc_report_amount" widget="monetary" readonly="1"/></strong>.
+                    En pagos parciales, el primer reporte usa el importe acordado y los siguientes el saldo contable real;
                     no se creara un pago ni un asiento contable.
                 </div>
                 <group string="Autorizacion del cliente"

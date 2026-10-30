@@ -1,0 +1,62 @@
+<odoo>
+    <record id="account_move_form_ddtp_card_fee" model="ir.ui.view">
+        <field name="name">account.move.form.ddtp.card.fee</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="doorandoor_sales_new.view_move_form_inherit_doorandoor_sales_new"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <field name="ddtp_is_card_fee_invoice" invisible="1"/>
+                <field name="ddtp_origin_invoice_id" invisible="1"/>
+                <field name="ddtp_card_fee_line_id" invisible="1"/>
+                <field name="ddtp_payment_plan" invisible="1"/>
+                <field name="ddtp_payment_due_amount" invisible="1"/>
+                <field name="ddtp_payment_pending_amount" invisible="1"/>
+                <field name="ddtp_card_payment_enabled" invisible="1"/>
+                <field name="ddtp_card_payment_amount" invisible="1"/>
+                <field name="ddtp_card_fee_amount" invisible="1"/>
+                <field name="ddtp_card_fee_rate" invisible="1"/>
+                <field name="ddtp_card_fee_rate_display" invisible="1"/>
+                <field name="ddtp_card_fee_preview" invisible="1"/>
+                <field name="ddtp_card_total_preview" invisible="1"/>
+            </xpath>
+            <xpath expr="//notebook/page[2]" position="before">
+                <page string="Opciones de pago" name="ddtp_card_payment" invisible="move_type != 'out_invoice'">
+                    <group string="Cobro con tarjeta">
+                        <group>
+                            <field name="ddtp_payment_plan" readonly="state != 'draft'"/>
+                            <field name="ddtp_payment_due_amount" readonly="1"/>
+                            <field name="ddtp_payment_pending_amount" invisible="ddtp_payment_plan != 'partial'" readonly="1"/>
+                            <field name="ddtp_card_payment_enabled" readonly="state != 'draft'"/>
+                        </group>
+                        <group invisible="not ddtp_card_payment_enabled">
+                            <field name="ddtp_card_fee_rate_display" string="Cargo por pago con tarjeta (%)" readonly="1"/>
+                            <field name="ddtp_card_fee_preview" string="Importe del cargo por tarjeta" readonly="1"/>
+                            <field name="ddtp_card_total_preview" readonly="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="not ddtp_card_payment_enabled">
+                        El cargo por pago con tarjetas se añade a los totales de esta misma factura.
+                    </div>
+                </page>
+            </xpath>
+            <xpath expr="//table[hasclass('oe_subtotal_footer_table')]/tr[last()]" position="after">
+                <tr invisible="move_type != 'out_invoice' or ddtp_payment_plan != 'partial'">
+                    <td class="text-end"><span>Pago parcial</span></td>
+                    <td class="text-end ps-2"><field name="ddtp_payment_due_amount" nolabel="1" readonly="1"/></td>
+                </tr>
+                <tr invisible="move_type != 'out_invoice' or not ddtp_card_payment_enabled">
+                    <td class="text-end"><span>Cargo por pago con tarjeta (<field name="ddtp_card_fee_rate_display" class="oe_inline" readonly="1"/>%)</span></td>
+                    <td class="text-end ps-2"><field name="ddtp_card_fee_preview" nolabel="1" readonly="1"/></td>
+                </tr>
+                <tr invisible="move_type != 'out_invoice' or ddtp_payment_plan != 'partial'">
+                    <td class="text-end fw-bold"><span>Saldo pendiente</span></td>
+                    <td class="text-end ps-2 fw-bold"><field name="ddtp_payment_pending_amount" nolabel="1" readonly="1"/></td>
+                </tr>
+                <tr invisible="move_type != 'out_invoice' or not ddtp_card_payment_enabled">
+                    <td class="text-end fw-bold"><span>Total con tarjeta</span></td>
+                    <td class="text-end ps-2 fw-bold"><field name="ddtp_card_total_preview" nolabel="1" readonly="1"/></td>
+                </tr>
+            </xpath>
+        </field>
+    </record>
+</odoo>

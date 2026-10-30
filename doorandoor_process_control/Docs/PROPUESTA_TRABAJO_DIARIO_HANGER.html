@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Trabajo diario de almacén con Hanger</title>
+<style>
+  @page { size: Letter; margin: 14mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: #102a43; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.45; }
+  h1, h2, h3 { margin: 0; color: #073b64; }
+  h1 { font-size: 29px; line-height: 1.15; }
+  h2 { font-size: 21px; margin-bottom: 12px; padding-bottom: 7px; border-bottom: 3px solid #f2bf3b; }
+  h3 { font-size: 15px; margin-bottom: 5px; }
+  p { margin: 6px 0; }
+  .page { min-height: 242mm; page-break-after: always; position: relative; }
+  .page:last-child { page-break-after: auto; }
+  .cover { background: linear-gradient(135deg, #073b64 0%, #0a5a91 67%, #f2bf3b 67%, #f2bf3b 100%); color: white; padding: 28mm 18mm; border-radius: 8px; }
+  .cover h1 { color: white; max-width: 520px; font-size: 34px; }
+  .cover .subtitle { font-size: 18px; max-width: 520px; margin-top: 18px; }
+  .cover .badge { display: inline-block; margin-top: 35px; padding: 8px 14px; background: white; color: #073b64; border-radius: 20px; font-weight: 700; }
+  .cover .meta { position: absolute; left: 18mm; bottom: 25mm; font-size: 13px; }
+  .lead { font-size: 15px; color: #334e68; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card { border: 1px solid #d9e2ec; border-left: 6px solid #0a5a91; border-radius: 7px; padding: 13px; background: #fff; }
+  .card.yellow { border-left-color: #f2bf3b; }
+  .card.green { border-left-color: #23a455; }
+  .card.gray { border-left-color: #829ab1; }
+  .flow { display: flex; align-items: stretch; gap: 7px; margin: 15px 0; }
+  .step { flex: 1; min-height: 92px; padding: 11px 8px; border-radius: 7px; color: white; background: #0a5a91; text-align: center; }
+  .step.yellow { background: #d99b00; }
+  .step.green { background: #168a46; }
+  .step.gray { background: #526d82; }
+  .step strong { display: block; font-size: 14px; margin: 4px 0; }
+  .arrow { align-self: center; color: #829ab1; font-size: 23px; font-weight: 700; }
+  .number { display: inline-grid; place-items: center; width: 25px; height: 25px; border-radius: 50%; background: white; color: #073b64; font-weight: 700; }
+  .roles { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  .roles th { background: #073b64; color: white; padding: 9px; text-align: left; }
+  .roles td { border: 1px solid #d9e2ec; padding: 9px; vertical-align: top; }
+  .roles tr:nth-child(even) td { background: #f5f8fa; }
+  .callout { margin: 14px 0; background: #fff6d8; border: 1px solid #f2bf3b; border-radius: 7px; padding: 12px; }
+  .ok { background: #e9f8ef; border-color: #23a455; }
+  .screen { border: 2px solid #073b64; border-radius: 8px; overflow: hidden; margin-top: 12px; }
+  .screen-head { background: #073b64; color: white; padding: 10px 13px; display: flex; justify-content: space-between; font-weight: 700; }
+  .columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; background: #edf2f7; }
+  .column { background: white; border-radius: 6px; padding: 8px; min-height: 178px; }
+  .column-title { font-weight: 700; padding: 6px; text-align: center; border-bottom: 3px solid #f2bf3b; }
+  .column.receive .column-title { border-color: #28a6c7; }
+  .column.deliver .column-title { border-color: #23a455; }
+  .ticket { border: 1px solid #d9e2ec; border-left: 4px solid #f2bf3b; border-radius: 5px; padding: 8px; margin-top: 8px; }
+  .receive .ticket { border-left-color: #28a6c7; }
+  .deliver .ticket { border-left-color: #23a455; }
+  .button { display: block; color: white; font-weight: 700; text-align: center; margin-top: 8px; padding: 6px; border-radius: 4px; background: #d99b00; }
+  .receive .button { background: #1685a5; }
+  .deliver .button { background: #168a46; }
+  ul { margin: 7px 0 7px 18px; padding: 0; }
+  li { margin: 5px 0; }
+  .footer { position: absolute; bottom: 0; left: 0; right: 0; border-top: 1px solid #d9e2ec; padding-top: 5px; color: #627d98; font-size: 10px; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<section class="page cover">
+  <h1>Trabajo diario de almacén con Hanger</h1>
+  <div class="subtitle">Propuesta de operación simple para despachos, recepciones, traslados internos y entregas, conservando la trazabilidad nativa de Odoo.</div>
+  <div class="badge">Propuesta para validación operativa</div>
+  <div class="meta"><strong>Door &amp; Door</strong><br>Operaciones de almacén · 14 de octubre de 2026</div>
+</section>
+
+<section class="page">
+  <h2>1. Principio de la solución</h2>
+  <p class="lead">No se reemplaza el Inventario de Odoo. Se añade una capa sencilla para que el almacenero vea únicamente el trabajo que debe ejecutar.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>Inventario nativo</h3>
+      <p>Lo utiliza Logística y la administración para crear, planificar, corregir y auditar movimientos.</p>
+      <ul>
+        <li>Recepciones y entregas.</li>
+        <li>Traslados internos.</li>
+        <li>Ubicaciones, reservas y trazabilidad.</li>
+        <li>Historial completo de movimientos.</li>
+      </ul>
+    </div>
+    <div class="card yellow">
+      <h3>Trabajo diario + Hanger</h3>
+      <p>Lo utiliza el almacenero para ejecutar la operación asignada sin navegar por menús técnicos.</p>
+      <ul>
+        <li>Por despachar.</li>
+        <li>Por recibir.</li>
+        <li>Listo para entregar.</li>
+        <li>Una acción principal por tarjeta.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout ok"><strong>Resultado:</strong> dos formas de ver la misma operación, sin duplicar documentos ni cantidades. Odoo mantiene el control; el Hanger simplifica la ejecución.</div>
+  <h2 style="margin-top:24px">2. Vista propuesta para el almacenero</h2>
+  <div class="screen">
+    <div class="screen-head"><span>Trabajo diario</span><span>Almacén asignado</span></div>
+    <div class="columns">
+      <div class="column">
+        <div class="column-title">Por despachar</div>
+        <div class="ticket"><strong>DD/INT/00002</strong><br>Doral → Fort Myers<br>2 unidades<span class="button">Despachar</span></div>
+      </div>
+      <div class="column receive">
+        <div class="column-title">Por recibir</div>
+        <div class="ticket"><strong>DWPB/IN/00001</strong><br>Doral → WPB<br>20 unidades<span class="button">Recibir</span></div>
+      </div>
+      <div class="column deliver">
+        <div class="column-title">Listo para entregar</div>
+        <div class="ticket"><strong>DWPB/OUT/00003</strong><br>Cliente / factura<br>2 unidades<span class="button">Entregar</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Door &amp; Door · Propuesta operativa</span><span>2</span></div>
+</section>
+
+<section class="page">
+  <h2>3. Traslado entre almacenes</h2>
+  <p class="lead">Ejemplo: mover mercancía desde Doral hacia West Palm Beach.</p>
+  <div class="flow">
+    <div class="step"><span class="number">1</span><strong>Logística crea</strong>Traslado interno en Inventario</div>
+    <div class="arrow">›</div>
+    <div class="step yellow"><span class="number">2</span><strong>Origen despacha</strong>Conteo y validación con Hanger</div>
+    <div class="arrow">›</div>
+    <div class="step"><span class="number">3</span><strong>En tránsito</strong>Odoo conserva la mercancía en tránsito</div>
+    <div class="arrow">›</div>
+    <div class="step green"><span class="number">4</span><strong>Destino recibe</strong>Conteo y validación con Hanger</div>
+  </div>
+  <div class="callout"><strong>Control esencial:</strong> el stock no aparece disponible en el almacén destino hasta que la recepción física se valida. El despacho y la recepción quedan enlazados.</div>
+  <h3>Qué ve cada persona</h3>
+  <table class="roles">
+    <thead><tr><th>Responsable</th><th>Qué ve</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td>Logística</td><td>Documento completo en Inventario</td><td>Define origen, destino, productos y cantidades.</td></tr>
+      <tr><td>Almacén de origen</td><td>Tarjeta “Por despachar”</td><td>Escanea, cuenta y valida la salida.</td></tr>
+      <tr><td>Almacén de destino</td><td>Tarjeta “Por recibir”</td><td>Escanea, cuenta y valida la entrada.</td></tr>
+      <tr><td>Gerencia</td><td>Historial y documentos enlazados</td><td>Audita responsables, fechas y diferencias.</td></tr>
+    </tbody>
+  </table>
+  <h2 style="margin-top:25px">4. Traslado dentro del mismo almacén</h2>
+  <div class="flow">
+    <div class="step"><span class="number">1</span><strong>Logística crea</strong>Origen y destino internos</div>
+    <div class="arrow">›</div>
+    <div class="step yellow"><span class="number">2</span><strong>Almacenero mueve</strong>Escanea los productos</div>
+    <div class="arrow">›</div>
+    <div class="step green"><span class="number">3</span><strong>Valida</strong>Un único documento</div>
+  </div>
+  <p>No se crea una recepción separada porque la mercancía nunca abandona el control del mismo almacén.</p>
+  <div class="footer"><span>Door &amp; Door · Propuesta operativa</span><span>3</span></div>
+</section>
+
+<section class="page">
+  <h2>5. Entrega de una venta</h2>
+  <div class="flow">
+    <div class="step"><span class="number">1</span><strong>Venta habilitada</strong>Factura y condiciones cumplidas</div>
+    <div class="arrow">›</div>
+    <div class="step yellow"><span class="number">2</span><strong>Abastecimiento</strong>Traslado si el producto está en otra ciudad</div>
+    <div class="arrow">›</div>
+    <div class="step"><span class="number">3</span><strong>Preparación</strong>Operación visible en destino</div>
+    <div class="arrow">›</div>
+    <div class="step green"><span class="number">4</span><strong>Entrega</strong>Conteo y validación con Hanger</div>
+  </div>
+  <div class="grid2">
+    <div class="card green">
+      <h3>Si hay mercancía local</h3>
+      <p>La operación pasa directamente a <strong>Listo para entregar</strong>.</p>
+    </div>
+    <div class="card yellow">
+      <h3>Si está en otro almacén</h3>
+      <p>Primero se ejecutan despacho y recepción. La entrega se habilita únicamente al completar el abastecimiento.</p>
+    </div>
+  </div>
+  <h2 style="margin-top:25px">6. Reglas que no cambian</h2>
+  <ul>
+    <li>No se crean movimientos paralelos ni documentos duplicados.</li>
+    <li>Cada operador ve solamente los almacenes autorizados.</li>
+    <li>El conteo prepara cantidades; la validación sigue siendo una acción consciente.</li>
+    <li>Las diferencias físicas no se ocultan ni se corrigen automáticamente.</li>
+    <li>Todos los pasos conservan usuario, fecha, documento origen y chatter.</li>
+    <li>Las operaciones históricas deben conservar su respaldo documental.</li>
+  </ul>
+  <div class="callout ok"><strong>Prueba local disponible:</strong> menú <strong>Operaciones → Almacén → Trabajo diario</strong>. La propuesta aún no modifica Gestión.</div>
+  <h2 style="margin-top:25px">7. Criterios para aprobar la prueba</h2>
+  <table class="roles">
+    <thead><tr><th>Validación</th><th>Resultado esperado</th></tr></thead>
+    <tbody>
+      <tr><td>Facilidad</td><td>El almacenero encuentra su siguiente operación sin buscar en listas técnicas.</td></tr>
+      <tr><td>Hanger</td><td>El QR abre el mismo documento y el botón correcto.</td></tr>
+      <tr><td>Seguridad</td><td>El operador no accede a almacenes ajenos.</td></tr>
+      <tr><td>Inventario</td><td>Origen, tránsito y destino reflejan cada validación física.</td></tr>
+      <tr><td>Auditoría</td><td>Despacho, recepción y entrega permanecen enlazados.</td></tr>
+    </tbody>
+  </table>
+  <div class="footer"><span>Door &amp; Door · Propuesta operativa</span><span>4</span></div>
+</section>
+
+</body>
+</html>

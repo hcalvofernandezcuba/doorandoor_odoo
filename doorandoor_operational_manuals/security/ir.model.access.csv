@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_operational_manual_reader,Guia operativa interna solo lectura,model_doorandoor_operational_manual,base.group_user,1,0,0,0
+access_operational_manual_manager,Administracion de guias operativas,model_doorandoor_operational_manual,doorandoor_operational_manuals.group_operational_manual_manager,1,1,1,1

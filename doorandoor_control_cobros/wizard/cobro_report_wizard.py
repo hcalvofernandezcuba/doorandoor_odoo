@@ -1,3 +1,5 @@
+import base64
+
 from odoo import _, fields, models
 
 
@@ -138,6 +140,43 @@ class DoorAndDoorCobroReportWizard(models.TransientModel):
             }
         return self.env.ref("doorandoor_control_cobros.action_report_ddc_cobro_wizard_pdf").report_action(self)
 
+    def _action_send_pdf(self, report_xmlid, filename, subject):
+        self.ensure_one()
+        pdf, __format = self.env["ir.actions.report"]._render_qweb_pdf(
+            report_xmlid, self.ids
+        )
+        attachment = self.env["ir.attachment"].create({
+            "name": filename,
+            "type": "binary",
+            "datas": base64.b64encode(pdf),
+            "res_model": self._name,
+            "res_id": self.id,
+            "mimetype": "application/pdf",
+        })
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Enviar reporte por correo"),
+            "res_model": "mail.compose.message",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_composition_mode": "comment",
+                "default_partner_ids": self.partner_ids.commercial_partner_id.ids,
+                "default_attachment_ids": [attachment.id],
+                "default_subject": subject,
+            },
+        }
+
+    def action_send_pdf(self):
+        self.ensure_one()
+        if not self._get_controls():
+            return self.action_print_pdf()
+        return self._action_send_pdf(
+            "doorandoor_control_cobros.action_report_ddc_cobro_wizard_pdf",
+            "Reporte-de-pagos.pdf",
+            _("Reporte de pagos"),
+        )
+
     def _get_credit_authorizations(self):
         self.ensure_one()
         domain = [("company_id", "=", self.env.company.id)]
@@ -206,6 +245,16 @@ class DoorAndDoorCobroReportWizard(models.TransientModel):
         return self.env.ref(
             "doorandoor_control_cobros.action_report_ddc_authorized_credit_pdf"
         ).report_action(self)
+
+    def action_send_credit_pdf(self):
+        self.ensure_one()
+        if not self._get_credit_authorizations():
+            return self.action_print_credit_pdf()
+        return self._action_send_pdf(
+            "doorandoor_control_cobros.action_report_ddc_authorized_credit_pdf",
+            "Reporte-de-creditos-autorizados.pdf",
+            _("Reporte de créditos autorizados"),
+        )
 
 
 class DoorAndDoorCobroWizardReport(models.AbstractModel):

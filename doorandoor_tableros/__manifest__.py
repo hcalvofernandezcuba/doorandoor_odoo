@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Tableros",
-    "version": "18.0.1.3.0",
+    "version": "18.0.1.6.0",
     "category": "Reporting",
-    "summary": "18.0.1.3.0 - Agrega análisis gerencial de reservas y prereservas en Ventas",
+    "summary": "18.0.1.6.0 - Agrega tablero financiero Stripe de solo lectura",
     "description": """
 DoorAndDoor Tableros
 ====================
@@ -27,6 +27,22 @@ Alcance inicial
 
 Historial resumido
 ------------------
+
+- 18.0.1.6.0
+  Agrega Stripe en Tableros/Finanzas con cobros, estados, clientes,
+  devoluciones, bruto, comisiones, neto, liquidaciones y diferencias usando
+  exclusivamente datos ya sincronizados en Odoo.
+
+- 18.0.1.5.0
+  Agrega Reportes/Ventas exentas de impuestos con facturas fiscales pagadas,
+  PO, registro oficial, base, impuestos, total, pago validado, estados, fecha,
+  vistas lista/pivote/gráfico y salida PDF consolidada con totales.
+
+- 18.0.1.4.0
+  Agrega el tablero nativo Ventas e Impuestos con todas las facturas de cliente
+  contabilizadas y pagadas, tanto del nuevo flujo PO como de los flujos
+  historicos. Resume ventas, base sin impuestos, impuestos, exentas, clientes y
+  vendedores con filtros por periodo, cliente y vendedor.
 
 - 18.0.1.3.0
   Agrega Reservas y Prereservas en Tableros/Ventas con analisis de ocupacion,
@@ -129,12 +145,16 @@ Historial resumido
         "sale",
         "doorandoor_ficha_cliente",
         "doorandoor_process_control",
+        "doorandoor_tax_state",
+        "doorandoor_stripe_reconciliation",
+        "doorandoor_stripe_refund",
     ],
     "data": [
         "security/ir.model.access.csv",
         "data/dashboards.xml",
         "data/cleanup_legacy_menus.xml",
         "views/payment_dashboard_views.xml",
+        "views/tax_exempt_sales_report_views.xml",
         "views/menu_views.xml",
     ],
     "installable": True,

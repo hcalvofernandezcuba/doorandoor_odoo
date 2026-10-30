@@ -1,11 +1,47 @@
 {
     "name": "DoorAndDoor Telegram Integration",
-    "version": "18.0.1.1.0",
+    "version": "18.0.1.4.0",
     "category": "Productivity/Discuss",
-    "summary": "18.0.1.1.0 - Habilita la instalación y configuración separada por ambiente",
+    "summary": "18.0.1.4.0 - Conecta el canal Dirección y soporte con Telegram",
     "description": """
 DoorAndDoor Telegram Integration
 ================================
+
+18.0.1.4.0 - Bandeja compartida Dirección y soporte
+------------------------------------------------
+
+- Asocia un canal de Conversaciones al bot de desarrollo.
+- Envía desde el canal con `/tg Usuario: mensaje`.
+- Publica las respuestas Telegram en el canal y en el historial individual.
+- Mantiene fuera del canal colectivo los comandos y enlaces de activación.
+
+18.0.1.3.1 - Historial Telegram aislado
+------------------------------------------------
+
+- Evita la colisión entre la conversación Telegram y los mensajes del chatter.
+- Garantiza el registro independiente de mensajes entrantes y salientes.
+
+18.0.1.3.0 - Conversaciones Odoo-Telegram
+------------------------------------------------
+
+- Permite escribir desde la ficha del usuario vinculado y recibir su respuesta.
+- Conserva el historial entrante y saliente con identidad y fecha.
+- Añade recepción manual inmediata además de la consulta automática local.
+
+18.0.1.2.0 - Encuestas visuales de aprobación
+------------------------------------------------
+
+- Crea propuestas con varias imágenes y votantes autorizados.
+- Envía variantes y botones de aprobación al Telegram vinculado.
+- Registra cambios de voto, participación y resultado dentro de Odoo.
+- Restringe la fase inicial al bot de desarrollo local.
+
+18.0.1.1.1 - Guía operativa del bot de Pruebas
+------------------------------------------------
+
+- Documenta BotFather, getMe, getUpdates y la confirmación segura de chats.
+- Define el paso a paso de instalación, webhook y validadores iniciales.
+- Separa el vínculo interno actual del futuro flujo para clientes portal.
 
 18.0.1.1.0 - Habilitación para instalación
 ------------------------------------------------
@@ -41,6 +77,7 @@ DoorAndDoor Telegram Integration
         "data/telegram_cron.xml",
         "views/telegram_user_link_views.xml",
         "views/telegram_notification_views.xml",
+        "views/telegram_poll_views.xml",
         "views/telegram_bot_views.xml",
         "wizard/telegram_link_wizard_views.xml",
         "views/telegram_menus.xml",

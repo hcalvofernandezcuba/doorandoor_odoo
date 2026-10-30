@@ -7,8 +7,11 @@
             <form string="Configure su producto" class="ddpc_sale_style_configurator">
                 <sheet>
                     <field name="move_line_id" invisible="1"/>
+                    <field name="remove_line_on_cancel" invisible="1"/>
                     <field name="selection_mode" invisible="1"/>
                     <field name="available_attribute_ids" invisible="1"/>
+                    <field name="requires_hinges" invisible="1"/>
+                    <field name="available_hinge_template_value_ids" invisible="1"/>
                     <div class="row align-items-start mb-3">
                         <div class="col-12 col-md-2 text-center">
                             <field name="product_image" widget="image" class="ddpc_product_image" options="{'preview_image': 'product_image'}"/>
@@ -28,6 +31,7 @@
                             <field name="attribute_selection_line_ids" nolabel="1" class="mt-3 ddpc_single_options">
                                 <list create="0" delete="0" editable="bottom">
                                     <field name="attribute_line_id" column_invisible="1"/>
+                                    <field name="sequence" column_invisible="1"/>
                                     <field name="available_template_value_ids" column_invisible="1"/>
                                     <field name="attribute_id"/>
                                     <field name="selected_template_value_id"
@@ -37,6 +41,13 @@
                                            placeholder="Seleccione un valor..."/>
                                 </list>
                             </field>
+                            <div class="mt-3" invisible="not requires_hinges">
+                                <label for="hinge_template_value_id" string="Hinges" class="fw-bold"/>
+                                <field name="hinge_template_value_id"
+                                       required="requires_hinges"
+                                       options="{'no_create': True, 'no_open': True}"
+                                       placeholder="Seleccione Gold, Silver o Black..."/>
+                            </div>
                         </div>
                         <div class="col-6 col-md-1">
                             <label for="quantity" string="Cantidad" class="fw-bold"/>
@@ -62,7 +73,7 @@
                 </sheet>
                 <footer>
                     <button name="action_apply_variant" string="Confirmar" type="object" class="btn-primary"/>
-                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    <button name="action_cancel_configuration" string="Cancelar" type="object" class="btn-secondary"/>
                 </footer>
             </form>
         </field>

@@ -15,7 +15,7 @@
                         <field name="scan_code"
                                widget="ddmh_camera_barcode"
                                placeholder="Ejemplo: DTP/OUT/00118"
-                               options="{'always_reload': True}"/>
+                               options="{'always_reload': True, 'auto_action': 'action_open_operation'}"/>
                     </group>
                     <div class="d-grid gap-2 mt-4">
                         <button name="action_open_operation" type="object"

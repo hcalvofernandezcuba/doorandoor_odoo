@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_purchaseorder_document_logistic_origin" inherit_id="purchase.report_purchaseorder_document">
+        <xpath expr="//th[@name='th_quantity']" position="after">
+            <th class="text-start"><strong>Destino / Documento</strong></th>
+        </xpath>
+        <xpath expr="//td[span[@t-field='line.product_qty']]" position="after">
+            <td class="text-start">
+                <span t-field="line.ddpfw_supply_origin"/>
+            </td>
+        </xpath>
+        <xpath expr="//div[@id='informations']" position="inside">
+            <div class="col-4">
+                <strong>Origen logístico</strong>
+                <div t-field="o.ddpfw_supply_summary"/>
+                <div t-if="o.ddpfw_source_invoice_ids">
+                    Facturas:
+                    <span t-esc="', '.join(name for name in o.ddpfw_source_invoice_ids.mapped('name') if name)"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="stock_labels_report_purchase_origin" inherit_id="doorandoor_stock_labels.stock_labels_report">
+        <xpath expr="//div[contains(@class, 'ddsl-stock-3x1')]/div[1]" position="inside">
+            <div t-if="label.get('purchase_order') or label.get('origin_document')"
+                 style="font-size:5.5px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                <strong t-if="label.get('purchase_order')">OC: <t t-esc="label.get('purchase_order')"/></strong>
+                <span t-if="label.get('origin_type')">
+                    · <t t-if="label.get('origin_type') == 'sale'">VENTA</t><t t-else="">REPOSICIÓN</t>
+                </span>
+                <span t-if="label.get('origin_document')"> · <t t-esc="label.get('origin_document')"/></span>
+                <span t-if="label.get('customer_name')"> · <t t-esc="label.get('customer_name')"/></span>
+            </div>
+        </xpath>
+    </template>
+</odoo>

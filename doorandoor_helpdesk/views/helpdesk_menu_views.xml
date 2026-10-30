@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_ddhd_root" name="Soporte técnico" sequence="85" groups="base.group_user"/>
+    <menuitem id="menu_ddhd_my_tickets" name="Mis tickets" parent="menu_ddhd_root"
+              action="action_ddhd_my_tickets" sequence="10" groups="base.group_user"/>
+    <menuitem id="menu_ddhd_local_tickets" name="Casos de mi sede" parent="menu_ddhd_root"
+              action="action_ddhd_local_tickets" sequence="15"
+              groups="doorandoor_helpdesk.group_ddhd_local_responsible"/>
+    <menuitem id="menu_ddhd_all_tickets" name="Todos los tickets" parent="menu_ddhd_root"
+              action="action_ddhd_all_tickets" sequence="20"
+              groups="doorandoor_helpdesk.group_ddhd_technician,base.group_system"/>
+    <menuitem id="menu_ddhd_daily_report" name="Reporte diario" parent="menu_ddhd_root"
+              action="action_ddhd_daily_report_wizard" sequence="30"
+              groups="doorandoor_helpdesk.group_ddhd_manager,base.group_system"/>
+    <menuitem id="menu_ddhd_summary_report" name="Reporte resumido" parent="menu_ddhd_root"
+              action="action_ddhd_summary_report_wizard" sequence="31"
+              groups="doorandoor_helpdesk.group_ddhd_manager,base.group_system"/>
+    <menuitem id="menu_ddhd_solution_dashboard" name="Tablero de soluciones" parent="menu_ddhd_root"
+              action="action_ddhd_solution_dashboard" sequence="32"
+              groups="doorandoor_helpdesk.group_ddhd_manager,base.group_system"/>
+</odoo>

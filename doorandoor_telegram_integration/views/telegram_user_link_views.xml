@@ -13,7 +13,25 @@
             <header><button name="action_revoke" string="Desvincular" type="object" invisible="state != 'active'"/><field name="state" widget="statusbar"/></header>
             <sheet><group><group><field name="user_id" readonly="1"/><field name="bot_id" readonly="1"/><field name="verified_at" readonly="1"/></group>
             <group><field name="telegram_username" readonly="1"/><field name="telegram_first_name" readonly="1"/><field name="telegram_last_name" readonly="1"/><field name="telegram_user_id" readonly="1"/><field name="telegram_chat_id" readonly="1"/></group></group>
-            <group string="Preferencias"><field name="notify_general"/><field name="notify_manufacturing"/><field name="notify_warehouse"/><field name="notify_tasks"/></group>
+            <notebook>
+                <page string="Conversación">
+                    <group groups="doorandoor_telegram_integration.group_ddtg_manager">
+                        <field name="outgoing_message" placeholder="Escriba un mensaje para este usuario de Telegram..." nolabel="1"/>
+                        <div class="oe_button_box">
+                            <button name="action_send_chat_message" string="Enviar por Telegram" type="object" class="btn-primary" invisible="not outgoing_message or state != 'active'"/>
+                            <button name="action_receive_chat_messages" string="Recibir respuestas ahora" type="object" class="btn-secondary" invisible="state != 'active'"/>
+                        </div>
+                    </group>
+                    <field name="telegram_message_ids" readonly="1" nolabel="1">
+                        <list decoration-info="direction == 'incoming'" decoration-success="direction == 'outgoing'">
+                            <field name="create_date"/><field name="direction" widget="badge"/><field name="text"/><field name="telegram_message_id" optional="hide"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Preferencias">
+                    <group><field name="notify_general"/><field name="notify_manufacturing"/><field name="notify_warehouse"/><field name="notify_tasks"/></group>
+                </page>
+            </notebook>
             </sheet><chatter/></form></field>
     </record>
     <record id="action_ddtg_user_link" model="ir.actions.act_window">

@@ -30,6 +30,11 @@
         <field name="res_model">server.monitor.wireguard.peer</field>
         <field name="view_mode">list,form</field>
     </record>
+    <record id="action_server_monitor_users" model="ir.actions.act_url">
+        <field name="name">Usuarios activos</field>
+        <field name="url">/usuarios/</field>
+        <field name="target">self</field>
+    </record>
 
     <menuitem
         id="menu_server_monitor_root"
@@ -99,6 +104,7 @@
         sequence="2"
         groups="server_monitor.group_server_monitor_user"
     />
+    <menuitem id="menu_server_monitor_users" name="Usuarios activos" parent="menu_server_monitor_odoo" action="action_server_monitor_users" sequence="3" groups="server_monitor.group_server_monitor_user"/>
 
     <record id="view_server_monitor_wireguard_peer_list" model="ir.ui.view">
         <field name="name">server.monitor.wireguard.peer.list</field>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stripe_refund_request_list" model="ir.ui.view">
+        <field name="name">doorandoor.stripe.refund.request.list</field>
+        <field name="model">doorandoor.stripe.refund.request</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'done'" decoration-danger="state in ('error', 'rejected')"
+                  decoration-warning="state == 'pending'" decoration-info="state == 'processing'">
+                <field name="name"/>
+                <field name="invoice_id"/>
+                <field name="partner_id"/>
+                <field name="reason_id"/>
+                <field name="requested_by_id"/>
+                <field name="amount" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'draft'"
+                       decoration-warning="state == 'pending'"
+                       decoration-info="state == 'processing'"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state in ('error', 'rejected')"/>
+                <field name="provider_reference" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stripe_refund_request_form" model="ir.ui.view">
+        <field name="name">doorandoor.stripe.refund.request.form</field>
+        <field name="model">doorandoor.stripe.refund.request</field>
+        <field name="arch" type="xml">
+            <form string="Devolución Stripe">
+                <header>
+                    <button name="action_submit" type="object" string="Enviar a Control de Cobros"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve_and_refund" type="object"
+                            string="Autorizar y devolver por Stripe" class="oe_highlight"
+                            groups="doorandoor_control_cobros.group_ddc_manager"
+                            confirm="Se creará la nota de crédito y se devolverá el importe a la tarjeta original. ¿Desea continuar?"
+                            invisible="state != 'pending'"/>
+                    <button name="action_reject" type="object" string="Rechazar"
+                            groups="doorandoor_control_cobros.group_ddc_manager"
+                            invisible="state != 'pending'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,pending,processing,done"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Borrador" bg_color="text-bg-secondary" invisible="state != 'draft'"/>
+                    <widget name="web_ribbon" title="Pendiente de autorización" bg_color="text-bg-warning" invisible="state != 'pending'"/>
+                    <widget name="web_ribbon" title="Enviado a Stripe" bg_color="text-bg-info" invisible="state != 'processing'"/>
+                    <widget name="web_ribbon" title="Reembolso completado" bg_color="text-bg-success" invisible="state != 'done'"/>
+                    <widget name="web_ribbon" title="Reembolso fallido" bg_color="text-bg-danger" invisible="state != 'error'"/>
+                    <widget name="web_ribbon" title="Solicitud rechazada" bg_color="text-bg-danger" invisible="state != 'rejected'"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="invoice_id"/>
+                            <field name="partner_id"/>
+                            <field name="original_transaction_id"/>
+                            <field name="requested_by_id"/>
+                            <field name="requested_at" invisible="not requested_at"/>
+                        </group>
+                        <group>
+                            <field name="amount" class="fw-bold"/>
+                            <field name="maximum_refundable_amount"/>
+                            <field name="reviewed_by_id" invisible="not reviewed_by_id"/>
+                            <field name="reviewed_at" invisible="not reviewed_at"/>
+                            <field name="credit_note_id" invisible="not credit_note_id"/>
+                            <field name="refund_transaction_id" invisible="not refund_transaction_id"/>
+                            <field name="refund_payment_id" invisible="not refund_payment_id"/>
+                            <field name="provider_reference" invisible="not provider_reference"/>
+                            <field name="operational_sync_state" widget="badge"
+                                   decoration-warning="operational_sync_state == 'pending'"
+                                   decoration-success="operational_sync_state == 'done'"
+                                   decoration-danger="operational_sync_state == 'error'"/>
+                            <field name="operational_sync_error" invisible="not operational_sync_error"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Causa de la devolución">
+                            <field name="reason_id" required="1" readonly="state != 'draft'"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="reason" placeholder="Explique cualquier detalle necesario..."
+                                   readonly="state != 'draft'"/>
+                        </group>
+                        <field name="review_note" readonly="state not in ('pending', 'rejected')"/>
+                    </group>
+                    <notebook>
+                        <page string="Productos a devolver">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom" create="0" delete="0">
+                                    <field name="product_id"/>
+                                    <field name="description" optional="hide"/>
+                                    <field name="invoiced_quantity"/>
+                                    <field name="already_requested_quantity"/>
+                                    <field name="available_quantity"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
+                                    <field name="amount" sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Respuesta Stripe" invisible="not refund_transaction_id">
+                            <field name="transaction_state_message" readonly="1" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_stripe_refund_request_search" model="ir.ui.view">
+        <field name="name">doorandoor.stripe.refund.request.search</field>
+        <field name="model">doorandoor.stripe.refund.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="invoice_id"/>
+                <field name="partner_id"/>
+                <field name="reason_id"/>
+                <filter name="group_reason" string="Causa" context="{'group_by': 'reason_id'}"/>
+                <filter name="pending" string="Pendientes" domain="[('state', '=', 'pending')]"/>
+                <filter name="done" string="Completadas" domain="[('state', '=', 'done')]"/>
+                <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_stripe_refund_requests" model="ir.actions.act_window">
+        <field name="name">Devoluciones Stripe</field>
+        <field name="res_model">doorandoor.stripe.refund.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_stripe_refund_request_search"/>
+    </record>
+</odoo>

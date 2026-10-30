@@ -1,12 +1,27 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'DoorAndDoor - Botón de Entrega desde Ventas',
-    'version': '18.0.1.1.0',
+    'version': '18.0.1.1.6',
     'category': 'Sales/Inventory',
-    'summary': '18.0.1.1.0 - Cierra toda creación y procesamiento de entregas sin pago total',
+    'summary': '18.0.1.1.6 - Sustituye Pre Order por prefactura en mensajes operativos',
     'description': """
 DoorAndDoor - Botón de Entrega desde Ventas
 ============================================
+
+Version 18.0.1.1.4
+------------------
+El botón estándar de Odoo para Entregas y su acción directa se sujetan a la
+misma autorización de cobro o crédito. Un picking creado anticipadamente ya
+no expone la operación hasta que la venta puede entregarse.
+
+Los botones informativos deshabilitados se eliminan de cotizaciones y
+prefacturas para que no induzcan un proceso operativo fuera de secuencia.
+
+Version 18.0.1.1.1
+------------------
+Actualiza las ayudas visuales: el flujo nuevo se habilita por cobro total o
+credito autorizado del PO de Ventas; los documentos historicos conservan la
+exigencia de factura fiscal publicada y pagada.
 
 Version 18.0.1.1.0
 ------------------
@@ -50,6 +65,7 @@ Autor: DoorAndDoor Team
     'data': [
         'security/ir.model.access.csv',
         'views/sale_order_views.xml',
+        'views/account_move_views.xml',
         'views/stock_picking_views.xml',
     ],
     'installable': True,

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_register_form_ddsr_stripe" model="ir.ui.view">
+        <field name="name">account.payment.register.form.ddsr.stripe</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='journal_id']" position="after">
+                <field name="ddsr_stripe_checkout_mode" invisible="1"/>
+                <div class="alert alert-info mt-2" role="status"
+                     invisible="not ddsr_stripe_checkout_mode">
+                    Al pulsar <strong>Crear pago</strong> se abrirá el formulario seguro de
+                    Stripe. La factura no se marcará como pagada hasta recibir la confirmación
+                    de Stripe.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

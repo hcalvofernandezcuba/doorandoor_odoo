@@ -2,6 +2,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 import requests
 import logging
+import time
 
 _logger = logging.getLogger(__name__)
 
@@ -99,7 +100,13 @@ class ZohoPartnerImport(models.TransientModel):
 
         for contact in all_contacts:
             try:
-                result = self._create_or_update_partner(connector, contact, contact_type)
+                # The contacts collection endpoint only returns summary data.
+                # Addresses and contact persons are available in the detail
+                # endpoint, so always enrich the record before mapping it.
+                detailed_contact = self._fetch_contact_detail(connector, contact)
+                result = self._create_or_update_partner(
+                    connector, detailed_contact, contact_type
+                )
                 if result.get("created"):
                     created_partners |= result.get("partner")
                     imported += 1
@@ -170,6 +177,62 @@ class ZohoPartnerImport(models.TransientModel):
         _logger.info("Fetched %s %s contacts from Zoho", len(all_contacts), contact_type)
         return all_contacts
 
+    def _fetch_contact_detail(self, connector, contact):
+        """Return the complete Zoho contact, including its addresses.
+
+        Zoho's paginated ``contacts`` response deliberately omits
+        ``billing_address``, ``shipping_address`` and ``contact_persons``.
+        Importing that summary directly silently cleared those fields in Odoo.
+        The detail endpoint is therefore required for a complete partner sync.
+        """
+        contact_id = contact.get("contact_id")
+        if not contact_id:
+            raise UserError(_("Zoho contact has no contact_id."))
+
+        url = connector._get_api_url("contacts/%s" % contact_id)
+        last_error = False
+        for attempt in range(1, 6):
+            try:
+                response = requests.get(
+                    url,
+                    headers=connector._get_headers(),
+                    timeout=60,
+                )
+            except requests.exceptions.RequestException as error:
+                last_error = str(error)
+            else:
+                if response.status_code == 200:
+                    detail = response.json().get("contact")
+                    if not detail:
+                        raise UserError(
+                            _("Zoho returned no detail for contact %s.") % contact_id
+                        )
+                    return detail
+
+                last_error = self._extract_zoho_error(response)
+                if response.status_code not in (429, 500, 502, 503, 504):
+                    break
+
+                retry_after = response.headers.get("Retry-After")
+                try:
+                    delay = max(float(retry_after), 1.0)
+                except (TypeError, ValueError):
+                    delay = min(2 ** attempt, 30)
+                _logger.warning(
+                    "Zoho contact %s detail request returned HTTP %s; "
+                    "retrying in %s seconds (attempt %s/5)",
+                    contact_id,
+                    response.status_code,
+                    delay,
+                    attempt,
+                )
+                time.sleep(delay)
+
+        raise UserError(
+            _("Could not fetch complete Zoho contact %(contact)s: %(error)s")
+            % {"contact": contact_id, "error": last_error or _("Unknown error")}
+        )
+
     def _create_or_update_partner(self, connector, zoho_data, contact_type):
         Partner = self.env["res.partner"]
 
@@ -210,7 +273,9 @@ class ZohoPartnerImport(models.TransientModel):
             "city": billing.get("city"),
             "zip": billing.get("zip"),
             "state_id": self._get_state(billing.get("state")),
-            "country_id": self._get_country(billing.get("country")),
+            "country_id": self._get_country(
+                billing.get("country"), billing.get("country_code")
+            ),
             "customer_rank": 1 if is_customer else 0,
             "supplier_rank": 1 if is_vendor else 0,
             "is_company": zoho_data.get("contact_type") == "company",
@@ -261,7 +326,7 @@ class ZohoPartnerImport(models.TransientModel):
         self._import_contact_persons(partner, zoho_data.get("contact_persons", []))
 
         # === DIRECCIÓN DE ENVÍO COMO CONTACTO HIJO ===
-        if shipping and any(shipping.values()):
+        if self._address_has_content(shipping):
             self._create_shipping_address(partner, shipping)
 
         # === ETIQUETAS / TAGS ===
@@ -410,7 +475,7 @@ class ZohoPartnerImport(models.TransientModel):
         """
         Crea la dirección de envío como un contacto hijo de tipo 'delivery'.
         """
-        if not shipping_data or not any(shipping_data.values()):
+        if not self._address_has_content(shipping_data):
             return
 
         # Verificar si ya existe una dirección de envío
@@ -428,7 +493,9 @@ class ZohoPartnerImport(models.TransientModel):
             "city": shipping_data.get("city"),
             "zip": shipping_data.get("zip"),
             "state_id": self._get_state(shipping_data.get("state")),
-            "country_id": self._get_country(shipping_data.get("country")),
+            "country_id": self._get_country(
+                shipping_data.get("country"), shipping_data.get("country_code")
+            ),
             "phone": shipping_data.get("phone"),
         }
 
@@ -508,7 +575,23 @@ class ZohoPartnerImport(models.TransientModel):
         ], limit=1)
         return state.id if state else False
 
-    def _get_country(self, country_name):
+    def _address_has_content(self, address_data):
+        """Ignore Zoho address shells that only contain technical IDs."""
+        if not address_data:
+            return False
+        address_fields = (
+            "address", "street2", "city", "zip", "state", "country",
+            "country_code", "phone", "attention",
+        )
+        return any(address_data.get(field_name) for field_name in address_fields)
+
+    def _get_country(self, country_name, country_code=False):
+        if country_code:
+            country = self.env["res.country"].search([
+                ("code", "=ilike", country_code)
+            ], limit=1)
+            if country:
+                return country.id
         if not country_name:
             return False
         country = self.env["res.country"].search([

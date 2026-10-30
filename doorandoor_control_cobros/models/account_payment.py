@@ -571,10 +571,12 @@ class AccountPayment(models.Model):
             invoice = origin_control.move_id
             if payment.currency_id != payment.company_id.currency_id:
                 continue
-            advance_account = invoice._ddc_get_advance_account()
             credit_lines = payment.move_id.line_ids.filtered(
                 lambda line: line.account_id.account_type == "asset_receivable" and line.amount_residual < 0
             )
+            if not credit_lines:
+                continue
+            advance_account = invoice._ddc_get_advance_account()
             for credit_line in credit_lines:
                 amount = abs(credit_line.amount_residual)
                 transfer = self.env["account.move"].create(

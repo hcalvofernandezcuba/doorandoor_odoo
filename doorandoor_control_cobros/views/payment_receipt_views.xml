@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddc_payment_receipt_list" model="ir.ui.view">
+        <field name="name">doorandoor.payment.receipt.list</field>
+        <field name="model">doorandoor.payment.receipt</field>
+        <field name="arch" type="xml">
+            <list string="Recibos de cobro" create="0" delete="0">
+                <field name="name"/>
+                <field name="generated_at"/>
+                <field name="receipt_type" widget="badge"/>
+                <field name="partner_id"/>
+                <field name="invoice_id" optional="show"/>
+                <field name="date_from" optional="hide"/>
+                <field name="date_to" optional="hide"/>
+                <field name="total_received" sum="Total recibido"/>
+                <field name="total_applied" sum="Total aplicado"/>
+                <field name="total_credit_notes" optional="show"/>
+                <field name="total_unapplied" optional="show"/>
+                <field name="generated_by_id" optional="show"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddc_payment_receipt_form" model="ir.ui.view">
+        <field name="name">doorandoor.payment.receipt.form</field>
+        <field name="model">doorandoor.payment.receipt</field>
+        <field name="arch" type="xml">
+            <form string="Recibo de cobro" create="0" delete="0">
+                <header>
+                    <button name="action_print_receipt" type="object" string="Imprimir PDF" class="btn-primary"/>
+                    <button name="action_send_email" type="object" string="Enviar por correo" class="btn-secondary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="receipt_type" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="invoice_id" readonly="1" invisible="receipt_type != 'invoice'"/>
+                            <field name="date_from" readonly="1" invisible="receipt_type != 'customer'"/>
+                            <field name="date_to" readonly="1" invisible="receipt_type != 'customer'"/>
+                        </group>
+                        <group>
+                            <field name="generated_at" readonly="1"/>
+                            <field name="generated_by_id" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                            <field name="currency_id" readonly="1" groups="base.group_multi_currency"/>
+                        </group>
+                    </group>
+                    <group string="Resumen">
+                        <group>
+                            <field name="invoice_untaxed" readonly="1" invisible="receipt_type != 'invoice'"/>
+                            <field name="invoice_tax" readonly="1" invisible="receipt_type != 'invoice'"/>
+                            <field name="invoice_total" readonly="1" invisible="receipt_type != 'invoice'"/>
+                            <field name="invoice_fees" readonly="1" invisible="receipt_type != 'invoice' or invoice_fees == 0"/>
+                            <field name="invoice_accounting_total" readonly="1" invisible="receipt_type != 'invoice'"/>
+                            <field name="invoice_residual" readonly="1" invisible="receipt_type != 'invoice'"/>
+                            <field name="total_received" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="total_applied" readonly="1"/>
+                            <field name="total_credit_notes" readonly="1"/>
+                            <field name="total_unapplied" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Detalle de factura" invisible="receipt_type != 'invoice'">
+                            <field name="invoice_line_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="product_id"/>
+                                    <field name="description" optional="show"/>
+                                    <field name="quantity"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="price_unit"/>
+                                    <field name="discount" optional="show"/>
+                                    <field name="tax_names"/>
+                                    <field name="price_subtotal" sum="Subtotal"/>
+                                    <field name="price_total" sum="Total"/>
+                                </list>
+                            </field>
+                            <separator string="Impuestos"/>
+                            <field name="tax_line_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="name"/>
+                                    <field name="base_amount"/>
+                                    <field name="tax_amount" sum="Total impuestos"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Pagos y aplicaciones">
+                            <field name="line_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="application_date"/>
+                                    <field name="line_type" widget="badge"/>
+                                    <field name="invoice_id"/>
+                                    <field name="payment_id"/>
+                                    <field name="journal_id"/>
+                                    <field name="reference"/>
+                                    <field name="payment_amount" sum="Importes originales"/>
+                                    <field name="applied_amount" sum="Total aplicado"/>
+                                    <field name="unapplied_amount" sum="Total sin aplicar"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Observaciones">
+                            <field name="notes" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ddc_payment_receipt_search" model="ir.ui.view">
+        <field name="name">doorandoor.payment.receipt.search</field>
+        <field name="model">doorandoor.payment.receipt</field>
+        <field name="arch" type="xml">
+            <search string="Recibos de cobro">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="invoice_id"/>
+                <field name="generated_at"/>
+                <field name="generated_by_id"/>
+                <filter string="Por factura" name="invoice" domain="[('receipt_type','=','invoice')]"/>
+                <filter string="Por cliente" name="customer" domain="[('receipt_type','=','customer')]"/>
+                <separator/>
+                <filter string="Cliente" name="group_partner" context="{'group_by':'partner_id'}"/>
+                <filter string="Mes" name="group_month" context="{'group_by':'generated_at:month'}"/>
+                <filter string="Tipo" name="group_type" context="{'group_by':'receipt_type'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddc_payment_receipts" model="ir.actions.act_window">
+        <field name="name">Recibos de cobro</field>
+        <field name="res_model">doorandoor.payment.receipt</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_ddc_payment_receipt_search"/>
+    </record>
+
+    <record id="view_ddc_payment_receipt_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.payment.receipt.wizard.form</field>
+        <field name="model">doorandoor.payment.receipt.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generar recibo de cobro">
+                <sheet>
+                    <group>
+                        <field name="receipt_type" widget="radio"/>
+                        <field name="partner_id" options="{'no_create': True}"/>
+                        <field name="invoice_id" options="{'no_create': True}"
+                               invisible="receipt_type != 'invoice'"
+                               required="receipt_type == 'invoice'"/>
+                        <field name="date_from" invisible="receipt_type != 'customer'"/>
+                        <field name="date_to" invisible="receipt_type != 'customer'"/>
+                        <field name="include_unapplied" invisible="receipt_type != 'customer'"/>
+                        <field name="notes" placeholder="Texto opcional visible para el cliente..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_generate_pdf" type="object"
+                            string="Generar e imprimir PDF" class="btn-primary"/>
+                    <button name="action_generate" type="object"
+                            string="Generar y revisar" class="btn-secondary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddc_payment_receipt_wizard" model="ir.actions.act_window">
+        <field name="name">Generar recibo de cobro</field>
+        <field name="res_model">doorandoor.payment.receipt.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_ddc_customer_payment_statement_wizard" model="ir.actions.act_window">
+        <field name="name">Estado de pagos por cliente</field>
+        <field name="res_model">doorandoor.payment.receipt.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_receipt_type': 'customer'}</field>
+    </record>
+
+    <record id="view_move_form_ddc_payment_receipt" model="ir.ui.view">
+        <field name="name">account.move.form.ddc.payment.receipt</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ddc_create_payment_receipt" type="object"
+                        string="Recibo de cobro" class="btn-secondary"
+                        groups="doorandoor_control_cobros.group_ddc_user"
+                        invisible="move_type != 'out_invoice' or state != 'posted'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_form_ddc_payment_statement" model="ir.ui.view">
+        <field name="name">res.partner.form.ddc.payment.statement</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_ddc_create_payment_statement" type="object"
+                        class="oe_stat_button" icon="fa-file-text-o"
+                        groups="doorandoor_control_cobros.group_ddc_user"
+                        invisible="customer_rank == 0">
+                    <div class="o_stat_info"><span class="o_stat_text">Estado de pagos</span></div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_product_search_ddsn_commercial_policy" model="ir.ui.view">
+        <field name="name">product.product.search.ddsn.commercial.policy</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_search_form_view"/>
+        <field name="priority">130</field>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='group_by_product_tmpl_id']" position="before">
+                <separator groups="base.group_system"/>
+                <filter name="ddsn_fixed_price"
+                        string="Precio fijo / Sin bonificación"
+                        domain="[('ddsn_fixed_price', '=', True)]"
+                        groups="base.group_system"/>
+                <filter name="ddsn_product_bonus"
+                        string="Con bonificación del ITEM"
+                        domain="[('ddsn_fixed_price', '=', False), ('ddsn_product_bonus_active', '=', True)]"
+                        groups="base.group_system"/>
+                <filter name="ddsn_without_commercial_rule"
+                        string="Sin regla especial"
+                        domain="[('ddsn_fixed_price', '=', False), ('ddsn_product_bonus_active', '=', False)]"
+                        groups="base.group_system"/>
+            </xpath>
+            <xpath expr="//filter[@name='group_by_product_tmpl_id']" position="after">
+                <filter name="group_by_ddsn_commercial_policy"
+                        string="Política comercial"
+                        context="{'group_by': 'ddsn_commercial_policy'}"
+                        groups="base.group_system"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_product_product_list_ddsn_commercial_policy" model="ir.ui.view">
+        <field name="name">product.product.list.ddsn.commercial.policy</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="priority">130</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_code']" position="after">
+                <field name="ddsn_commercial_policy"
+                       string="Política comercial"
+                       optional="show"
+                       readonly="1"
+                       widget="badge"
+                       decoration-danger="ddsn_fixed_price"
+                       groups="base.group_system"/>
+                <field name="ddsn_fixed_price"
+                       string="Precio fijo / Sin bonificación"
+                       optional="hide"
+                       groups="base.group_system"/>
+                <field name="ddsn_product_bonus_percent"
+                       string="Bonificación ITEM %"
+                       optional="hide"
+                       groups="base.group_system"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_product_product_form_ddsn_commercial_policy" model="ir.ui.view">
+        <field name="name">product.product.form.ddsn.commercial.policy</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="priority">120</field>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Política comercial" groups="base.group_system">
+                    <group string="Reglas del ITEM">
+                        <group>
+                            <field name="ddsn_fixed_price"/>
+                            <field name="ddsn_product_bonus_active"
+                                   readonly="ddsn_fixed_price"/>
+                            <field name="ddsn_product_bonus_percent"
+                                   readonly="ddsn_fixed_price or not ddsn_product_bonus_active"/>
+                            <field name="ddsn_product_bonus_date_from"
+                                   readonly="ddsn_fixed_price or not ddsn_product_bonus_active"/>
+                            <field name="ddsn_product_bonus_date_to"
+                                   readonly="ddsn_fixed_price or not ddsn_product_bonus_active"/>
+                            <field name="ddsn_product_bonus_authorized_by_id"
+                                   readonly="ddsn_fixed_price or not ddsn_product_bonus_active"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                        <group>
+                            <field name="ddsn_product_bonus_notes"
+                                   placeholder="Motivo, alcance, autorización y excepciones..."/>
+                            <div class="alert alert-info" role="alert" invisible="not ddsn_fixed_price">
+                                Este ITEM tiene precio fijo. Ningún descuento o bonificación puede modificarlo.
+                            </div>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

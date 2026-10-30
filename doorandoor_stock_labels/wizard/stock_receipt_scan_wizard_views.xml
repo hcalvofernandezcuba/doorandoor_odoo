@@ -16,6 +16,8 @@
                                 <field name="product_id"/>
                                 <field name="expected_qty"/>
                                 <field name="counted_qty"/>
+                                <field name="is_counted" column_invisible="True"/>
+                                <field name="difference_qty"/>
                             </list>
                         </field>
                     </group>

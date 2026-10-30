@@ -1,0 +1,40 @@
+<odoo>
+    <record id="view_ddcl_clover_checkout_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.clover.checkout.wizard.form</field>
+        <field name="model">doorandoor.clover.checkout.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Pago con tarjeta - Clover">
+                <sheet>
+                    <div class="alert alert-warning" role="status">
+                        <strong>Simulación local Clover.</strong> Estos campos son ficticios: no se guarda ni se transmite información de tarjeta.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="invoice_id"/>
+                            <field name="partner_id"/>
+                            <field name="amount"/>
+                        </group>
+                        <group string="Formulario Clover (simulado)">
+                            <field name="cardholder_name"/>
+                            <field name="card_number"/>
+                            <field name="expiry"/>
+                            <field name="cvc" password="True"/>
+                        </group>
+                        <group string="Autorización OTP de capacitación">
+                            <field name="otp_sent_at" readonly="1"/>
+                            <field name="otp_code" password="True" placeholder="Código recibido por Telegram"/>
+                            <field name="otp_verified_at" readonly="1"/>
+                            <button name="action_send_training_otp" string="Enviar OTP a Telegram"
+                                    type="object" class="btn-secondary"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_simulate_approved" string="Validar OTP y simular aprobación" type="object" class="btn-primary"/>
+                    <button name="action_simulate_declined" string="Simular rechazo" type="object" class="btn-secondary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

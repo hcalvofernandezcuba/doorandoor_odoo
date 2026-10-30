@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía gráfica de operaciones de almacén</title>
+<style>
+@page{size:Letter;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#243447;margin:0;font-size:11px;line-height:1.38}h1,h2,h3{color:#523b78;margin:0 0 8px}h1{font-size:27px}h2{font-size:20px;border-bottom:3px solid #76569e;padding-bottom:5px}h3{font-size:14px}.page{page-break-after:always;min-height:245mm;padding:5mm}.page:last-child{page-break-after:auto}.cover{background:linear-gradient(140deg,#3e285e,#76569e 58%,#10a6b2);color:white;padding:28mm 18mm}.cover h1{color:white;font-size:34px}.cover .subtitle{font-size:18px}.badge{display:inline-block;border-radius:16px;padding:4px 10px;background:#eee;font-weight:bold}.purple{background:#76569e;color:white}.green{background:#22a746;color:white}.orange{background:#f3a000;color:#111}.blue{background:#17a2b8;color:white}.red{background:#d94b4b;color:white}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{border:1px solid #ccd4dc;border-radius:8px;padding:10px;background:#fff}.callout{border-left:6px solid #17a2b8;background:#e8f7fa;padding:10px;margin:10px 0}.warning{border-left-color:#f3a000;background:#fff4d9}.danger{border-left-color:#d94b4b;background:#fdeaea}.ok{border-left-color:#22a746;background:#eaf8ee}.flow{display:flex;align-items:stretch;gap:5px;margin:12px 0}.step{flex:1;border:2px solid #76569e;border-radius:8px;padding:8px;text-align:center;background:#f7f3fb}.arrow{align-self:center;font-size:21px;color:#76569e}.screen{border:2px solid #76569e;border-radius:8px;overflow:hidden;margin:9px 0;background:#f8f9fb}.bar{background:#76569e;color:white;padding:8px;font-size:14px;font-weight:bold}.content{padding:11px}.field{border-bottom:1px solid #bfc6ce;padding:6px 3px;margin:2px 0}.label{display:inline-block;width:42%;color:#66717c}.value{color:#573f80;font-weight:bold}.btn{display:inline-block;padding:7px 13px;border-radius:4px;margin:7px 4px 0 0;background:#76569e;color:white;font-weight:bold}.btn.green{background:#22a746}.decision{border:2px solid #f3a000;background:#fff8e8;padding:9px;text-align:center;transform:skew(-8deg);margin:8px}.decision span{display:block;transform:skew(8deg);font-weight:bold}.legend td{padding:5px;border-bottom:1px solid #ddd}.check li{margin:5px 0}.mini-map{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.slot{border:2px dashed #22a746;background:#eaf8ee;padding:13px 5px;text-align:center;border-radius:5px}.slot.busy{border-style:solid;border-color:#76569e;background:#f1ebf7}.slot.blocked{border-color:#d94b4b;background:#fdeaea}.big{font-size:16px;font-weight:bold}.footer{position:absolute;bottom:8mm;color:#69737d;font-size:9px}.page{position:relative}table{border-collapse:collapse;width:100%}th{background:#523b78;color:white;padding:6px}td{padding:6px;border:1px solid #d8dde3}.barcode{font-family:monospace;font-size:22px;letter-spacing:3px;text-align:center;border:1px solid #222;padding:8px;margin:7px}.no-break{page-break-inside:avoid}
+</style>
+</head>
+<body>
+<section class="page cover">
+  <div style="margin-top:25mm"><div class="badge" style="background:white;color:#523b78">DOOR &amp; DOOR · OPERACIONES</div>
+  <h1>Guía gráfica de operaciones con Hanger, recepciones, lotes y predespacho</h1>
+  <p class="subtitle">Manual paso a paso para operadores de almacén</p>
+  <p style="margin-top:25mm;font-size:15px">Objetivo: que cada mercancía conserve su ITEM, label, ubicación y documento desde que entra hasta que sale.</p></div>
+  <div class="footer" style="color:white">Uso interno · Versión operativa 2026</div>
+</section>
+
+<section class="page">
+<h2>1. Regla principal: identificar primero el tipo de operación</h2>
+<div class="flow"><div class="step"><b>1</b><br>Seleccionar almacén</div><div class="arrow">➜</div><div class="step"><b>2</b><br>Seleccionar documento</div><div class="arrow">➜</div><div class="step"><b>3</b><br>Seleccionar ITEM</div><div class="arrow">➜</div><div class="step"><b>4</b><br>Definir destino</div></div>
+<div class="grid">
+ <div class="card"><h3>Proveedor</h3><p>Mercancía nueva. Puede traer labels compatibles o necesitar labels DoorAndDoor.</p><span class="badge blue">Recepción</span></div>
+ <div class="card"><h3>Traslado para reposición</h3><p>La mercancía pasa a un lote del almacén destino y conserva los labels del origen.</p><span class="badge purple">Almacenar en lote</span></div>
+ <div class="card"><h3>Traslado para entrega</h3><p>El documento completo pasa a un área de predespacho. No se mezcla con lotes de almacenamiento.</p><span class="badge orange">Predespacho</span></div>
+ <div class="card"><h3>Agregar mercancía a un lote</h3><p>Se elige un lote existente del mismo ITEM y solo se añade la cantidad nueva.</p><span class="badge green">Incremento</span></div>
+</div>
+<div class="callout danger"><b>Nunca mezclar variantes.</b> Dos productos parecidos no son el mismo ITEM si cambia ancho, alto, mano, color, vidrio, herrajes u otro atributo.</div>
+<h3>Leyenda de estados</h3><table class="legend"><tr><td><span class="badge purple">Borrador</span></td><td>Aún se puede corregir documento, ITEM, cantidad y destino.</td></tr><tr><td><span class="badge blue">Escaneando</span></td><td>El Hanger está esperando labels.</td></tr><tr><td><span class="badge orange">Listo</span></td><td>Conteo completo, falta validar.</td></tr><tr><td><span class="badge green">Confirmado</span></td><td>Operación aplicada a existencias y trazabilidad.</td></tr></table>
+</section>
+
+<section class="page">
+<h2>2. Agregar productos a un lote existente</h2>
+<div class="screen"><div class="bar">Inventario ▸ Ingreso de mercancía a lote ▸ Nuevo</div><div class="content">
+ <div class="field"><span class="label">Almacén de destino</span><span class="value">Doorandoor - Doral</span></div>
+ <div class="field"><span class="label">Recepción / traslado</span><span class="value">DD/IN/00125</span></div>
+ <div class="field"><span class="label">Producto (ITEM)</span><span class="value">interior doors (shaker 5, 24, 80, LH)</span></div>
+ <div class="field"><span class="label">Lote recomendado</span><span class="value">D24B1</span></div>
+ <div class="field"><span class="label">Cantidad nueva</span><span class="value">18</span></div>
+ <span class="btn">Preparar labels</span>
+</div></div>
+<div class="flow"><div class="step">Buscar el documento</div><div class="arrow">➜</div><div class="step">Elegir el ITEM exacto</div><div class="arrow">➜</div><div class="step">Elegir lote compatible</div><div class="arrow">➜</div><div class="step">Indicar cantidad nueva</div></div>
+<div class="callout ok"><b>Resultado correcto:</b> el sistema conserva los labels históricos y añade solamente las unidades nuevas. Si el producto usa un serial compartido, todos los labels impresos conservan el mismo código.</div>
+<div class="grid"><div class="card"><h3>Producto serializado</h3><div class="barcode">00013136</div><div class="barcode">00013137</div><p>Un código diferente por unidad física.</p></div><div class="card"><h3>Lote con serial compartido</h3><div class="barcode">00020564</div><div class="barcode">00020564</div><p>El mismo código se imprime para todas las piezas; cada disparo suma una unidad.</p></div></div>
+<div class="callout warning"><b>Antes de imprimir:</b> revise ITEM, lote y cantidad. Si se cambia el ITEM, los labels anteriores deben sustituirse por los nuevos.</div>
+</section>
+
+<section class="page">
+<h2>3. Recepción de proveedor con lote compatible</h2>
+<div class="flow"><div class="step">Proveedor entrega</div><div class="arrow">➜</div><div class="step">Seleccionar recepción</div><div class="arrow">➜</div><div class="step">Seleccionar ITEM</div><div class="arrow">➜</div><div class="step">Odoo propone lote del mismo ITEM</div></div>
+<div class="screen"><div class="bar">Ingreso de mercancía etiquetada</div><div class="content">
+ <div class="field"><span class="label">Tipo</span><span class="value">Recepción de proveedor</span></div>
+ <div class="field"><span class="label">Destino operativo</span><span class="value">Almacenar en lote</span></div>
+ <div class="field"><span class="label">Producto</span><span class="value">hardware (hinges, silver, 3.5×3.5)</span></div>
+ <div class="field"><span class="label">Lote recomendado</span><span class="value">D30A1-1</span></div>
+ <div class="field"><span class="label">Modo de labels</span><span class="value">Generar labels DoorAndDoor</span></div>
+ <span class="btn">Preparar labels</span><span class="btn green">Confirmar ingreso</span>
+</div></div>
+<table><tr><th>Mercancía recibida</th><th>Modo correcto</th><th>Acción</th></tr><tr><td>Trae labels DoorAndDoor válidos</td><td>Labels existentes</td><td>Escanear cada label recibido.</td></tr><tr><td>Trae códigos de proveedor compatibles</td><td>Labels compatibles</td><td>Adoptar cada código; no duplicarlo.</td></tr><tr><td>No trae labels compatibles</td><td>Generar labels DoorAndDoor</td><td>Imprimir, pegar y confirmar.</td></tr></table>
+<div class="callout danger"><b>No confirme primero el ingreso serializado.</b> La recepción de inventario debe quedar validada y después se confirma la ubicación/labels.</div>
+</section>
+
+<section class="page">
+<h2>4. Proveedor sin lote compatible: escoger espacio vacío</h2>
+<div class="decision"><span>¿Existe un lote generado del mismo ITEM en este almacén?</span></div>
+<div class="grid"><div class="card"><h3>SÍ</h3><p>Elegir el lote compatible recomendado.</p></div><div class="card"><h3>NO</h3><p>Odoo muestra solamente posiciones físicas vacías y disponibles.</p></div></div>
+<h3>Ejemplo del mapa de espacios</h3><div class="mini-map"><div class="slot busy"><b>D33G1</b><br>Ocupado<br>Miami door</div><div class="slot"><b>D33G2</b><br>Vacío<br>Disponible</div><div class="slot blocked"><b>D33G3</b><br>Bloqueado</div><div class="slot"><b>D33G4</b><br>Vacío<br>Disponible</div></div>
+<div class="screen"><div class="bar">Producto y etiquetado</div><div class="content">
+ <div class="field"><span class="label">Producto (ITEM)</span><span class="value">baseboard (white, 5.25)</span></div>
+ <div class="field"><span class="label">Lote compatible</span><span class="value">No existe</span></div>
+ <div class="field"><span class="label">Nuevo espacio</span><span class="value">D33G2 ▼</span></div>
+ <div class="callout"><b>Mensaje de Odoo:</b> “No existe un lote compatible para este ITEM. Seleccione una posición vacía; el sistema creará allí el nuevo lote sin mezclar productos.”</div>
+ <span class="btn">Guardar y preparar labels</span>
+</div></div>
+<div class="callout ok"><b>Resultado:</b> se crea el lote D33G2 para ese ITEM, queda vinculado a la recepción y aparece ocupado en el mapa después de confirmar.</div>
+<div class="callout danger"><b>No disponible en la lista:</b> espacios ocupados, reservados, bloqueados, en mantenimiento o pertenecientes a otro almacén.</div>
+</section>
+
+<section class="page">
+<h2>5. Traslado interno para reponer stock</h2>
+<div class="flow"><div class="step">Origen cuenta y valida labels</div><div class="arrow">➜</div><div class="step">Camión traslada</div><div class="arrow">➜</div><div class="step">Destino escanea los mismos labels</div><div class="arrow">➜</div><div class="step">Ubicar en lote compatible</div></div>
+<div class="screen"><div class="bar">Recepción de traslado · DTP/INT/00025</div><div class="content">
+ <div class="field"><span class="label">Almacén de origen</span><span class="value">Doral</span></div>
+ <div class="field"><span class="label">Almacén de destino</span><span class="value">West Palm Beach</span></div>
+ <div class="field"><span class="label">Destino operativo</span><span class="value">Almacenar en lote</span></div>
+ <div class="field"><span class="label">Modo</span><span class="value">Labels existentes</span></div>
+ <div class="field"><span class="label">Lote de destino</span><span class="value">WPB12C2-L</span></div>
+ <span class="btn">Preparar labels</span>
+</div></div>
+<ul class="check"><li>☑ Escanear exactamente los labels contados en el despacho.</li><li>☑ Confirmar que producto y cantidad coinciden con el documento.</li><li>☑ Reutilizar el código del origen; no generar un segundo label.</li><li>☑ Confirmar la recepción y comprobar el mapa del destino.</li></ul>
+</section>
+
+<section class="page">
+<h2>6. Traslado interno para entrega a cliente</h2>
+<div class="callout"><b>Regla:</b> todos los productos del documento se colocan juntos en una única área virtual de predespacho. No se reparten entre lotes del almacén receptor.</div>
+<div class="flow"><div class="step">Traslado basado en venta</div><div class="arrow">➜</div><div class="step">Destino: Traslado para entrega</div><div class="arrow">➜</div><div class="step">Crear PRE-DESPACHO / documento</div><div class="arrow">➜</div><div class="step">Entregar al cliente</div></div>
+<div class="screen"><div class="bar">Documento DOR/INT/00117</div><div class="content">
+ <div class="field"><span class="label">Destino operativo</span><span class="value">Traslado para entrega</span></div>
+ <div class="field"><span class="label">Área de predespacho</span><span class="value">PRE-DESPACHO / DOR-INT-00117</span></div>
+ <div class="field"><span class="label">Producto 1</span><span class="value">Impact door × 2</span></div>
+ <div class="field"><span class="label">Producto 2</span><span class="value">Hardware × 4</span></div>
+ <div class="field"><span class="label">Producto 3</span><span class="value">Baseboard × 20</span></div>
+ <span class="btn">Preparar labels</span>
+</div></div>
+<div class="grid"><div class="card"><h3>Correcto</h3><p>Los tres productos permanecen bajo el mismo documento y la misma zona de predespacho.</p></div><div class="card"><h3>Incorrecto</h3><p>Enviar cada producto a un lote distinto, perder la unidad del pedido o generar labels nuevos.</p></div></div>
+</section>
+
+<section class="page">
+<h2>7. Operación con Hanger</h2>
+<div class="flow"><div class="step">Escanear documento</div><div class="arrow">➜</div><div class="step">Abrir conteo</div><div class="arrow">➜</div><div class="step">Disparar cada label</div><div class="arrow">➜</div><div class="step">Validar desde Hanger</div></div>
+<div class="screen" style="max-width:330px;margin:auto"><div class="bar">DD/OUT/00043</div><div class="content">
+ <div class="callout">Active el lector. Un serial único suma una unidad. Para label compartido, repita el disparo por cada pieza.</div>
+ <div class="field"><span class="label">Esperado</span><span class="value">4</span></div><div class="field"><span class="label">Contado</span><span class="value">4</span></div><div class="field"><span class="label">Diferencia</span><span class="value">0</span></div>
+ <span class="btn green">Validar operación</span>
+</div></div>
+<table><tr><th>Señal</th><th>Significado</th><th>Qué hacer</th></tr><tr><td>Lectura aceptada / vibración</td><td>El ITEM pertenece al documento.</td><td>Continuar.</td></tr><tr><td>Label ya leído</td><td>Serial único repetido.</td><td>No volver a disparar, salvo lote compartido.</td></tr><tr><td>ITEM no pertenece</td><td>Label equivocado.</td><td>Separar la pieza y revisar.</td></tr><tr><td>Diferencia distinta de cero</td><td>Faltan o sobran unidades.</td><td>No validar como completo.</td></tr></table>
+</section>
+
+<section class="page">
+<h2>8. Faltantes y devoluciones por daño</h2>
+<div class="grid"><div class="card"><h3>Faltante</h3><p>La mercancía no llegó físicamente.</p><ol><li>Contar solo labels recibidos.</li><li>Escribir observación.</li><li>Adjuntar evidencia si existe.</li><li>Cerrar con faltantes.</li></ol><p>Gerencia recibe documento, labels pendientes, origen, destino, chofer y vehículo.</p></div><div class="card"><h3>Daño</h3><p>La mercancía sí llegó, pero está defectuosa por accidente o manipulación.</p><ol><li>Cerrar primero la recepción.</li><li>Seleccionar labels dañados.</li><li>Describir el daño.</li><li>Adjuntar imagen.</li><li>Crear devolución.</li></ol></div></div>
+<div class="callout danger"><b>No confundir:</b> un faltante no crea una devolución. Una devolución solo corresponde a mercancía físicamente recibida y dañada.</div>
+<h3>Control final del supervisor</h3><ul class="check"><li>☑ Documento de inventario en estado Hecho.</li><li>☑ Control de labels en Confirmado o Cerrado con faltantes.</li><li>☑ Existencia actual correcta en el mapa.</li><li>☑ Entrada o salida visible en Análisis de movimientos por ITEM.</li><li>☑ Lote/área de predespacho correcto.</li><li>☑ Chatter con operador, fecha y resultado.</li></ul>
+</section>
+
+<section class="page">
+<h2>9. Lista rápida antes de terminar</h2>
+<table><tr><th>Pregunta</th><th>Sí</th><th>Si la respuesta es NO</th></tr><tr><td>¿Estoy en el almacén correcto?</td><td>Continuar</td><td>Cambiar almacén antes de seleccionar documento.</td></tr><tr><td>¿El documento corresponde a esta mercancía?</td><td>Continuar</td><td>No escanear; informar al supervisor.</td></tr><tr><td>¿Elegí el ITEM exacto?</td><td>Continuar</td><td>Comparar todos los atributos.</td></tr><tr><td>¿Existe lote compatible?</td><td>Usarlo</td><td>Seleccionar un espacio vacío disponible.</td></tr><tr><td>¿Es para entrega?</td><td>Usar predespacho</td><td>Almacenar en lote compatible.</td></tr><tr><td>¿El conteo coincide?</td><td>Validar</td><td>Documentar faltante o revisar sobrante.</td></tr><tr><td>¿El mapa y movimientos cambiaron?</td><td>Finalizar</td><td>No repetir operación; avisar al supervisor.</td></tr></table>
+<div class="callout ok big">Una operación termina cuando coinciden: documento + ITEM + labels + cantidad + ubicación + movimiento.</div>
+<div class="callout warning"><b>Ante un error:</b> tome una foto de la pantalla, anote el número completo del documento y cree el ticket desde la operación. No cambie manualmente el ITEM, lote o cantidad después de iniciar.</div>
+<div class="footer">DoorAndDoor · Guía gráfica de operaciones de almacén</div>
+</section>
+</body></html>

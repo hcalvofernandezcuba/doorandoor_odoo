@@ -11,9 +11,22 @@ class DdspSpecialFromMasterWizard(models.TransientModel):
     master_template_id = fields.Many2one(
         "product.template",
         string="Plantilla maestra",
-        required=True,
         domain="[('ddsp_is_manufacturing_template', '=', True), ('active', '=', True)]",
     )
+    create_new_master = fields.Boolean(
+        string="La plantilla no existe: crear una nueva",
+        help=(
+            "Crea una plantilla maestra reutilizable con la configuracion del primer "
+            "producto especial. Requiere el rol Creador de plantillas maestras especiales."
+        ),
+    )
+    new_master_name = fields.Char(string="Nombre de la nueva plantilla")
+    new_master_output_name = fields.Char(string="Nombre comercial resultante")
+    new_master_family = fields.Selection(
+        [("windows", "WINDOWS"), ("doors", "DOORS")],
+        string="Familia de fabricacion",
+    )
+    new_master_reference = fields.Char(string="Referencia de la plantilla")
     master_bom_id = fields.Many2one(
         "mrp.bom",
         string="LDM maestra",
@@ -35,13 +48,36 @@ class DdspSpecialFromMasterWizard(models.TransientModel):
         "ddsp.special.from.master.operation", "wizard_id", string="Operaciones de la receta"
     )
     quantity = fields.Float(string="Cantidad", default=1.0, required=True)
-    price_unit = fields.Monetary(string="Precio unitario", required=True)
+    allow_vendor_price = fields.Boolean(compute="_compute_allow_vendor_price")
+    price_unit = fields.Monetary(string="Precio del proveedor", required=True)
     currency_id = fields.Many2one("res.currency", compute="_compute_document_data")
     company_id = fields.Many2one("res.company", compute="_compute_document_data")
     special_notes = fields.Text(string="Especificaciones del producto", required=True)
     production_instructions = fields.Text(
         string="Instrucciones de fabricacion", required=True
     )
+
+    @api.depends("master_template_id", "master_template_id.ddsp_allow_vendor_price", "create_new_master")
+    def _compute_allow_vendor_price(self):
+        for wizard in self:
+            wizard.allow_vendor_price = bool(
+                wizard.create_new_master or wizard.master_template_id.ddsp_allow_vendor_price
+            )
+
+    @api.onchange("create_new_master")
+    def _onchange_create_new_master(self):
+        if self.create_new_master:
+            self.master_template_id = False
+            self.master_bom_id = False
+            self.base_variant_id = False
+            self.attribute_line_ids = [(5, 0, 0)]
+            self.component_line_ids = [(5, 0, 0)]
+            self.operation_line_ids = [(5, 0, 0)]
+        else:
+            self.new_master_name = False
+            self.new_master_output_name = False
+            self.new_master_family = False
+            self.new_master_reference = False
 
     def _ddsp_configured_variant_price(self):
         """Return the commercial price configured by Administration."""
@@ -158,7 +194,7 @@ class DdspSpecialFromMasterWizard(models.TransientModel):
             self.move_id.state != "draft" or self.move_id.move_type != "out_invoice"
         ):
             raise UserError(_("La prefactura o factura debe permanecer en borrador."))
-        if not self.master_template_id.ddsp_is_manufacturing_template:
+        if not self.master_template_id or not self.master_template_id.ddsp_is_manufacturing_template:
             raise UserError(_("Seleccione una plantilla maestra WINDOWS o DOORS."))
         if self.master_bom_id and self.master_bom_id.product_tmpl_id != self.master_template_id:
             raise UserError(_("La LDM seleccionada no pertenece a la plantilla maestra."))
@@ -204,13 +240,86 @@ class DdspSpecialFromMasterWizard(models.TransientModel):
             )
         if self.quantity <= 0:
             raise UserError(_("La cantidad debe ser mayor que cero."))
+        if self.allow_vendor_price and self.price_unit <= 0:
+            raise UserError(_("Indique el precio cotizado por el proveedor para este Especial."))
+
+    def _ddsp_create_master_template(self):
+        """Create the technical master without opening general catalogue rights."""
+        self.ensure_one()
+        if not self.create_new_master:
+            return self.master_template_id
+        if not self.env.user.has_group(
+            "doorandoor_special_products.group_ddsp_master_template_creator"
+        ):
+            raise UserError(
+                _(
+                    "No tiene la herramienta para crear plantillas maestras especiales. "
+                    "Solicite el rol Ventas / Creador de plantillas maestras especiales."
+                )
+            )
+        missing = []
+        if not (self.new_master_name or "").strip():
+            missing.append(_("nombre"))
+        if not (self.new_master_output_name or "").strip():
+            missing.append(_("nombre comercial"))
+        if not self.new_master_family:
+            missing.append(_("familia de fabricacion"))
+        if missing:
+            raise UserError(
+                _("Complete los datos de la nueva plantilla: %s.") % ", ".join(missing)
+            )
+        if not self.component_line_ids.filtered(
+            lambda line: line.include and line.product_id and line.product_qty > 0
+        ):
+            raise UserError(
+                _(
+                    "La nueva plantilla necesita al menos un componente real de fabricacion. "
+                    "Agreguelo en Componentes de la receta."
+                )
+            )
+        unit = self.env.ref("uom.product_uom_unit")
+        category = self.env["product.category"].sudo().search([], order="id", limit=1)
+        code = (self.new_master_reference or "").strip()
+        if not code:
+            sequence = self.env["ir.sequence"].next_by_code("ddsp.special.product") or "NEW"
+            code = "MASTER-%s" % sequence
+        master = self.env["product.template"].sudo().create(
+            {
+                "name": self.new_master_name.strip(),
+                "default_code": code,
+                "type": "consu",
+                "is_storable": True,
+                "categ_id": category.id,
+                "uom_id": unit.id,
+                "uom_po_id": unit.id,
+                "list_price": self.price_unit,
+                "sale_ok": False,
+                "purchase_ok": False,
+                "company_id": self.company_id.id,
+                "ddsp_is_manufacturing_template": True,
+                "ddsp_manufacturing_family": self.new_master_family,
+                "ddsp_template_output_name": self.new_master_output_name.strip(),
+                "ddsp_allow_vendor_price": True,
+                "ddsp_allow_special": False,
+            }
+        )
+        self.master_template_id = master
+        return master
 
     def action_create_special_product(self):
         self.ensure_one()
+        created_master = bool(self.create_new_master)
+        if created_master:
+            self._ddsp_create_master_template()
         self._ddsp_validate()
-        # Never trust a price received from the browser. Sales users only
-        # select the variant; Administration configures its commercial price.
-        configured_price = self._ddsp_configured_variant_price()
+        # A manual price is accepted only for a master explicitly authorized
+        # by Administration (for example, supplier-quoted EMC specials).
+        # Every other master continues using its configured catalogue price.
+        configured_price = (
+            self.price_unit
+            if self.allow_vendor_price
+            else self._ddsp_configured_variant_price()
+        )
         master = self.master_template_id
         code = self.env["ir.sequence"].next_by_code("ddsp.special.product") or "ESP"
         changes = []
@@ -267,7 +376,7 @@ class DdspSpecialFromMasterWizard(models.TransientModel):
                 "uom_id": master.uom_id.id,
                 "uom_po_id": master.uom_po_id.id,
                 "list_price": configured_price,
-                "standard_price": master.standard_price,
+                "standard_price": master.sudo().standard_price,
                 "sale_ok": True,
                 "purchase_ok": False,
                 "route_ids": [(6, 0, master.route_ids.ids)],
@@ -311,15 +420,21 @@ class DdspSpecialFromMasterWizard(models.TransientModel):
         operation_map = {}
         for operation_line in self.operation_line_ids.filtered("include"):
             source = operation_line.source_operation_id
-            operation = source.sudo().copy({
+            operation_vals = {
                 "bom_id": bom.id,
                 "name": operation_line.name,
                 "workcenter_id": operation_line.workcenter_id.id,
                 "time_cycle_manual": operation_line.time_cycle_manual,
                 "blocked_by_operation_ids": [(5, 0, 0)],
                 "bom_product_template_attribute_value_ids": [(5, 0, 0)],
-            })
-            operation_map[source.id] = operation
+            }
+            operation = (
+                source.sudo().copy(operation_vals)
+                if source
+                else self.env["mrp.routing.workcenter"].sudo().create(operation_vals)
+            )
+            if source:
+                operation_map[source.id] = operation
         for component_line in self.component_line_ids.filtered("include"):
             source = component_line.source_bom_line_id
             vals = {
@@ -356,6 +471,28 @@ class DdspSpecialFromMasterWizard(models.TransientModel):
         if self.master_bom_id:
             bom._ddsp_apply_manufacturing_rules(changes)
         template._ddsp_validate_special_bom(require_production_user=False)
+        if created_master:
+            master_attribute_commands = []
+            for attribute_line in template.attribute_line_ids:
+                master_attribute_commands.append(
+                    (
+                        0,
+                        0,
+                        {
+                            "attribute_id": attribute_line.attribute_id.id,
+                            "value_ids": [(6, 0, attribute_line.value_ids.ids)],
+                        },
+                    )
+                )
+            master.sudo().write({"attribute_line_ids": master_attribute_commands})
+            master_bom = bom.sudo().copy(
+                {
+                    "product_tmpl_id": master.id,
+                    "product_id": False,
+                    "code": "%s-RECIPE" % (master.default_code or "MASTER"),
+                }
+            )
+            template.sudo().write({"ddsp_source_bom_template_id": master_bom.id})
         line_vals = {
             "product_id": product.id,
             "name": final_name,
@@ -395,6 +532,22 @@ class DdspSpecialFromMasterWizard(models.TransientModel):
                 {
                     "ddsp_origin_invoice_id": self.move_id.id,
                     "ddsp_origin_invoice_line_id": line.id,
+                }
+            )
+        document = self.sale_order_id or self.move_id
+        if created_master:
+            document.message_post(
+                body=_(
+                    "Plantilla maestra especial creada por %(user)s: %(master)s "
+                    "(%(family)s). Primer producto generado: %(product)s."
+                )
+                % {
+                    "user": self.env.user.display_name,
+                    "master": master.display_name,
+                    "family": dict(self._fields["new_master_family"].selection).get(
+                        self.new_master_family, self.new_master_family
+                    ),
+                    "product": template.display_name,
                 }
             )
         return {"type": "ir.actions.act_window_close"}

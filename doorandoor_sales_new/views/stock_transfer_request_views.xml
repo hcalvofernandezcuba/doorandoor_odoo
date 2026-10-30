@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddsn_stock_transfer_request_list" model="ir.ui.view">
+        <field name="name">ddsn.stock.transfer.request.list</field>
+        <field name="model">ddsn.stock.transfer.request</field>
+        <field name="arch" type="xml"><list decoration-warning="state == 'pending'" decoration-success="state == 'done'">
+            <field name="name"/><field name="sale_order_id"/><field name="product_id"/><field name="quantity"/>
+            <field name="destination_warehouse_id"/><field name="source_warehouse_id"/><field name="requested_by_id"/><field name="state" widget="badge"/>
+        </list></field>
+    </record>
+    <record id="view_ddsn_stock_transfer_request_form" model="ir.ui.view">
+        <field name="name">ddsn.stock.transfer.request.form</field>
+        <field name="model">ddsn.stock.transfer.request</field>
+        <field name="arch" type="xml"><form>
+            <header><button name="action_create_transfer" type="object" string="Crear traslado" class="btn-primary" groups="stock.group_stock_manager,base.group_system" invisible="state != 'pending'"/><field name="state" widget="statusbar"/></header>
+            <sheet><div class="oe_button_box" name="button_box"><button name="action_open_picking" type="object" class="oe_stat_button" icon="fa-truck" invisible="not picking_id"><field name="picking_id" widget="statinfo" string="Traslado"/></button></div>
+            <div class="oe_title"><h1><field name="name"/></h1></div><group><group><field name="sale_order_id"/><field name="sale_line_id"/><field name="product_id"/><field name="quantity"/></group><group><field name="destination_warehouse_id"/><field name="source_warehouse_id" options="{'no_create': True}" readonly="state != 'pending'"/><field name="requested_by_id"/><field name="company_id" groups="base.group_multi_company"/></group></group></sheet><chatter/>
+        </form></field>
+    </record>
+    <record id="action_ddsn_stock_transfer_request" model="ir.actions.act_window"><field name="name">Solicitudes de traslado</field><field name="res_model">ddsn.stock.transfer.request</field><field name="view_mode">list,form</field></record>
+    <menuitem id="menu_ddsn_stock_transfer_request" name="Solicitudes de traslado" parent="stock.menu_stock_root" action="action_ddsn_stock_transfer_request" sequence="35"/>
+</odoo>

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_load_plan_list" model="ir.ui.view">
+        <field name="name">doorandoor.load.plan.list</field>
+        <field name="model">doorandoor.load.plan</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'done'" decoration-danger="state in ('incident', 'cancel')" decoration-info="state == 'in_transit'">
+                <field name="name"/>
+                <field name="scheduled_departure"/>
+                <field name="origin_warehouse_id"/>
+                <field name="vehicle_name"/>
+                <field name="fleet_vehicle_id" optional="show"/>
+                <field name="license_plate" optional="show"/>
+                <field name="driver_id"/>
+                <field name="last_checkpoint_warehouse_id" optional="show"/>
+                <field name="last_checkpoint_at" optional="show"/>
+                <field name="next_stop_id" optional="show"/>
+                <field name="responsible_id"/>
+                <field name="stop_count"/>
+                <field name="picking_count"/>
+                <field name="total_units"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_load_plan_search" model="ir.ui.view">
+        <field name="name">doorandoor.load.plan.search</field>
+        <field name="model">doorandoor.load.plan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="origin_warehouse_id"/>
+                <field name="vehicle_name"/>
+                <field name="license_plate"/>
+                <field name="driver_id"/>
+                <field name="responsible_id"/>
+                <filter name="active_trips" string="Viajes activos" domain="[('state', 'in', ('route_ready', 'loading', 'loaded', 'in_transit', 'partial_unload', 'incident'))]"/>
+                <filter name="draft" string="Borradores" domain="[('state', '=', 'draft')]"/>
+                <filter name="done" string="Completados" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                <filter name="group_origin" string="Almacén de origen" context="{'group_by': 'origin_warehouse_id'}"/>
+                <filter name="group_responsible" string="Responsable" context="{'group_by': 'responsible_id'}"/>
+                <filter name="group_departure_day" string="Día de salida" context="{'group_by': 'scheduled_departure:day'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_load_plan_form" model="ir.ui.view">
+        <field name="name">doorandoor.load.plan.form</field>
+        <field name="model">doorandoor.load.plan</field>
+        <field name="arch" type="xml">
+            <form string="Plan de carga y ruta">
+                <header>
+                    <button name="action_prepare_route" string="Preparar ruta" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_start_loading" string="Iniciar carga" type="object" class="btn-primary" invisible="state != 'route_ready'"/>
+                    <button name="action_return_route_ready" string="Volver a ruta preparada" type="object" invisible="state != 'loading'" groups="doorandoor_cargas_control.group_load_control_planner"/>
+                    <button name="action_mark_loaded" string="Carga verificada" type="object" class="btn-primary" invisible="state != 'loading'"/>
+                    <button name="action_start_trip" string="Iniciar viaje" type="object" class="btn-primary" invisible="state != 'loaded'" groups="doorandoor_cargas_control.group_load_control_driver,doorandoor_cargas_control.group_load_control_planner"/>
+                    <button name="action_mark_partial_unload" string="Registrar descarga parcial" type="object" invisible="state != 'in_transit'" groups="doorandoor_cargas_control.group_load_control_planner"/>
+                    <button name="action_done" string="Completar" type="object" class="btn-primary" invisible="state not in ('in_transit', 'partial_unload')" groups="doorandoor_cargas_control.group_load_control_manager"/>
+                    <button name="action_incident" string="Incidencia" type="object" invisible="state in ('done', 'cancel')" groups="doorandoor_cargas_control.group_load_control_driver,doorandoor_cargas_control.group_load_control_planner"/>
+                    <button name="action_cancel" string="Cancelar" type="object" invisible="state in ('done', 'cancel')" groups="doorandoor_cargas_control.group_load_control_manager"/>
+                    <button name="action_reset_draft" string="Restablecer" type="object" invisible="state not in ('incident', 'cancel')" groups="doorandoor_cargas_control.group_load_control_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,route_ready,loading,loaded,in_transit,partial_unload,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_print_load_manifest" type="object" class="oe_stat_button" icon="fa-file-pdf-o">
+                            <div class="o_stat_info"><span class="o_stat_text">Imprimir</span><span class="o_stat_text">Manifiesto</span></div>
+                        </button>
+                        <button name="action_open_google_maps" type="object" class="oe_stat_button" icon="fa-map-marker" invisible="not google_maps_url">
+                            <div class="o_stat_info"><span class="o_stat_text">Abrir ruta</span><span class="o_stat_text">Google Maps</span></div>
+                        </button>
+                    </div>
+                    <div class="oe_title"><label for="name"/><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Ruta">
+                            <field name="origin_warehouse_id" readonly="state != 'draft'"/>
+                            <field name="origin_address" readonly="state != 'draft'"/>
+                            <field name="scheduled_departure" readonly="state not in ('draft', 'route_ready')"/>
+                            <field name="route_mode" readonly="state != 'draft'"/>
+                            <field name="simulation_mode" readonly="state not in ('draft', 'route_ready', 'loading')"/>
+                            <field name="responsible_id"/>
+                        </group>
+                        <group string="Vehículo">
+                            <field name="fleet_vehicle_id" readonly="state not in ('draft', 'route_ready')"/>
+                            <field name="vehicle_name" readonly="1"/>
+                            <field name="license_plate" readonly="1"/>
+                            <field name="driver_profile_id" readonly="state not in ('draft', 'route_ready')"/>
+                            <field name="driver_id" readonly="1"/>
+                            <field name="actual_departure"/>
+                            <field name="actual_arrival"/>
+                            <field name="last_checkpoint_warehouse_id"/>
+                            <field name="last_checkpoint_at"/>
+                            <field name="next_stop_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Paradas y documentos" name="stops">
+                            <div class="alert alert-info" role="alert">
+                                <strong>Carga real:</strong> abra cada parada y seleccione sus entregas o traslados en <strong>Operaciones asociadas</strong>.
+                                Si solo está probando la ruta y no existen documentos reales, active <strong>Ruta de simulación</strong>.
+                            </div>
+                            <field name="stop_ids" readonly="state not in ('draft', 'route_ready', 'loading')" context="{'default_plan_id': id}">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="destination_type"/>
+                                    <field name="warehouse_id" invisible="destination_type != 'warehouse'"/>
+                                    <field name="partner_id" invisible="destination_type != 'customer'"/>
+                                    <field name="destination_display_name" readonly="1" optional="show"/>
+                                    <field name="destination_address" optional="show"/>
+                                    <field name="planned_arrival"/>
+                                    <field name="unloading_minutes"/>
+                                    <field name="load_sequence" readonly="1"/>
+                                    <field name="load_zone"/>
+                                    <field name="picking_ids" widget="many2many_tags"/>
+                                    <field name="picking_count" readonly="1"/>
+                                    <field name="total_units" readonly="1"/>
+                                    <field name="transit_minutes" readonly="1" optional="show"/>
+                                    <field name="counting_minutes" readonly="1" optional="show"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="company_id" column_invisible="True"/>
+                                </list>
+                                <form string="Parada">
+                                    <header>
+                                        <button name="action_arrive" string="Confirmar llegada" type="object" class="btn-primary" invisible="state not in ('pending', 'ready', 'en_route')" groups="doorandoor_cargas_control.group_load_control_driver,doorandoor_cargas_control.group_load_control_planner"/>
+                                        <button name="action_start_count" string="Iniciar conteo" type="object" class="btn-primary" invisible="state != 'arrived'" groups="doorandoor_cargas_control.group_load_control_driver,doorandoor_cargas_control.group_load_control_planner"/>
+                                        <button name="action_finish_count" string="Terminar conteo" type="object" class="btn-primary" invisible="state != 'counting'" groups="doorandoor_cargas_control.group_load_control_driver,doorandoor_cargas_control.group_load_control_planner"/>
+                                        <button name="action_depart" string="Confirmar salida" type="object" class="btn-primary" invisible="state != 'counted'" groups="doorandoor_cargas_control.group_load_control_driver,doorandoor_cargas_control.group_load_control_planner"/>
+                                        <field name="state" widget="statusbar" statusbar_visible="pending,arrived,counting,counted,departed"/>
+                                    </header>
+                                    <group>
+                                        <group>
+                                            <field name="sequence"/>
+                                            <field name="destination_type"/>
+                                            <field name="warehouse_id" invisible="destination_type != 'warehouse'"/>
+                                            <field name="partner_id" invisible="destination_type != 'customer'"/>
+                                            <field name="destination_display_name" readonly="1"/>
+                                            <field name="destination_address"/>
+                                            <field name="planned_arrival"/>
+                                            <field name="actual_arrival"/>
+                                        </group>
+                                        <group>
+                                            <field name="load_sequence" readonly="1"/>
+                                            <field name="load_zone"/>
+                                            <field name="unloading_minutes"/>
+                                            <field name="state"/>
+                                            <field name="count_started_at"/>
+                                            <field name="count_finished_at"/>
+                                            <field name="departed_at"/>
+                                            <field name="transit_minutes"/>
+                                            <field name="counting_minutes"/>
+                                        </group>
+                                    </group>
+                                    <field name="picking_ids" widget="many2many_tags"/>
+                                    <field name="notes"/>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Tripulación" name="crew">
+                            <field name="crew_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="driver_profile_id"/>
+                                    <field name="role"/>
+                                    <field name="notes"/>
+                                    <field name="company_id" column_invisible="True"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Controles del viaje" name="trip_controls">
+                            <group>
+                                <group>
+                                    <field name="odometer_start"/>
+                                    <field name="odometer_end"/>
+                                    <field name="distance_traveled"/>
+                                </group>
+                                <group>
+                                    <field name="fuel_added"/>
+                                    <field name="fuel_used"/>
+                                    <field name="fuel_efficiency"/>
+                                </group>
+                            </group>
+                            <field name="trip_control_ids" context="{'default_plan_id': id}">
+                                <list editable="bottom">
+                                    <field name="recorded_at"/>
+                                    <field name="control_type"/>
+                                    <field name="stop_id"/>
+                                    <field name="odometer"/>
+                                    <field name="fuel_level_pct"/>
+                                    <field name="fuel_added_gallons"/>
+                                    <field name="fuel_used_gallons"/>
+                                    <field name="recorded_by"/>
+                                    <field name="notes" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Resumen" name="summary">
+                            <group>
+                                <field name="stop_count"/>
+                                <field name="picking_count"/>
+                                <field name="total_units"/>
+                                <field name="google_maps_url" widget="url"/>
+                            </group>
+                        </page>
+                        <page string="Observaciones" name="notes"><field name="notes"/></page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_load_plan" model="ir.actions.act_window">
+        <field name="name">Planes de carga</field>
+        <field name="res_model">doorandoor.load.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_load_plan_search"/>
+        <field name="context">{'search_default_active_trips': 1}</field>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Cree el primer plan de carga y ruta.</p><p>Organice paradas, documentos y el orden inverso de carga del camión.</p></field>
+    </record>
+</odoo>

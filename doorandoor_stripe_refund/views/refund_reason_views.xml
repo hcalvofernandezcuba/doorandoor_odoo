@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stripe_refund_reason_list" model="ir.ui.view">
+        <field name="name">doorandoor.stripe.refund.reason.list</field>
+        <field name="model">doorandoor.stripe.refund.reason</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="requires_details"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_stripe_refund_reason_form" model="ir.ui.view">
+        <field name="name">doorandoor.stripe.refund.reason.form</field>
+        <field name="model">doorandoor.stripe.refund.reason</field>
+        <field name="arch" type="xml">
+            <form string="Causa de devolución">
+                <sheet>
+                    <widget name="web_ribbon" title="Archivada" bg_color="text-bg-secondary" invisible="active"/>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="sequence"/>
+                        <field name="active"/>
+                        <field name="requires_details"/>
+                        <field name="description" placeholder="Orientación para Ventas y Control de Cobros..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_stripe_refund_reasons" model="ir.actions.act_window">
+        <field name="name">Causas de devolución</field>
+        <field name="res_model">doorandoor.stripe.refund.reason</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,7 +1,7 @@
 {
     "name": "Server Monitor",
-    "version": "18.0.1.0.3",
-    "summary": "Real-time server metrics dashboard",
+    "version": "18.0.1.2.0",
+    "summary": "18.0.1.2.0 - Dashboard grafico de consumo, trafico, usuarios y dispositivos",
     "author": "Hoang Minh Hieu",
     "support": "hieuhoangminh1996@gmail.com",
     "category": "Tools",
@@ -11,6 +11,7 @@
         "security/server_monitor_security.xml",
         "security/ir.model.access.csv",
         "views/server_monitor_views.xml",
+        "views/user_monitor_templates.xml",
     ],
     "assets": {
         "web.assets_backend": [
@@ -23,6 +24,7 @@
             "server_monitor/static/src/odoo_monitor/odoo_monitor.js",
             "server_monitor/static/src/odoo_monitor/odoo_log.js",
             "server_monitor/static/src/wireguard_monitor/wireguard_monitor.js",
+            "server_monitor/static/src/user_monitor/user_tracker.js",
             "server_monitor/static/src/server_monitor/server_monitor.xml",
             "server_monitor/static/src/postgres_monitor/postgres_monitor.xml",
             "server_monitor/static/src/odoo_monitor/odoo_monitor.xml",

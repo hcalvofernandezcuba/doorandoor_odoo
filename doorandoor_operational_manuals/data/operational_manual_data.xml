@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="manual_historic_logistics" model="doorandoor.operational.manual">
+        <field name="name">Logistica historica de arrancada</field>
+        <field name="code">DD-GUIA-HIST-001</field>
+        <field name="area">historical</field>
+        <field name="module_name">doorandoor_historic_logistics</field>
+        <field name="operation_name">Diagnostico, regularizacion, labels, camiones y entrega con Hanger</field>
+        <field name="audience">Yuliet, supervisores logisticos y operadores autorizados</field>
+        <field name="version">1.2</field>
+        <field name="effective_date">2026-10-22</field>
+        <field name="summary">Explica como procesar ventas del sistema anterior sin duplicar inventario y como decidir entre continuar una operacion, trasladar, recibir o regularizar.</field>
+        <field name="change_log">Agrega la matriz completa para escoger entre OCR, operacion existente, regularizacion, recepcion, traslado, predespacho, stock y producto especial; incorpora la ruta diaria unica y responsables locales.</field>
+        <field name="pdf_filename">GUIA_OPERATIVA_LOGISTICA_HISTORICA.pdf</field>
+        <field name="pdf_file" type="base64" file="doorandoor_operational_manuals/static/manuals/GUIA_OPERATIVA_LOGISTICA_HISTORICA.pdf"/>
+        <field name="state">published</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="manual_initial_inventory" model="doorandoor.operational.manual">
+        <field name="name">Carga inicial de inventario</field>
+        <field name="code">DD-GUIA-INV-001</field>
+        <field name="area">inventory</field>
+        <field name="module_name">doorandoor_inventory_variant_count</field>
+        <field name="operation_name">Conteo inicial, revision y carga controlada</field>
+        <field name="audience">Supervisores y operadores de inventario</field>
+        <field name="version">1.0</field>
+        <field name="effective_date">2026-10-20</field>
+        <field name="summary">Guia de consulta para preparar, revisar y ejecutar la carga inicial de inventario.</field>
+        <field name="pdf_filename">GUIA_CLIENTE_CARGA_INICIAL_INVENTARIO.pdf</field>
+        <field name="pdf_file" type="base64" file="doorandoor_operational_manuals/static/manuals/GUIA_CLIENTE_CARGA_INICIAL_INVENTARIO.pdf"/>
+        <field name="state">published</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="manual_warehouse_operations" model="doorandoor.operational.manual">
+        <field name="name">Operaciones graficas de almacen</field>
+        <field name="code">DD-GUIA-ALM-001</field>
+        <field name="area">warehouse</field>
+        <field name="module_name">doorandoor_inventory_variant_count</field>
+        <field name="operation_name">Recepciones, ubicaciones, conteos y movimientos</field>
+        <field name="audience">Operadores y responsables de almacen</field>
+        <field name="version">1.0</field>
+        <field name="effective_date">2026-10-20</field>
+        <field name="summary">Referencia visual de las operaciones principales de almacen y sus controles.</field>
+        <field name="pdf_filename">GUIA_GRAFICA_OPERACIONES_ALMACEN.pdf</field>
+        <field name="pdf_file" type="base64" file="doorandoor_operational_manuals/static/manuals/GUIA_GRAFICA_OPERACIONES_ALMACEN.pdf"/>
+        <field name="state">published</field>
+        <field name="sequence">30</field>
+    </record>
+</odoo>

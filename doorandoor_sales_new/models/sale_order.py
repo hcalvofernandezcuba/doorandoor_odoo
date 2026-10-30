@@ -1,9 +1,12 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessError, ValidationError
+from odoo.tools.float_utils import float_compare
 
 
 class SaleOrder(models.Model):
-    _inherit = "sale.order"
+    _name = "sale.order"
+    _inherit = ["sale.order", "doorandoor.document.barcode.mixin"]
+    _description = "Sales Order"
 
     # Keep every reassignment in chatter so commercial reports can reproduce
     # the actual chain of responsibility instead of only the current owner.
@@ -35,12 +38,26 @@ class SaleOrder(models.Model):
         [
             ("quotation", "Cotización"),
             ("preinvoice", "Prefactura"),
+            ("po", "PO"),
             ("invoiced", "Facturada"),
         ],
         string="Flow Stage",
         default="quotation",
         tracking=True,
         copy=False,
+    )
+    ddsn_po_first_flow = fields.Boolean(
+        string="Flujo PO antes de factura",
+        default=True,
+        copy=False,
+        index=True,
+        help="La Orden de Venta se emite como PO desde la prefactura y la factura fiscal se crea automáticamente al liquidar la entrega.",
+    )
+    ddsn_po_issued_at = fields.Datetime(
+        string="PO emitido el",
+        copy=False,
+        readonly=True,
+        tracking=True,
     )
     ddsn_preinvoice_move_id = fields.Many2one(
         "account.move",
@@ -182,6 +199,12 @@ class SaleOrder(models.Model):
         return True
 
     def action_confirm(self):
+        for order in self:
+            order.order_line.filtered(
+                lambda line: not line.display_type and line.product_id
+            ).with_context(ddsn_automatic_pricing=True)._ddsn_apply_automatic_bonus()
+        for order in self:
+            order._ddsn_prepare_office_stock_requests()
         # Flujo nativo: confirmar cotización sin crear prefactura automáticamente
         if self.env.context.get("ddsn_finalize_from_preinvoice"):
             self._ddsn_assign_quote_number()
@@ -202,6 +225,44 @@ class SaleOrder(models.Model):
         result = super(SaleOrder, self.with_context(skip_procurement=True)).action_confirm()
         self._ddsn_broadcast_document_update("sale_confirmed")
         return result
+
+    def _ddsn_prepare_office_stock_requests(self):
+        """Keep the sale at its office and request replenishment for shortages."""
+        Request = self.env["ddsn.stock.transfer.request"]
+        for order in self:
+            warehouse = order.warehouse_id
+            if not warehouse:
+                continue
+            for line in order.order_line.filtered(lambda item: not item.display_type and item.product_id):
+                if line.ddsn_supply_warehouse_id != warehouse:
+                    line.ddsn_supply_warehouse_id = warehouse
+                product, required_qty, transformed = line._ddsn_get_stock_control_product()
+                if not product or not product.is_storable or required_qty <= 0:
+                    continue
+                available = product.with_company(order.company_id).with_context(
+                    location=warehouse.lot_stock_id.id
+                ).qty_available
+                if not transformed:
+                    available -= line._ddsn_get_committed_qty_for_display(warehouse=warehouse)
+                    available -= line._ddsn_get_reserved_qty_for_display(warehouse=warehouse)
+                shortage = max(required_qty - available, 0.0)
+                if not shortage:
+                    continue
+                existing = Request.search([
+                    ("sale_line_id", "=", line.id), ("state", "not in", ("done", "cancel"))
+                ], limit=1)
+                if existing:
+                    continue
+                request = Request.create({
+                    "sale_order_id": order.id, "sale_line_id": line.id,
+                    "product_id": product.id, "quantity": shortage,
+                    "destination_warehouse_id": warehouse.id,
+                    "company_id": order.company_id.id, "requested_by_id": self.env.user.id,
+                })
+                order.message_post(body=_(
+                    "Solicitud logística %(request)s creada: %(qty).2f de %(product)s hacia %(warehouse)s. "
+                    "Logística decidirá el almacén de origen."
+                ) % {"request": request.name, "qty": shortage, "product": product.display_name, "warehouse": warehouse.display_name})
 
     def _ddsn_confirm_for_fiscal_invoice(self):
         """Align the native sale state before a linked fiscal invoice posts.
@@ -245,6 +306,91 @@ class SaleOrder(models.Model):
             return False
         return self._ddsn_open_preinvoice(self.ddsn_preinvoice_move_id)
 
+    def action_ddsn_print_po(self):
+        self.ensure_one()
+        preinvoice = self.ddsn_preinvoice_move_id
+        if (
+            not self.ddsn_po_first_flow
+            or not preinvoice
+            or preinvoice.ddsn_preinvoice_state != "confirmed"
+        ):
+            raise ValidationError(_("Confirme la prefactura antes de emitir el PO."))
+        if not self.ddsn_po_issued_at:
+            self.write({"ddsn_po_issued_at": fields.Datetime.now(), "ddsn_flow_stage": "po"})
+            self.message_post(body=_("PO emitido desde la prefactura %s.") % preinvoice.ddsn_preinvoice_number)
+        return self.env.ref("doorandoor_sales_new.action_report_ddsn_po").report_action(self)
+
+    def _create_invoices(self, grouped=False, final=False, date=None):
+        blocked_orders = self.filtered("ddsn_po_first_flow")
+        if blocked_orders and not self.env.context.get("ddsn_invoice_after_delivery"):
+            raise ValidationError(
+                _("No puede crear la factura en esta etapa. En el flujo PO la factura se genera después de liquidar la entrega.")
+            )
+        return super()._create_invoices(grouped=grouped, final=final, date=date)
+
+    def _ddsn_create_invoice_after_full_delivery(self):
+        """Create and post the fiscal invoice once a PO is fully delivered."""
+        for order in self.filtered("ddsn_po_first_flow"):
+            # The hook runs inside stock.move._action_done. Discard the sale
+            # line cache so Odoo reads the quantities just completed by stock.
+            order.order_line.invalidate_recordset(["qty_delivered", "qty_to_invoice"])
+            fiscal_invoices = (order.invoice_ids | order.ddsn_invoice_move_id).filtered(
+                lambda move: move.move_type == "out_invoice"
+                and move.state != "cancel"
+                and not move.ddsn_is_preinvoice
+            )
+            if fiscal_invoices:
+                continue
+            product_lines = order.order_line.filtered(
+                lambda line: not line.display_type and line.product_id
+            )
+            if not product_lines or any(
+                float_compare(
+                    line.qty_delivered,
+                    line.product_uom_qty,
+                    precision_rounding=line.product_uom.rounding,
+                ) < 0
+                for line in product_lines
+            ):
+                continue
+            preinvoice = order.ddsn_preinvoice_move_id
+            if not preinvoice or preinvoice.ddsn_preinvoice_state != "confirmed":
+                raise ValidationError(
+                    _("El PO %s no tiene una prefactura confirmada para generar la factura fiscal.")
+                    % order.name
+                )
+            preinvoice.with_context(
+                ddsn_invoice_after_delivery=True
+            ).action_ddsn_create_invoice_from_preinvoice()
+            invoice = preinvoice.ddsn_created_invoice_id
+            if not invoice:
+                raise ValidationError(
+                    _("No fue posible generar la factura fiscal después de completar la entrega del PO %s.")
+                    % order.name
+                )
+            order.ddsn_invoice_move_id = invoice.id
+            order.ddsn_flow_stage = "invoiced"
+            if preinvoice:
+                preinvoice.write(
+                    {
+                        "ddsn_created_invoice_id": invoice.id,
+                        "ddsn_reservation_expires_at": False,
+                    }
+                )
+            invoice.write(
+                {
+                    "ddsn_source_preinvoice_id": preinvoice.id,
+                    "sale_order_id": order.id,
+                }
+            )
+            invoice.action_post()
+            order.message_post(
+                body=_("Entrega liquidada. Se creó y contabilizó automáticamente la factura %s.")
+                % invoice.name
+            )
+            order._ddsn_broadcast_document_update("invoice_created_after_delivery")
+        return True
+
     def _ddsn_assign_quote_number(self):
         for order in self:
             if self.env.user.has_group("sales_team.group_sale_salesman") and not self.env.user.has_group(
@@ -278,6 +424,10 @@ class SaleOrder(models.Model):
                 "quantity": line.product_uom_qty,
                 "price_unit": line.price_unit,
                 "discount": line.discount,
+                "ddsn_bonus_percent": line.ddsn_bonus_percent,
+                "ddsn_bonus_source": line.ddsn_bonus_source,
+                "ddsn_bonus_rule_reference": line.ddsn_bonus_rule_reference,
+                "ddsn_bonus_authorized_by_id": line.ddsn_bonus_authorized_by_id.id,
                 "generated_sale_line_id": line.id,
                 "ddsn_supply_warehouse_id": (
                     line.ddsn_supply_warehouse_id or self.warehouse_id
@@ -307,7 +457,7 @@ class SaleOrder(models.Model):
             "ddsn_is_preinvoice": True,
             "ddsn_preinvoice_state": "draft",
         }
-        return self.env["account.move"].create(move_vals)
+        return self.env["account.move"].with_context(ddsn_automatic_pricing=True).create(move_vals)
 
     def _ddsn_open_preinvoice(self, preinvoice):
         self.ensure_one()
@@ -318,6 +468,19 @@ class SaleOrder(models.Model):
         return action
 
     def write(self, vals):
+        if (
+            "pricelist_id" in vals
+            and not self.env.context.get("ddsn_automatic_pricing")
+            and not self.env.user.has_group("base.group_system")
+        ):
+            changed_orders = self.filtered(
+                lambda order: order.order_line
+                and order.pricelist_id.id != vals.get("pricelist_id")
+            )
+            if changed_orders:
+                raise ValidationError(
+                    _("Solo un administrador de Ajustes puede cambiar la lista de precios después de agregar productos.")
+                )
         previous_salespeople = (
             {order.id: order.user_id for order in self}
             if "user_id" in vals
@@ -385,3 +548,96 @@ class SaleOrder(models.Model):
         result = super().action_draft()
         self._ddsn_broadcast_document_update("sale_reopened")
         return result
+
+    def action_ddsn_admin_set_draft(self):
+        """Safely reopen a confirmed sale without bypassing downstream documents.
+
+        DoorAndDoor confirms quotations without native procurement, but the
+        confirmation may create pending inter-warehouse replenishment requests.
+        Only those still pending are cancelled automatically.  Once another
+        operational or fiscal document exists, support must resolve that
+        document first instead of silently breaking its traceability.
+        """
+        if not self.env.user.has_group("base.group_system"):
+            raise AccessError(
+                _("Solo Administración/Ajustes puede devolver una venta a borrador.")
+            )
+        Request = self.env["ddsn.stock.transfer.request"].sudo()
+        for order in self:
+            if order.state not in ("sale", "done", "sent", "cancel"):
+                continue
+            active_invoices = order.invoice_ids.filtered(lambda move: move.state != "cancel")
+            if active_invoices:
+                raise ValidationError(
+                    _(
+                        "No puede devolver %(sale)s a borrador porque tiene documentos de "
+                        "facturación activos: %(documents)s. Cancélelos o reviértalos primero."
+                    )
+                    % {
+                        "sale": order.name,
+                        "documents": ", ".join(active_invoices.mapped("name")),
+                    }
+                )
+            active_pickings = order.picking_ids.filtered(lambda picking: picking.state != "cancel")
+            if active_pickings:
+                raise ValidationError(
+                    _(
+                        "No puede devolver %(sale)s a borrador porque tiene operaciones de "
+                        "inventario activas: %(documents)s. Cancélelas o termínelas primero."
+                    )
+                    % {
+                        "sale": order.name,
+                        "documents": ", ".join(active_pickings.mapped("name")),
+                    }
+                )
+            requests = Request.search([
+                ("sale_order_id", "=", order.id),
+                ("state", "not in", ("done", "cancel")),
+            ])
+            processed_requests = requests.filtered(
+                lambda request: request.state != "pending" or request.picking_id
+            )
+            if processed_requests:
+                raise ValidationError(
+                    _(
+                        "No puede devolver %(sale)s a borrador porque las solicitudes "
+                        "logísticas %(requests)s ya generaron una operación."
+                    )
+                    % {
+                        "sale": order.name,
+                        "requests": ", ".join(processed_requests.mapped("name")),
+                    }
+                )
+            request_names = requests.mapped("name")
+            if requests:
+                requests.write({"state": "cancel"})
+                for request in requests:
+                    request.message_post(
+                        body=_(
+                            "Solicitud cancelada automáticamente al devolver la venta %(sale)s "
+                            "a borrador por %(user)s."
+                        )
+                        % {"sale": order.name, "user": self.env.user.display_name}
+                    )
+            previous_state = order.state
+            order.write(
+                {
+                    "state": "draft",
+                    "signature": False,
+                    "signed_by": False,
+                    "signed_on": False,
+                }
+            )
+            order.message_post(
+                body=_(
+                    "Venta devuelta de %(previous)s a borrador por %(user)s "
+                    "(Administración/Ajustes). Solicitudes logísticas pendientes canceladas: %(requests)s."
+                )
+                % {
+                    "previous": previous_state,
+                    "user": self.env.user.display_name,
+                    "requests": ", ".join(request_names) or _("ninguna"),
+                }
+            )
+        self._ddsn_broadcast_document_update("sale_reopened")
+        return True

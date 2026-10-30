@@ -1,0 +1,45 @@
+<odoo>
+    <record id="sale_order_form_ddtp_card_fee" model="ir.ui.view">
+        <field name="name">sale.order.form.ddtp.card.fee</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[2]" position="before">
+                <page string="Opciones de pago" name="ddtp_card_payment" invisible="state not in ('draft', 'sent')">
+                    <group string="Cobro con tarjeta">
+                        <group>
+                            <field name="ddtp_payment_plan"/>
+                            <field name="ddtp_payment_due_amount"/>
+                            <field name="ddtp_payment_pending_amount"
+                                   invisible="ddtp_payment_plan != 'partial'"
+                                   readonly="1"/>
+                            <field name="ddtp_card_payment_enabled"/>
+                        </group>
+                        <group invisible="not ddtp_card_payment_enabled">
+                            <field name="ddtp_card_fee_rate" string="Cargo por pago con tarjeta (%)" readonly="1"/>
+                            <field name="ddtp_card_fee_preview" string="Importe del cargo por tarjeta" readonly="1"/>
+                            <field name="ddtp_card_total_preview" readonly="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="not ddtp_card_payment_enabled">
+                        El cargo por pago con tarjetas se añadirá a los totales de la misma factura al generarla.
+                    </div>
+                </page>
+            </xpath>
+            <xpath expr="//group[@name='sale_total']/field[@name='tax_totals']" position="after">
+                <div class="oe_subtotal_footer_separator text-end" invisible="not ddtp_card_payment_enabled">
+                    <span>Cargo por pago con tarjeta (<field name="ddtp_card_fee_rate" class="oe_inline" readonly="1"/>%)</span>
+                    <field name="ddtp_card_fee_preview" class="oe_inline" readonly="1"/>
+                </div>
+                <div class="text-end fw-bold" invisible="not ddtp_card_payment_enabled">
+                    <span>Total con tarjeta</span>
+                    <field name="ddtp_card_total_preview" class="oe_inline" readonly="1"/>
+                </div>
+                <div class="text-end fw-bold" invisible="ddtp_payment_plan != 'partial'">
+                    <span>Saldo pendiente después del primer pago</span>
+                    <field name="ddtp_payment_pending_amount" class="oe_inline" readonly="1"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

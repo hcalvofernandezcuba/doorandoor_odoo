@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dispatch_preparation_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.dispatch.preparation.wizard.form</field>
+        <field name="model">doorandoor.dispatch.preparation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Preparar despacho">
+                <group>
+                    <group string="Salida">
+                        <field name="company_id" invisible="1"/>
+                        <field name="origin_warehouse_id"/>
+                        <field name="scheduled_departure"/>
+                        <field name="responsible_id"/>
+                    </group>
+                    <group string="Camión y tripulación">
+                        <field name="fleet_vehicle_id"/>
+                        <field name="driver_profile_id"/>
+                        <field name="crew_ids" widget="many2many_tags"/>
+                        <field name="eligible_count" readonly="1"/>
+                    </group>
+                </group>
+                <div class="alert alert-info" role="alert">
+                    Solo aparecen entregas y traslados pendientes del almacén de salida que no pertenecen a otra carga activa.
+                    Crear el despacho organiza documentos y paradas; no valida ni duplica movimientos de inventario.
+                </div>
+                <field name="eligible_picking_ids" invisible="1"/>
+                <field name="picking_ids" widget="many2many" nolabel="1">
+                    <list>
+                        <field name="name"/>
+                        <field name="scheduled_date"/>
+                        <field name="ddpc_operation_category"/>
+                        <field name="partner_id"/>
+                        <field name="ddpc_dest_warehouse_id"/>
+                        <field name="origin"/>
+                        <field name="state" widget="badge"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_create_dispatch" string="Crear despacho y ruta" type="object" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dispatch_preparation" model="ir.actions.act_window">
+        <field name="name">Preparación de despachos</field>
+        <field name="res_model">doorandoor.dispatch.preparation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="view_ddcc_pending_dispatch_list" model="ir.ui.view">
+        <field name="name">stock.picking.ddcc.pending.dispatch.list</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="name"/>
+                <field name="scheduled_date"/>
+                <field name="ddpc_source_warehouse_id"/>
+                <field name="ddpc_dest_warehouse_id"/>
+                <field name="ddpc_operation_category"/>
+                <field name="partner_id"/>
+                <field name="origin"/>
+                <field name="ddcc_load_plan_names" optional="show"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_ddcc_pending_dispatches" model="ir.actions.act_window">
+        <field name="name">Despachos pendientes</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_ddcc_pending_dispatch_list"/>
+        <field name="domain">[('state', 'not in', ('done', 'cancel')), ('ddpc_operation_category', 'in', ('delivery', 'transfer'))]</field>
+        <field name="context">{'search_default_available': 1}</field>
+    </record>
+</odoo>

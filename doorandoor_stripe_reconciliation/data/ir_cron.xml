@@ -1,0 +1,12 @@
+<odoo noupdate="1">
+    <record id="ir_cron_ddsr_sync_stripe_settlements" model="ir.cron">
+        <field name="name">Stripe: sincronizar liquidaciones</field>
+        <field name="model_id" ref="payment.model_payment_provider"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_ddsr_sync_settlements()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="False"/>
+    </record>
+</odoo>
+

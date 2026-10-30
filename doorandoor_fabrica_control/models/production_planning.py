@@ -156,6 +156,7 @@ class DdfcDailyPlan(models.Model):
             ("eligible_at", "<", cutoff), ("pending_qty", ">", 0),
         ])
         for need in needs:
+            need.product_id._ddfc_ensure_configured_bom(self.company_id)
             bom = self.env["mrp.bom"]._bom_find(need.product_id, company_id=self.company_id.id).get(need.product_id)
             self.env["ddfc.daily.plan.line"].with_context(ddfc_snapshot_loading=True).create({
                 "plan_id": self.id, "warehouse_id": need.warehouse_id.id,
@@ -391,6 +392,19 @@ class DdfcDailyPlanComponent(models.Model):
     required_qty = fields.Float(string="Cantidad requerida", required=True)
     available_qty = fields.Float(string="Disponible en Tampa", compute="_compute_availability")
     shortage_qty = fields.Float(string="Faltante", compute="_compute_availability")
+    label_policy = fields.Selection(
+        [("unique", "Label único"), ("shared", "Label compartido")],
+        compute="_compute_label_policy", string="Control de labels",
+    )
+
+    @api.depends("product_id.product_tmpl_id.ddic_shared_lot_serial")
+    def _compute_label_policy(self):
+        for line in self:
+            line.label_policy = (
+                "shared"
+                if line.product_id.product_tmpl_id.ddic_shared_lot_serial
+                else "unique"
+            )
 
     @api.depends("product_id", "required_qty", "plan_id.production_warehouse_id")
     def _compute_availability(self):
@@ -415,3 +429,16 @@ class DdfcDailyPlanOrderComponent(models.Model):
     product_id = fields.Many2one("product.product", string="Parte o pieza", required=True)
     product_uom_id = fields.Many2one("uom.uom", string="UdM", required=True)
     required_qty = fields.Float(string="Cantidad requerida", required=True)
+    label_policy = fields.Selection(
+        [("unique", "Label único"), ("shared", "Label compartido")],
+        compute="_compute_label_policy", string="Control de labels",
+    )
+
+    @api.depends("product_id.product_tmpl_id.ddic_shared_lot_serial")
+    def _compute_label_policy(self):
+        for line in self:
+            line.label_policy = (
+                "shared"
+                if line.product_id.product_tmpl_id.ddic_shared_lot_serial
+                else "unique"
+            )

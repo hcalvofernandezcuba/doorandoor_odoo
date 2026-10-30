@@ -59,6 +59,18 @@ Muestra exclusivamente cantidades pendientes de facturas publicadas y
 totalmente pagadas. Operaciones no crea entregas comerciales manuales; la
 orden de despacho nace del flujo de la factura pagada.
 
+#### Herramienta principal del almacenero: Hanger
+
+El operador trabaja normalmente desde **Operaciones > Almacén > Mis entregas**
+en el Hanger. La cola presenta una sola tarjeta por operación y respeta
+automáticamente los almacenes asignados al usuario.
+
+La entrega puede localizarse por código o QR, Pickup Order, factura actual,
+referencia del sistema anterior, cliente o producto. Al pulsar **Abrir y
+contar**, el Hanger abre la operación móvil. El conteo prepara las cantidades
+reales, pero no valida automáticamente la salida; el operador debe revisar y
+confirmar la operación antes de entregar la mercancía al cliente.
+
 #### Flujo del caso: entrega comercial al cliente
 
 1. Ventas crea la cotización, prefactura y factura siguiendo el flujo
@@ -89,6 +101,32 @@ despacho manuales para evadir este control.
 Si la línea aún no tiene una orden de despacho asociada, no muestra el botón
 **Procesar entrega**. Esto indica que todavía espera preparación, producción o
 la generación oficial del picking.
+
+#### Ventas procedentes del sistema anterior
+
+Gerencia o un responsable autorizado entra en **Operaciones > Almacén > Crear
+entrega histórica**. Debe indicar factura anterior, fecha, cliente, **almacén
+proveedor**, **almacén de entrega al cliente**, productos, cantidades,
+referencia del pago y adjuntar el respaldo documental.
+
+Si ambos almacenes coinciden, **Liberar al almacén** crea directamente la salida
+al cliente y la coloca en **Mis entregas**. Si son distintos —por ejemplo,
+proveedor Doral y entrega WPB— el mismo botón inicia una sola cadena controlada:
+
+1. genera el despacho interno desde Doral hacia tránsito;
+2. al validar ese despacho, genera automáticamente la recepción en WPB;
+3. mantiene bloqueada la entrega al cliente mientras la recepción esté pendiente;
+4. al recibir toda la cantidad en WPB, genera y libera la entrega final desde WPB;
+5. al validar la entrega final, marca el control histórico como entregado.
+
+El control histórico enlaza el despacho, la recepción y la entrega final, y
+registra notas auditables en sus respectivos chatters. El operador puede abrir
+cada documento desde el formulario y procesarlo con Hanger. Una recepción
+parcial no libera prematuramente la salida al cliente.
+
+La referencia histórica no puede repetirse dentro de la compañía. Este flujo
+no crea una factura fiscal nueva en Odoo ni permite omitir el respaldo de la
+venta anterior.
 
 ### Entradas de fábrica
 

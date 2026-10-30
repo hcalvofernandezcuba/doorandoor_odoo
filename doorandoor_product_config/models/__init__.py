@@ -1,5 +1,6 @@
 from . import account_move_line
 from . import product_product
 from . import product_template
+from . import sale_order_line
 from . import ddpc_variant_selector
 from . import stock_move

@@ -193,6 +193,37 @@ Zoho permite cantidades en **servicios** y **consumibles**, pero Odoo solo cuant
 
 ## Changelog / Historial de Versiones
 
+### v18.0.1.2.12 — Entregas solo cuando existen en Zoho
+**Fecha:** 2026-09-07  
+**Cambios:**
+- Mantiene sin dirección de entrega a los clientes que no tengan una dirección
+  de envío explícita en Zoho; los comerciales podrán completarla en Odoo.
+
+### v18.0.1.2.11 — Entrega basada en dirección fiscal
+**Fecha:** 2026-09-07  
+**Cambios:**
+- Cuando Zoho no contiene una dirección de entrega utilizable, copia la
+  dirección de facturación como dirección de entrega.
+- Si tampoco existe dirección de facturación, no crea una dirección vacía.
+
+### v18.0.1.2.10 — Validación de direcciones y países
+**Fecha:** 2026-09-07  
+**Cambios:**
+- Ignora objetos de dirección de Zoho que solo contienen identificadores
+  técnicos y no crea contactos de entrega vacíos.
+- Resuelve el país primero por `country_code` y conserva la búsqueda por nombre
+  como alternativa.
+
+### v18.0.1.2.9 — Direcciones completas de clientes
+**Fecha:** 2026-09-07  
+**Cambios:**
+- Consulta el endpoint de detalle de cada contacto porque el listado de Zoho no
+  incluye las direcciones fiscal y de envío ni las personas asociadas.
+- Añade reintentos controlados ante límites de frecuencia y errores temporales
+  de la API de Zoho.
+- Evita actualizar un cliente con datos parciales cuando no puede obtenerse su
+  detalle completo.
+
 ### v18.0.1.2.5 — Mapeo de tipos de producto corregido
 **Fecha:** 2026-05-20  
 **Cambios:**

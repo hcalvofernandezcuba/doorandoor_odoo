@@ -32,7 +32,7 @@ Estas operaciones deben realizarlas un administrador autorizado.
 2. Ejecute **Actualizar lista de aplicaciones**.
 3. Busque el módulo.
 4. Pulse **Actualizar**.
-5. Confirme que la versión instalada es `18.0.1.5.0`.
+5. Confirme que la versión instalada es `18.0.1.10.0`.
 
 No reinicie manualmente los contenedores Docker. Si la plataforma necesita un reinicio, solicítelo al equipo SRE.
 
@@ -173,7 +173,82 @@ El sistema debe:
 - generar una línea esperada de 10 bisagras;
 - generar una línea esperada de 5 cerraduras.
 
-Si aparece **No stock was found in the selected location**, compruebe que eligió la ubicación exacta y que el producto tiene existencias allí.
+Si la ubicación todavía no tiene existencias, la sesión comienza vacía en estado
+**Counting**. Esta es la situación prevista para una carga inicial.
+
+## 8.1. Carga inicial con el selector guiado
+
+### Ruta completa
+
+1. Ingrese en la base local operativa.
+2. Abra **Physical Counts → Count Sessions**.
+3. Pulse **Nuevo**.
+4. Seleccione una ubicación interna exacta y guarde.
+5. Pulse **Start and Load Stock**.
+6. En el bloque **Barcode Capture**, pulse **Agregar producto configurado**.
+
+El botón solo está disponible mientras la sesión se encuentra en **Counting**.
+No aparece en sesiones en borrador, revisión, validadas o canceladas.
+
+### Asistente “Agregar producto configurado”
+
+1. En **Producto**, seleccione la plantilla, por ejemplo `Impact Doors`.
+   La lista muestra plantillas almacenables, no miles de variantes técnicas.
+2. En **Atributos**, seleccione un valor en cada línea: Marca, Ancho, modelo,
+   alto, glass, color, swing u otros que formen parte de esa plantilla.
+3. Revise **Variante resultante**:
+   - si la combinación existe, muestra la variante encontrada;
+   - si utiliza un atributo dinámico y todavía no existe, muestra
+     **Nueva variante de inventario** y la crea al confirmar;
+   - si falta una selección, enumera los atributos pendientes.
+4. Compruebe la **Ubicación**, que se hereda de la sesión y no puede cambiarse
+   desde el asistente.
+5. Revise **Existencia actual** para la combinación localizada.
+6. Escriba la **Cantidad contada** físicamente. Este valor representa el total
+   encontrado, no una cantidad que se suma a la existencia.
+7. Mantenga **Generar barcode** marcado si desea que una variante nueva o sin
+   código reciba automáticamente un EAN-13 para sus labels.
+8. Elija una acción:
+   - **Agregar y continuar:** incorpora la variante y abre otro asistente vacío
+     para continuar la carga.
+   - **Agregar y cerrar:** incorpora la variante y regresa a la sesión.
+   - **Cancelar:** cierra sin incorporar el producto.
+
+Si vuelve a seleccionar una variante ya incluida sin lote, paquete ni
+propietario, el sistema actualiza su cantidad contada en lugar de crear una
+línea duplicada.
+
+### Revisar lo agregado
+
+1. Cierre el asistente cuando termine.
+2. Abra la pestaña **Variants / Adjustment** de la sesión.
+3. Revise en cada línea:
+   - variante exacta;
+   - cantidad esperada;
+   - cantidad contada;
+   - diferencia;
+   - unidad de medida;
+   - lote, paquete o propietario, cuando correspondan.
+4. Pulse **Review** solamente después de comprobar todas las líneas agregadas.
+5. Un usuario **Inventory Count Manager** pulsa **Validate Adjustment** para
+   modificar las existencias reales.
+
+El asistente nunca modifica stock por sí solo. Solamente prepara líneas de
+conteo; el inventario cambia al validar el ajuste completo.
+
+### Revisar el label de la variante
+
+1. Desde **Inventario → Productos → Productos**, abra la plantilla utilizada.
+2. Pulse **Labels de productos**.
+3. Seleccione **Variantes**.
+4. Busque la combinación agregada y confirme que aparecen todos sus atributos,
+   su referencia y su barcode.
+5. Seleccione el almacén, la cantidad de copias y pulse **Print**.
+
+La versión inicial del selector genera el barcode cuando se solicita, pero no
+abre automáticamente el PDF. La impresión continúa usando el asistente
+especializado de labels para permitir revisar variante, almacén, copias y lote
+de impresión.
 
 ## 9. Registrar un conteo manual por ítems
 

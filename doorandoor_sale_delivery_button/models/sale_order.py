@@ -140,6 +140,12 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
 
+        if not self.env.context.get("dddb_delivery_from_authorized_invoice"):
+            raise UserError(_(
+                "Las entregas no se gestionan desde Presupuestos, Órdenes de Venta "
+                "ni prefacturas. Utilice la factura autorizada y las operaciones de Inventario."
+            ))
+
         # Validar estado de la venta
         if self.state != 'sale':
             raise UserError(_(
@@ -357,6 +363,10 @@ class SaleOrder(models.Model):
             dict: Action window (tree o form)
         """
         self.ensure_one()
+        raise UserError(_(
+            "Las entregas no se consultan desde Presupuestos, Órdenes de Venta "
+            "ni prefacturas. Consulte la factura autorizada o Inventario."
+        ))
 
         if self.delivery_count == 0:
             # No hay entregas: crear una nueva

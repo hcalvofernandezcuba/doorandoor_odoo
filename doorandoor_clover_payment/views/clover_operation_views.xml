@@ -1,0 +1,15 @@
+<odoo>
+    <record id="view_ddcl_clover_operation_list" model="ir.ui.view">
+        <field name="name">doorandoor.clover.operation.list</field>
+        <field name="model">doorandoor.clover.operation</field>
+        <field name="arch" type="xml"><list><field name="reference"/><field name="invoice_id"/><field name="partner_id"/><field name="amount"/><field name="state"/><field name="provider_reference"/></list></field>
+    </record>
+    <record id="view_ddcl_clover_operation_form" model="ir.ui.view">
+        <field name="name">doorandoor.clover.operation.form</field>
+        <field name="model">doorandoor.clover.operation</field>
+        <field name="arch" type="xml"><form><sheet><group><field name="reference"/><field name="state"/><field name="invoice_id"/><field name="partner_id"/><field name="provider_id"/><field name="amount"/><field name="provider_reference"/><field name="payment_id"/><field name="is_mock"/><field name="state_message"/></group></sheet></form></field>
+    </record>
+    <record id="action_ddcl_clover_operation" model="ir.actions.act_window">
+        <field name="name">Operaciones Clover</field><field name="res_model">doorandoor.clover.operation</field><field name="view_mode">list,form</field>
+    </record>
+</odoo>

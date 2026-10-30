@@ -13,6 +13,13 @@ class StockPicking(models.Model):
         readonly=True,
         index=True,
     )
+    ddsn_supply_sale_order_id = fields.Many2one(
+        "sale.order",
+        string="PO de Ventas solicitante",
+        copy=False,
+        readonly=True,
+        index=True,
+    )
     ddsn_supply_preinvoice_id = fields.Many2one(
         "account.move",
         string="Prefactura de origen",
@@ -56,9 +63,20 @@ class StockPicking(models.Model):
         if done_outgoing:
             done_outgoing._ddsn_sync_invoice_delivery_status()
             done_outgoing._ddsn_sync_pickup_order_state()
-        self.filtered(
+            done_outgoing.mapped("sale_id")._ddsn_create_invoice_after_full_delivery()
+        supply_invoices = self.filtered(
             lambda picking: picking.state == "done" and picking.ddsn_supply_invoice_id
-        ).mapped("ddsn_supply_invoice_id")._ddsn_sync_release_from_payments()
+        ).mapped("ddsn_supply_invoice_id")
+        if "ddpc_transfer_source_picking_id" in self._fields:
+            received = self.filtered(
+                lambda picking: picking.state == "done"
+                and picking.ddpc_transfer_stage == "receipt"
+                and picking.ddpc_transfer_source_picking_id
+            )
+            supply_invoices |= received.mapped(
+                "ddpc_transfer_source_picking_id.ddsn_supply_invoice_id"
+            )
+        supply_invoices._ddsn_sync_release_from_payments()
         return result
 
     def button_validate(self):
@@ -68,6 +86,18 @@ class StockPicking(models.Model):
         done_pickings = pending_pickings.filtered(lambda picking: picking.state == "done")
         done_pickings._ddsn_sync_invoice_delivery_status()
         self._ddsn_sync_pickup_order_state()
+        # ``_action_done`` normally resumes a paid sale when the destination
+        # receipt of its supply transfer is completed.  Some validation paths
+        # finish their wizard after that hook, so repeat the idempotent lookup
+        # here, when ``button_validate`` can already see the final receipt
+        # state.  This guarantees that Hanger validation creates the customer
+        # delivery and Pickup Order without a manual synchronization step.
+        if "ddpc_transfer_source_picking_id" in self._fields:
+            received_supply_invoices = done_pickings.filtered(
+                lambda picking: picking.ddpc_transfer_stage == "receipt"
+                and picking.ddpc_transfer_source_picking_id
+            ).mapped("ddpc_transfer_source_picking_id.ddsn_supply_invoice_id")
+            received_supply_invoices._ddsn_sync_release_from_payments()
         return result
 
     def _ddsn_check_fully_paid_before_delivery(self):

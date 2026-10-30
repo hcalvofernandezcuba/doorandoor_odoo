@@ -1,0 +1,23 @@
+<odoo>
+    <!-- The invoice portal must not fall back to Odoo's generic provider
+         modal: Clover has a prior holder and OTP authorization stage. -->
+    <template id="portal_invoice_page_clover" inherit_id="account.portal_invoice_page" priority="30">
+        <xpath expr="//a[@data-bs-target='#pay_with']" position="replace">
+            <a t-if="invoice._has_to_be_paid()"
+               t-att-href="'/payment/clover/portal/invoice/%s?access_token=%s' % (invoice.id, invoice.access_token)"
+               class="btn btn-primary">
+                <i class="fa fa-fw fa-arrow-circle-right"/> Pagar ahora
+            </a>
+        </xpath>
+    </template>
+
+    <template id="portal_my_invoices_clover" inherit_id="account.portal_my_invoices" priority="30">
+        <xpath expr="//a[contains(@t-att-href, 'portal_pay')]" position="replace">
+            <a t-if="invoice._has_to_be_paid()"
+               t-att-href="'/payment/clover/portal/invoice/%s?access_token=%s' % (invoice.id, invoice.access_token)"
+               title="Pagar ahora" aria-label="Pagar ahora" class="btn btn-sm btn-primary" role="button">
+                <i class="fa fa-arrow-circle-right"/><span class="d-none d-md-inline"> Pagar ahora</span>
+            </a>
+        </xpath>
+    </template>
+</odoo>

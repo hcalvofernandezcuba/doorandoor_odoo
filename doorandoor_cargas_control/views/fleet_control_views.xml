@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fleet_vehicle_form_ddcc" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.ddcc</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Control de cargas" name="ddcc_logistics">
+                    <group>
+                        <group>
+                            <field name="ddcc_available_for_loads"/>
+                            <field name="ddcc_home_warehouse_id"/>
+                            <field name="ddcc_empty_weight"/>
+                            <field name="ddcc_max_payload"/>
+                            <field name="ddcc_max_gross_weight"/>
+                        </group>
+                        <group>
+                            <field name="ddcc_fuel_tank_capacity"/>
+                            <field name="odometer"/>
+                            <field name="odometer_unit"/>
+                            <field name="fuel_type"/>
+                        </group>
+                    </group>
+                    <field name="ddcc_logistic_notes" placeholder="Restricciones, equipos y observaciones operativas..."/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_ddcc_list" model="ir.ui.view">
+        <field name="name">fleet.vehicle.ddcc.list</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="license_plate"/>
+                <field name="model_id"/>
+                <field name="driver_id"/>
+                <field name="ddcc_home_warehouse_id"/>
+                <field name="ddcc_max_payload"/>
+                <field name="ddcc_max_gross_weight"/>
+                <field name="odometer"/>
+                <field name="odometer_unit"/>
+                <field name="fuel_type"/>
+                <field name="ddcc_available_for_loads"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_ddcc_fleet_vehicles" model="ir.actions.act_window">
+        <field name="name">Camiones</field>
+        <field name="res_model">fleet.vehicle</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="view_id" ref="view_fleet_vehicle_ddcc_list"/>
+        <field name="context">{'default_ddcc_available_for_loads': True}</field>
+    </record>
+
+    <record id="view_driver_profile_list" model="ir.ui.view">
+        <field name="name">doorandoor.driver.profile.list</field>
+        <field name="model">doorandoor.driver.profile</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="phone"/>
+                <field name="license_number"/>
+                <field name="license_class"/>
+                <field name="license_expiration"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_driver_profile_form" model="ir.ui.view">
+        <field name="name">doorandoor.driver.profile.form</field>
+        <field name="model">doorandoor.driver.profile</field>
+        <field name="arch" type="xml">
+            <form string="Chofer">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="user_id"/>
+                            <field name="phone"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="license_number"/>
+                            <field name="license_class"/>
+                            <field name="license_expiration"/>
+                            <field name="emergency_contact"/>
+                        </group>
+                    </group>
+                    <field name="notes"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddcc_driver_profiles" model="ir.actions.act_window">
+        <field name="name">Choferes</field>
+        <field name="res_model">doorandoor.driver.profile</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_inventory_serial_receipt_historical_recovery_form" model="ir.ui.view">
+        <field name="name">inventory.serial.receipt.historical.recovery.form</field>
+        <field name="model">inventory.serial.receipt</field>
+        <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_inventory_serial_receipt_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="before">
+                <field name="ddhl_historical_regularization_id" invisible="1"/>
+                <button name="action_finalize_historical_recovery" type="object"
+                        string="Finalizar conteo físico" class="btn-success"
+                        invisible="not ddhl_historical_regularization_id or state not in ('scanning', 'ready')"
+                        confirm="Se aplicarán únicamente los labels escaneados y el resto quedará pendiente. ¿Terminó de contar todo lo físicamente recibido?"/>
+            </xpath>
+            <xpath expr="//header/button[@name='action_close_incomplete']" position="attributes">
+                <attribute name="invisible">ddhl_historical_regularization_id or state not in ('scanning','ready') or operation_type != 'internal' or missing_count == 0</attribute>
+            </xpath>
+            <xpath expr="//group[.//field[@name='scan_code']]" position="before">
+                <div class="alert alert-info" role="alert" invisible="not ddhl_historical_regularization_id">
+                    <strong>Conteo libre:</strong> escanee en cualquier orden todos los labels físicos de este documento. El sistema identifica automáticamente su ITEM. Finalice una sola vez cuando no quede mercancía física por leer.
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_historic_regularization_list" model="ir.ui.view">
+        <field name="name">doorandoor.historic.regularization.list</field>
+        <field name="model">doorandoor.historic.regularization</field>
+        <field name="arch" type="xml">
+            <list string="Regularización de mercancía histórica"
+                  decoration-info="state == 'receipt_ready'"
+                  decoration-warning="state == 'labels_ready'"
+                  decoration-success="state == 'done'"
+                  decoration-danger="state == 'incident'">
+                <field name="name"/>
+                <field name="historical_delivery_id"/>
+                <field name="external_reference"/>
+                <field name="partner_id"/>
+                <field name="warehouse_id"/>
+                <field name="destination_mode"/>
+                <field name="destination_location_id" optional="show"/>
+                <field name="total_expected" sum="Pendiente"/>
+                <field name="total_physical" sum="Localizado"/>
+                <field name="total_labels" sum="Labels"/>
+                <field name="responsible_id" optional="show"/>
+                <field name="validated_by_id" optional="hide"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_historic_regularization_search" model="ir.ui.view">
+        <field name="name">doorandoor.historic.regularization.search</field>
+        <field name="model">doorandoor.historic.regularization</field>
+        <field name="arch" type="xml">
+            <search string="Buscar regularizaciones históricas">
+                <field name="name"/>
+                <field name="external_reference"/>
+                <field name="partner_id"/>
+                <field name="historical_delivery_id"/>
+                <field name="warehouse_id"/>
+                <field name="destination_location_id"/>
+                <filter name="to_locate" string="Por localizar" domain="[('state','=','draft')]"/>
+                <filter name="receipt_ready" string="Recepción preparada" domain="[('state','=','receipt_ready')]"/>
+                <filter name="to_validate" string="Por confirmar" domain="[('state','=','labels_ready')]"/>
+                <filter name="confirmed" string="Existencia confirmada" domain="[('state','=','done')]"/>
+                <separator/>
+                <filter name="my_tasks" string="Mis tareas" domain="[('responsible_id','=',uid)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_warehouse" string="Almacén" context="{'group_by':'warehouse_id'}"/>
+                    <filter name="group_destination" string="Destino" context="{'group_by':'destination_mode'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by':'state'}"/>
+                    <filter name="group_responsible" string="Responsable" context="{'group_by':'responsible_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_historic_regularization_form" model="ir.ui.view">
+        <field name="name">doorandoor.historic.regularization.form</field>
+        <field name="model">doorandoor.historic.regularization</field>
+        <field name="arch" type="xml">
+            <form string="Recepción histórica de arrancada">
+                <header>
+                    <button name="action_load_pending_products" type="object"
+                            string="Cargar pendientes" class="btn-secondary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_prepare_reception" type="object"
+                            string="1. Preparar recepción" class="btn-primary"
+                            groups="doorandoor_historic_logistics.group_historic_logistics_operator"
+                            invisible="state != 'draft'"/>
+                    <button name="action_prepare_labels" type="object"
+                            string="2. Preparar labels" class="btn-primary"
+                            groups="doorandoor_historic_logistics.group_historic_logistics_operator"
+                            invisible="state != 'receipt_ready'"/>
+                    <button name="action_print_labels" type="object"
+                            string="3. Imprimir labels" class="btn-secondary"
+                            invisible="state not in ('labels_ready', 'done')"/>
+                    <button name="action_open_stock_entry" type="object"
+                            string="4. Abrir recepción para Hanger" class="btn-primary"
+                            invisible="state != 'labels_ready'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,receipt_ready,labels_ready,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_historical_delivery" type="object"
+                                class="oe_stat_button" icon="fa-history">
+                            <div class="o_stat_info"><span class="o_stat_text">Venta histórica</span></div>
+                        </button>
+                        <button name="action_open_stock_entry" type="object"
+                                class="oe_stat_button" icon="fa-sign-in"
+                                invisible="not picking_id">
+                            <div class="o_stat_info"><span class="o_stat_text">Entrada validada</span></div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <div class="alert alert-info" role="alert" invisible="state != 'draft'">
+                        Esta pantalla registra mercancía histórica encontrada físicamente. Preparar labels no cambia existencias; solamente <strong>Confirmar existencia</strong> crea la entrada auditable.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="state != 'labels_ready'">
+                        Los labels están preparados, pero el inventario aún no ha cambiado. Una supervisora debe comprobar la evidencia y confirmar la existencia.
+                    </div>
+                    <div class="alert alert-info" role="alert" invisible="state != 'receipt_ready'">
+                        La recepción ya está creada y enlazada. Compruebe los ITEM y continúe con <strong>Preparar labels</strong>; el inventario todavía no ha cambiado.
+                    </div>
+                    <group>
+                        <group string="Documento histórico">
+                            <field name="historical_delivery_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="external_reference"/>
+                            <field name="partner_id"/>
+                            <field name="responsible_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Destino físico">
+                            <field name="warehouse_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="destination_mode" widget="radio" readonly="state != 'draft'"/>
+                            <field name="destination_location_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="picking_id" invisible="not picking_id"/>
+                        </group>
+                    </group>
+                    <group string="Control">
+                        <field name="total_expected"/>
+                        <field name="total_physical"/>
+                        <field name="total_labels"/>
+                        <field name="validated_by_id" invisible="not validated_by_id"/>
+                        <field name="validated_at" invisible="not validated_at"/>
+                    </group>
+                    <notebook>
+                        <page string="Productos físicos" name="products">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom" decoration-danger="physical_quantity &gt; pending_before">
+                                    <field name="historical_line_id" options="{'no_create': True}"/>
+                                    <field name="product_id"/>
+                                    <field name="expected_quantity"/>
+                                    <field name="already_regularized"/>
+                                    <field name="pending_before"/>
+                                    <field name="physical_quantity"/>
+                                    <field name="candidate_batch_ids" column_invisible="True"/>
+                                    <field name="batch_id" options="{'no_create': True}"/>
+                                    <field name="new_batch_reference"/>
+                                    <field name="serial_ids" widget="many2many_tags" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Evidencias y comprobación" name="evidence">
+                            <div class="alert alert-danger" role="alert" invisible="evidence_attachment_ids">
+                                Debe adjuntar una factura anterior, foto o documento que respalde la mercancía.
+                            </div>
+                            <field name="evidence_attachment_ids" widget="many2many_binary" readonly="state not in ('draft', 'receipt_ready')"/>
+                            <field name="physical_note" placeholder="Ejemplo: Yuliet contó 6 puertas en Doral, pasillo D35, contra factura LEGACY/INV/003667 y foto adjunta." readonly="state not in ('draft', 'receipt_ready')"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_historic_regularizations" model="ir.actions.act_window">
+        <field name="name">Panel de regularización histórica</field>
+        <field name="res_model">doorandoor.historic.regularization</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_historic_regularization_search"/>
+        <field name="context">{'search_default_to_locate': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Localice la mercancía de una venta histórica.</p>
+            <p>Registre evidencia, cantidad, lote y ubicación; imprima labels y confirme la entrada antes de despachar.</p>
+        </field>
+    </record>
+</odoo>

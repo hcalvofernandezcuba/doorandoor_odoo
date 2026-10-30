@@ -229,7 +229,7 @@
 
         <menuitem
             id="menu_ddpc_stock_root"
-            name="Operaciones"
+            name="Tareas de almacén"
             parent="stock.menu_stock_root"
             sequence="97"
             groups="doorandoor_process_control.group_ddpc_user"/>

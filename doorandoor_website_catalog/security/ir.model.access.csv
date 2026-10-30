@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_catalog_category_designer,Catálogo categorías diseñador,model_doorandoor_website_catalog_category,website.group_website_designer,1,1,1,1
+access_catalog_item_designer,Catálogo artículos diseñador,model_doorandoor_website_catalog_item,website.group_website_designer,1,1,1,1
+access_catalog_category_public,Catálogo categorías público,model_doorandoor_website_catalog_category,base.group_public,1,0,0,0
+access_catalog_item_public,Catálogo artículos público,model_doorandoor_website_catalog_item,base.group_public,1,0,0,0
+

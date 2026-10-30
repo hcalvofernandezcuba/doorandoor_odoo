@@ -70,6 +70,8 @@
                                    invisible="not ddsp_is_manufacturing_template"/>
                             <field name="ddsp_default_special_component_qty"
                                    invisible="not ddsp_is_manufacturing_template"/>
+                            <field name="ddsp_allow_vendor_price"
+                                   invisible="not ddsp_is_manufacturing_template"/>
                         </group>
                         <group string="Uso comercial">
                             <field name="ddsp_allow_special" string="Permitir transformaciones"/>

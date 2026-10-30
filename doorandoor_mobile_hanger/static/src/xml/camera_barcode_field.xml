@@ -3,10 +3,12 @@
     <t t-name="doorandoor_mobile_hanger.DdmhCameraBarcodeField">
         <div class="w-100">
             <div class="input-group input-group-lg">
-                <input type="text" class="o_input form-control"
+                <input type="text" class="o_input form-control" t-ref="input"
+                       t-att-autofocus="props.autoAction ? true : undefined"
                        t-att-value="value"
                        t-att-placeholder="props.placeholder || 'Escanee o escriba el código'"
                        t-on-input="onInput"
+                       t-on-keydown="onKeydown"
                        t-att-readonly="props.readonly"/>
                 <button type="button" class="btn btn-primary"
                         t-on-click.stop="startCamera"
@@ -18,9 +20,15 @@
             </div>
             <div class="d-grid gap-2 mt-2">
                 <button t-if="props.autoAction" type="button" class="btn btn-success btn-lg"
-                        t-on-click.stop="registerTypedCode" t-att-disabled="state.starting || props.readonly">
+                        t-on-click.stop="registerTypedCode" t-att-disabled="state.starting || state.busy || props.readonly">
                     <i class="fa fa-check-circle me-1"/>Registrar barcode escrito
                 </button>
+            </div>
+            <div t-if="props.continuous and state.lastProduct" class="alert alert-success mt-3 mb-0" role="status">
+                <div class="fw-bold fs-5"><i class="fa fa-check-circle me-1"/><t t-esc="state.lastProduct"/></div>
+                <div>Barcode: <t t-esc="state.lastBarcode"/></div>
+                <div class="fs-4">Contado: <strong><t t-esc="state.lastQty"/></strong></div>
+                <div>Disparos registrados en esta pantalla: <t t-esc="state.totalScans"/></div>
             </div>
             <div t-att-class="'card bg-dark mt-3 overflow-hidden ' + (state.active ? '' : 'd-none')">
                 <div t-ref="reader" t-att-id="readerId"

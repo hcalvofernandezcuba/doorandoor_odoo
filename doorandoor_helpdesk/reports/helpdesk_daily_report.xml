@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_ddhd_daily" model="ir.actions.report">
+        <field name="name">Reporte diario de soporte</field><field name="model">doorandoor.helpdesk.daily.report</field>
+        <field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_helpdesk.report_ddhd_daily</field>
+        <field name="report_file">doorandoor_helpdesk.report_ddhd_daily</field>
+        <field name="print_report_name">'Soporte_%s' % object.report_date</field>
+    </record>
+    <template id="report_ddhd_daily">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+            <div class="page">
+                <h2>Reporte diario de soporte técnico</h2>
+                <p><strong>Fecha:</strong> <span t-field="o.report_date"/> · <strong>Tickets:</strong> <span t-esc="len(o.ticket_ids)"/></p>
+                <table class="table table-sm table-bordered">
+                    <thead><tr><th>Hora / Ticket</th><th>Incidencia</th><th>Origen</th><th>Oficina / Almacén</th><th>Área</th><th>Técnico</th><th>Estado</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="o.ticket_ids" t-as="ticket">
+                            <td><span t-field="ticket.create_date" t-options="{'widget':'datetime','format':'HH:mm'}"/><br/><strong t-field="ticket.name"/></td>
+                            <td><span t-field="ticket.title"/><br/><small>Prioridad: <span t-field="ticket.priority"/></small></td>
+                            <td><span t-field="ticket.requester_id"/><br/><small t-field="ticket.request_channel"/></td>
+                            <td><span t-field="ticket.office_id"/><br/><small t-field="ticket.warehouse_id"/></td>
+                            <td><span t-field="ticket.affected_area"/></td>
+                            <td><span t-field="ticket.assigned_user_id"/></td>
+                            <td><strong t-field="ticket.state"/><br/><small t-if="ticket.analysis_started_at">Análisis: <span t-field="ticket.analysis_started_at" t-options="{'widget':'datetime','format':'HH:mm'}"/></small><br/><small t-if="ticket.resolved_at">Resuelto: <span t-field="ticket.resolved_at" t-options="{'widget':'datetime','format':'HH:mm'}"/></small></td>
+                        </tr>
+                        <tr t-if="not o.ticket_ids"><td colspan="7" class="text-center">No se reportaron tickets en esta fecha.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </t></t></t>
+    </template>
+</odoo>

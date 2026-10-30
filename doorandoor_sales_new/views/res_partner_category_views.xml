@@ -4,19 +4,23 @@
         <record id="view_partner_category_form_ddsn_bonus" model="ir.ui.view">
             <field name="name">res.partner.category.form.ddsn.bonus</field>
             <field name="model">res.partner.category</field>
+            <field name="inherit_id" ref="base.view_partner_category_form"/>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <form string="Customer Tag">
-                    <sheet>
+                <xpath expr="//sheet/group" position="after">
+                    <group string="DoorAndDoor Group Bonus" groups="base.group_system">
                         <group>
-                            <field name="name"/>
+                            <field name="ddsn_bonus_active"/>
                             <field name="ddsn_bonus_percent"/>
+                            <field name="ddsn_bonus_date_from"/>
+                            <field name="ddsn_bonus_date_to"/>
+                            <field name="ddsn_bonus_authorized_by_id"/>
                         </group>
                         <group>
-                            <field name="ddsn_bonus_notes" placeholder="Commercial agreements for this customer group..."/>
+                            <field name="ddsn_bonus_notes" placeholder="Causa, autorización, vigencia y excepciones..."/>
                         </group>
-                    </sheet>
-                </form>
+                    </group>
+                </xpath>
             </field>
         </record>
     </data>

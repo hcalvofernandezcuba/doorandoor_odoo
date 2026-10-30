@@ -115,12 +115,6 @@
         </template>
 
         <template id="report_invoice_document_signature" inherit_id="account.report_invoice_document">
-            <xpath expr="//t[@t-set='layout_document_title']/span[@t-elif=&quot;o.move_type == 'out_invoice' and o.state == 'draft'&quot;]" position="replace">
-                <span t-elif="o.move_type == 'out_invoice' and o.ddsn_is_preinvoice">
-                    Prefactura <span t-field="o.ddsn_preinvoice_number"/>
-                </span>
-                <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">Borrador de factura</span>
-            </xpath>
             <xpath expr="//div[hasclass('page')]" position="inside">
                 <div class="mt-2 pt-1">
                     <div class="row mb-2 align-items-start">
@@ -151,12 +145,17 @@
                     <div class="row">
                         <div class="col-6">
                             <t t-set="salesperson_history" t-value="o._ddsn_get_salesperson_history()"/>
+                            <t t-set="document_salesperson" t-value="o.invoice_user_id or o.sale_order_id.user_id or o.create_uid"/>
                             <div style="margin-top: 12px; font-size: 10px;">
                                 <strong t-if="len(salesperson_history) &lt;= 1">Comercial</strong>
                                 <strong t-else="">Comercial inicial</strong>
                             </div>
                             <div style="border-top: 1px solid #000; margin-top: 18px; padding-top: 3px; min-height: 14px; font-size: 10px;">
                                 <span t-esc="salesperson_history[0] if salesperson_history else (o.invoice_user_id or o.create_uid).name"/>
+                                <t t-if="document_salesperson.partner_id.phone or document_salesperson.partner_id.mobile or document_salesperson.ddco_office_id.phone">
+                                    <br/><strong>Phone:</strong>
+                                    <span t-esc="document_salesperson.partner_id.phone or document_salesperson.partner_id.mobile or document_salesperson.ddco_office_id.phone"/>
+                                </t>
                             </div>
                             <div t-foreach="salesperson_history[1:]" t-as="salesperson_name" class="mt-1" style="font-size: 10px;">
                                 <strong>Cambio de comercial:</strong>
@@ -176,18 +175,160 @@
             </xpath>
         </template>
 
+        <!-- Reuse the four native Bubble layout zones for invoices.  This is
+             deliberately conditional, so sales orders and deliveries retain
+             their own established report header. -->
+        <template id="external_layout_bubble_invoice_header" inherit_id="web.external_layout_bubble">
+            <xpath expr="//div[@class='d-flex justify-content-between']/div[1]" position="replace">
+                <div class="w-50">
+                    <t t-if="o and o._name == 'account.move' and o.move_type == 'out_invoice'">
+                        <div style="color: #000000;">
+                            <strong>FACTURA</strong>
+                            <div><span t-field="o.name"/></div>
+                            <div t-if="o.invoice_date">
+                                Fecha: <span t-field="o.invoice_date"/>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <img t-if="company.logo" class="o_company_logo mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                        <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Lema de la empresa</div>
+                    </t>
+                </div>
+            </xpath>
+            <xpath expr="//div[@name='company_address']" position="replace">
+                <div name="company_address" class="w-50 text-end">
+                    <t t-if="o and o._name == 'account.move' and o.move_type == 'out_invoice'">
+                        <div style="text-align: right; font-size: 10pt; line-height: 1.2;">
+                            <img t-if="company.logo" class="o_company_logo" t-att-src="image_data_uri(company.logo)" alt="Door &amp; Door" style="display: block; max-height: 106px; max-width: 300px; position: relative; top: -2pt; margin: 0 0 3px auto;"/>
+                            <address t-field="company.partner_id"
+                                     t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}'
+                                     style="margin: 0;"/>
+                            <div t-if="company.phone or company.mobile">
+                                <span t-esc="company.phone or company.mobile"/>
+                            </div>
+                            <div style="margin-top: 7px; color: #000000;">
+                                <strong>COMERCIAL</strong><br/>
+                                <span t-esc="(o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).name"/>
+                                <span t-if="(o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).partner_id.phone or (o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).partner_id.mobile">
+                                    <br/><span t-esc="(o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).partner_id.phone or (o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).partner_id.mobile"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <ul class="list-unstyled" name="company_address_list">
+                            <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/></li>
+                            <li t-else=""><span t-field="company.company_details"/></li>
+                            <li t-if="not forced_vat and company.vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="company.vat"/></li>
+                            <li t-elif="forced_vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="forced_vat"/></li>
+                        </ul>
+                    </t>
+                </div>
+            </xpath>
+        </template>
+
+        <!-- Gestión usa el diseño externo Wave.  Repite para ese diseño los
+             mismos dos bloques de cabecera ya validados en Bubble (Pruebas). -->
+        <template id="external_layout_wave_invoice_header" inherit_id="web.external_layout_wave">
+            <xpath expr="//div[@class='d-flex justify-content-between']/div[1]" position="replace">
+                <div class="w-50">
+                    <t t-if="o and o._name == 'account.move' and o.move_type == 'out_invoice'">
+                        <div style="color: #000000;">
+                            <strong>FACTURA</strong>
+                            <div><span t-field="o.name"/></div>
+                            <div t-if="o.invoice_date">
+                                Fecha: <span t-field="o.invoice_date"/>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <img t-if="company.logo" class="o_company_logo mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                        <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Lema de la empresa</div>
+                    </t>
+                </div>
+            </xpath>
+            <xpath expr="//div[@name='company_address']" position="replace">
+                <div name="company_address" class="w-50 text-end">
+                    <t t-if="o and o._name == 'account.move' and o.move_type == 'out_invoice'">
+                        <div style="text-align: right; font-size: 10pt; line-height: 1.2;">
+                            <img t-if="company.logo" class="o_company_logo" t-att-src="image_data_uri(company.logo)" alt="Door &amp; Door" style="display: block; max-height: 106px; max-width: 300px; position: relative; top: -2pt; margin: 0 0 3px auto;"/>
+                            <address t-field="company.partner_id"
+                                     t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}'
+                                     style="margin: 0;"/>
+                            <div t-if="company.phone or company.mobile">
+                                <span t-esc="company.phone or company.mobile"/>
+                            </div>
+                            <div style="margin-top: 7px; color: #000000;">
+                                <strong>COMERCIAL</strong><br/>
+                                <span t-esc="(o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).name"/>
+                                <span t-if="(o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).partner_id.phone or (o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).partner_id.mobile">
+                                    <br/><span t-esc="(o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).partner_id.phone or (o.invoice_user_id or o.sale_order_id.user_id or o.create_uid).partner_id.mobile"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <ul class="list-unstyled" name="company_address_list">
+                            <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/></li>
+                            <li t-else=""><span t-field="company.company_details"/></li>
+                            <li t-if="not forced_vat and company.vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="company.vat"/></li>
+                            <li t-elif="forced_vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="forced_vat"/></li>
+                        </ul>
+                    </t>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="report_invoice_document_native_blocks" inherit_id="account.report_invoice_document">
+            <xpath expr="//t[@t-call='web.external_layout']/div[1]" position="inside">
+                <t t-set="address">
+                    <div style="font-size: 11px; line-height: 1.2;">
+                        <strong>CLIENTE</strong>
+                        <div><span t-field="o.partner_id.name"/></div>
+                        <div style="margin-top: 7px;"><strong>DIRECCIÓN DE ENTREGA</strong></div>
+                        <address t-field="o.partner_shipping_id"
+                                 t-options='{"widget": "contact", "fields": ["name", "address", "phone"], "no_marker": true}'
+                                 style="margin: 1px 0 0 0;"/>
+                    </div>
+                </t>
+                <style>
+                    #informations,
+                    .address [name='information_block'] { display: none !important; }
+                    .address [name='address'] { margin-left: 0 !important; }
+                </style>
+            </xpath>
+            <xpath expr="//t[@t-set='layout_document_title']" position="replace">
+                <t t-set="layout_document_title"/>
+            </xpath>
+        </template>
+
         <template id="report_saleorder_document_signature" inherit_id="sale.report_saleorder_document">
+            <xpath expr="//t[@t-set='layout_document_title']" position="replace">
+                <t t-set="layout_document_title">
+                    <span t-if="doc.ddsn_po_first_flow and doc.ddsn_po_issued_at">PO # </span>
+                    <span t-elif="is_proforma">Pro-Forma Invoice # </span>
+                    <span t-elif="doc.state in ['draft','sent']">Quotation # </span>
+                    <span t-else="">Order # </span>
+                    <span t-field="doc.name"/>
+                </t>
+            </xpath>
             <xpath expr="//div[hasclass('page')]" position="inside">
                 <div class="mt-5 pt-4">
                     <div class="row">
                         <div class="col-6">
                             <t t-set="salesperson_history" t-value="doc._ddsn_get_salesperson_history()"/>
+                            <t t-set="document_salesperson" t-value="doc.user_id or doc.create_uid"/>
                             <div style="margin-top: 30px;">
                                 <strong t-if="len(salesperson_history) &lt;= 1">Comercial</strong>
                                 <strong t-else="">Comercial inicial</strong>
                             </div>
                             <div style="border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; min-height: 22px;">
                                 <span t-esc="salesperson_history[0] if salesperson_history else (doc.user_id or doc.create_uid).name"/>
+                                <t t-if="document_salesperson.partner_id.phone or document_salesperson.partner_id.mobile or document_salesperson.ddco_office_id.phone">
+                                    <br/><strong>Phone:</strong>
+                                    <span t-esc="document_salesperson.partner_id.phone or document_salesperson.partner_id.mobile or document_salesperson.ddco_office_id.phone"/>
+                                </t>
                             </div>
                             <div t-foreach="salesperson_history[1:]" t-as="salesperson_name" class="mt-1" style="font-size: 10px;">
                                 <strong>Cambio de comercial:</strong>
@@ -255,6 +396,18 @@
                         </div>
                     </div>
                 </div>
+            </xpath>
+        </template>
+
+        <template id="report_saleorder_force_english" inherit_id="sale.report_saleorder_raw">
+            <xpath expr="//t[@t-call='sale.report_saleorder_document']" position="attributes">
+                <attribute name="t-lang">'en_US'</attribute>
+            </xpath>
+        </template>
+
+        <template id="report_invoice_force_english" inherit_id="account.report_invoice">
+            <xpath expr="//t[@t-set='lang']" position="attributes">
+                <attribute name="t-value">'en_US'</attribute>
             </xpath>
         </template>
     </data>

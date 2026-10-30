@@ -1,0 +1,7 @@
+*.pdf
+*.PDF
+*.png
+*.jpg
+*.jpeg
+*.txt
+!.gitignore

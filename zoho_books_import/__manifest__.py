@@ -1,8 +1,8 @@
 {
     "name": "Zoho Books Import (Unidirectional)",
-    "version": "18.0.1.2.8",
+    "version": "18.0.1.2.13",
     "category": "Accounting",
-    "summary": "Import data from Zoho Books to Odoo 18 CE (One-way only)",
+    "summary": "Restringe menús e importaciones de Zoho al grupo administrativo específico",
     "description": """
         Unidirectional Zoho Books to Odoo Connector
         ===========================================
@@ -33,8 +33,8 @@
     ],
     "data": [
         "data/category.xml",
-        "security/ir.model.access.csv",
         "security/zoho_security.xml",
+        "security/ir.model.access.csv",
         "data/ir_sequence.xml",
         "data/ir_cron.xml",
         "views/zoho_connector_views.xml",

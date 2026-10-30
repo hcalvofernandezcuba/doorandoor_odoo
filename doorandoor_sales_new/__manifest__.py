@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Sales New",
-    "version": "18.0.2.7.1",
+    "version": "18.0.3.8.1",
     "category": "Sales",
-    "summary": "18.0.2.7.1 - Muestra por hover o clic el stock actualizado de cada almacén",
+    "summary": "18.0.3.8.1 - Configurador comercial sin ampliar acceso a ventas ajenas",
     "description": """
 DoorAndDoor Sales New
 =====================
@@ -21,6 +21,410 @@ La meta es soportar un proceso donde:
 
 Alcance funcional
 -----------------
+
+Version 18.0.3.8.1
+------------------
+
+Permite que un comercial limitado a sus propios documentos complete el
+configurador de productos en facturas. El calculo agregado de disponibilidad
+lee tecnicamente solo el almacen de pedidos ajenos, sin conceder acceso a esas
+ventas ni ampliar los grupos del usuario.
+
+Version 18.0.3.8.0
+------------------
+
+Agrega el botón Devolver a borrador, visible y ejecutable exclusivamente por
+Administración/Ajustes. Bloquea la reapertura si existen facturas u operaciones
+de inventario activas y cancela únicamente solicitudes logísticas todavía
+pendientes. Conserva el número de venta y registra usuario, estado anterior y
+solicitudes canceladas en el chatter.
+
+Version 18.0.3.7.2
+------------------
+
+Permite a los usuarios comerciales imprimir o enviar una factura desde que
+Control de Cobros haya validado cualquier importe mayor que cero. Mantiene
+bloqueados los pagos solamente reportados, pendientes o sin dinero validado.
+
+Version 18.0.3.7.1
+------------------
+
+Muestra en la lista de Variantes de producto la política Precio fijo / Sin
+bonificación como una etiqueta roja, para identificar inmediatamente los ITEM
+que bloquean cualquier descuento o bonificación.
+
+Version 18.0.3.7.0
+------------------
+
+Agrega en Variantes de producto filtros y agrupación por política comercial:
+Precio fijo / Sin bonificación, Bonificación propia del ITEM y Sin regla
+especial. Muestra la política como columna administrativa y bloquea en servidor
+la creación o modificación de bonificaciones de clientes para cualquier usuario
+que no pertenezca a Administrador/Ajustes. Los cambios autorizados en la regla
+del cliente quedan registrados en el chatter.
+
+Version 18.0.3.6.1
+------------------
+
+Conserva el número fiscal original cuando una factura publicada vuelve a
+borrador para corregirse y luego se reconfirma. Las facturas nuevas continúan
+recibiendo su secuencia exclusivamente al publicarse.
+
+Version 18.0.3.6.0
+------------------
+
+Agrega una política comercial por variante/ITEM administrada únicamente desde
+Ajustes. Precio fijo bloquea absolutamente cualquier descuento. La bonificación
+propia del ITEM prevalece sobre cliente, constructor y grupo sin acumularse, y
+la fuente aplicada conserva trazabilidad hasta la factura.
+
+Version 18.0.3.5.1
+------------------
+
+Permite imprimir o enviar una factura de pago parcial cuando Control de Cobros
+ha validado al menos el 50% del subtotal más todos los impuestos. Para tarjeta
+incluye además el cargo de procesamiento calculado sobre ese primer cobro.
+Los pagos solo reportados o pendientes no liberan la impresión.
+
+Version 18.0.3.5.0
+------------------
+
+Limita cada venta al almacén de su oficina. Cuando falta existencia crea una
+solicitud para que Logística seleccione el almacén de origen y genere el
+traslado interno hacia la sucursal, sin exponer otros almacenes al comercial.
+
+Version 18.0.3.4.45
+--------------------
+
+Permite a Administración/Ajustes imprimir cotizaciones, prefacturas y facturas
+en cualquier estado para análisis y resolución operativa. Conserva sin cambios
+las restricciones de confirmación y pago aplicables a los demás usuarios.
+
+Version 18.0.3.4.44
+--------------------
+
+Sincroniza una entrega de inventario completada con el estado Entregado de su
+Pickup Order, registra usuario y fecha y completa sus cantidades entregadas.
+
+Version 18.0.3.4.43
+--------------------
+
+Al reanudar el cumplimiento después de una recepción, conserva el importe ya
+validado y auditado por Control de Cobros aunque la conciliación contable aún
+no haya reducido el residual. Evita devolver productos liberados al estado de
+pago pendiente y no modifica asientos ni conciliaciones.
+
+Version 18.0.3.4.42
+--------------------
+
+Refresca el estado persistido del despacho y de su recepción antes de decidir
+la liberación. Evita que una recepción recién validada con Hanger permanezca
+interpretada como pendiente por una lectura anterior conservada en caché.
+
+Version 18.0.3.4.41
+--------------------
+
+Al validar con Hanger la recepción de un traslado de abastecimiento, reanuda
+de forma idempotente la factura pagada y crea su entrega final y Pickup Order
+sin exigir una sincronización manual.
+
+Version 18.0.3.4.40
+--------------------
+
+Las ventas pagadas abastecidas desde otro almacén esperan la recepción física
+del traslado antes de crear la entrega final y su Pickup Order. La validación
+de la recepción reanuda automáticamente el flujo comercial.
+
+Version 18.0.3.4.39
+--------------------
+
+Unifica la prioridad de descuentos en cotizaciones: ajuste manual, cliente,
+constructor, grupo comercial y precio base. Incorpora vigencia, autorizador,
+referencia de la regla aplicada y conserva esa evidencia en la factura. Las
+reglas de cliente y grupo quedan disponibles solo para Administración/Ajustes.
+
+Version 18.0.3.4.38
+--------------------
+
+Permite imprimir cotizaciones y prefacturas en cualquier etapa, mantiene la
+factura fiscal bloqueada hasta el pago total y muestra el teléfono del comercial
+asignado en los apartados de los reportes comerciales. Cuando el comercial no
+tiene teléfono propio utiliza el de su oficina comercial.
+
+Version 18.0.3.4.37
+--------------------
+
+Extiende la protección de impresión al reporte estándar con pagos para que el
+menú Imprimir no permita generar una factura pendiente. La factura confirmada
+solo puede imprimirse cuando su estado de pago sea Pagado.
+
+Version 18.0.3.4.36
+--------------------
+
+Alinea la regresión de liberación de productos fabricados con el flujo vigente
+de Fábrica: el pago crea una necesidad auditable, el plan diario aprobado crea
+la OF y la terminación habilita la salida y el Pickup Order. No recupera la
+creación inmediata de OF que fue sustituida por el corte diario.
+
+Version 18.0.3.4.34
+--------------------
+
+Crea o completa automáticamente los Pickup Orders después de liberar una
+factura totalmente pagada y generar su entrega. También los sincroniza cuando
+un producto fabricado pasa a la operación de salida. La operación es
+idempotente: reutiliza el Pickup Order abierto del picking y no duplica líneas.
+
+Version 18.0.3.4.33
+--------------------
+
+Aplica la protección visual de numeración fiscal al final de la composición de
+la vista de factura, de modo que ninguna herencia posterior reactive el campo
+editable en facturas o prefacturas en borrador.
+
+Version 18.0.3.4.32
+--------------------
+
+Oculta en facturas y prefacturas el campo técnico de número mientras el
+documento está en borrador. Tras la confirmación muestra el identificador
+fiscal asignado por Odoo en modo de solo lectura. Las cotizaciones ya mantienen
+su identificador Odoo en solo lectura.
+
+Version 18.0.3.4.31
+--------------------
+
+Impide que un usuario asigne o altere el número de una factura de cliente.
+Al crearla y al confirmarla se descarta cualquier texto introducido en el
+campo técnico ``name`` y Odoo asigna obligatoriamente la siguiente secuencia
+fiscal del diario. La regla es de una sola vía y se aplica también por API.
+
+Version 18.0.3.4.30
+--------------------
+
+Impide enviar o generar el PDF oficial de facturas de cliente cuyo pago no
+esté completado. Mantiene una Vista previa HTML disponible para facturas
+confirmadas, sin habilitar su envío ni la emisión del documento oficial.
+
+Version 18.0.3.4.29
+--------------------
+
+Impide imprimir o enviar facturas borrador y prefacturas, incluso mediante una
+acción directa; solo documentos contables confirmados reciben salida impresa.
+
+Version 18.0.3.4.28
+--------------------
+
+Evita que la bonificación comercial se ejecute sin un cliente seleccionado al
+añadir una línea nueva a la cotización.
+
+Version 18.0.3.4.27
+--------------------
+
+Conserva bloqueados los datos comerciales de una prefactura confirmada, pero
+permite ajustar Pago con tarjeta mientras el documento contable siga en borrador.
+
+Version 18.0.3.4.26
+--------------------
+
+Después de confirmar la prefactura, habilita Crear factura como siguiente paso
+del flujo comercial y oculta Emitir/Imprimir PO y Entregas en ese documento.
+
+Version 18.0.3.4.25
+--------------------
+
+Sustituye la denominación visible Pre Order por Prefactura en formularios,
+botones, mensajes, secuencia y ayudas operativas, sin alterar identificadores
+técnicos ni el flujo comercial.
+
+Version 18.0.3.4.24
+--------------------
+
+Oculta el bloque estándar duplicado de Dirección de envío y alinea a la
+izquierda el único bloque Cliente/Dirección de entrega de la factura.
+
+Version 18.0.3.4.23
+--------------------
+
+Traslada Comercial, nombre y teléfono desde la izquierda al bloque derecho,
+inmediatamente debajo de la dirección de oficina en facturas Bubble y Wave.
+
+Version 18.0.3.4.22
+--------------------
+
+Replica en el diseño Wave la cabecera de factura ya validada con Bubble:
+Factura a la izquierda y bloque de logo/oficina a la derecha.
+
+Version 18.0.3.4.21
+--------------------
+
+Amplía el logo de la cabecera de factura a 106 px, sin modificar la
+alineación derecha ni el resto del formato.
+
+Version 18.0.3.4.20
+--------------------
+
+Amplía dos puntos el logo de la cabecera de factura sin alterar su posición,
+el bloque de oficina ni ningún otro elemento del PDF.
+
+Version 18.0.3.4.19
+--------------------
+
+Amplía dos puntos el logo y normaliza dirección/teléfono de oficina a la
+misma escala visual que el bloque de dirección de entrega.
+
+Version 18.0.3.4.18
+--------------------
+
+Mantiene el logo de referencia y los datos de oficina como un bloque único,
+justificado completamente a la derecha de la cabecera.
+
+Version 18.0.3.4.17
+--------------------
+
+Compone la cabecera derecha de factura como un único bloque centrado: logo
+DoorAndDoor de tamaño ampliado y datos de la oficina inmediatamente debajo.
+
+Version 18.0.3.4.16
+--------------------
+
+Amplía ligeramente el logo de oficina y reduce su margen inferior para
+integrarlo con la dirección comercial sin modificar otros bloques.
+
+Version 18.0.3.4.15
+--------------------
+
+Amplía cuatro puntos la altura máxima del logo de oficina, conservando su
+centrado y el resto del formato de la factura.
+
+Version 18.0.3.4.14
+--------------------
+
+Centra dentro de su bloque y eleva dos puntos el logo DoorAndDoor de la
+oficina, sin alterar el resto de la distribución validada.
+
+Version 18.0.3.4.13
+--------------------
+
+Mantiene en negro los bloques intercambiados Factura y Comercial, evitando que
+hereden el color verde del título estándar de la plantilla Bubble.
+
+Version 18.0.3.4.12
+--------------------
+
+Intercambia exclusivamente la posición de los bloques Factura y Comercial:
+Factura/número/fecha se muestra arriba a la izquierda y Comercial/teléfono a
+la derecha del bloque de cliente y entrega. No incluye vencimiento.
+
+Version 18.0.3.4.11
+--------------------
+
+Modifica los bloques nativos del diseño Bubble para las facturas: comercial a
+la izquierda, logo/dirección/teléfono de oficina a la derecha, cliente y
+entrega en el área existente de dirección y número/fecha en el bloque nativo
+del documento. No muestra vencimiento ni crea cuadros adicionales.
+
+Version 18.0.3.4.10
+--------------------
+
+Retira la cabecera adicional que duplicaba datos corporativos, de cliente,
+entrega y factura. Conserva un solo encabezado del formato establecido.
+
+Version 18.0.3.4.9
+-------------------
+
+Inserta la cabecera comercial antes de las líneas de factura, usando la tabla
+de productos como ancla estable ante extensiones de impuestos y reportes.
+Oculta visualmente la banda estándar sin eliminar sus nodos técnicos.
+
+Version 18.0.3.4.8
+-------------------
+
+Conserva oculto el nodo estándar de dirección de facturación para mantener la
+compatibilidad con reportes heredados, mientras la cabecera DoorAndDoor
+imprime exclusivamente el diseño comercial y de entrega.
+
+Version 18.0.3.4.7
+-------------------
+
+Fija la cabecera de factura en dos columnas estables para PDF: comercial a la
+izquierda; logo, datos y teléfono de oficina a la derecha; debajo, cliente y
+entrega frente a número y fechas de la factura. Elimina el título estándar
+duplicado del documento.
+
+Version 18.0.3.4.6
+-------------------
+
+Reorganiza la cabecera impresa de las facturas: comercial responsable y
+teléfono, cliente, dirección efectiva de entrega y datos del documento. Se
+suprime la dirección de facturación y los campos internos de origen/código de
+cliente de la banda principal.
+
+Version 18.0.3.4.5
+-------------------
+
+Muestra de forma explícita en cada factura impresa el vendedor responsable y
+la dirección de entrega asociada a la venta. Los datos permanecen visibles
+aun cuando la dirección de facturación y entrega coincidan.
+
+Version 18.0.3.4.0
+-------------------
+
+Cierra las rutas de creación de líneas con precio o descuento manual para
+usuarios sin Ajustes y bloquea el cambio de lista cuando la venta ya contiene
+productos. Los precios automáticos de listas, bonos y variantes se conservan.
+Los traslados internos causados por un PO se crean con elevación técnica
+limitada y trazabilidad del vendedor solicitante, sin otorgarle permisos
+generales de Inventario.
+
+Version 18.0.3.3.0
+-------------------
+
+Al liquidar completamente la entrega del nuevo flujo PO, genera una sola
+factura fiscal desde la Orden de Venta, la contabiliza y enlaza prefactura,
+PO y factura. Las entregas parciales mantienen el PO abierto y no facturan
+hasta completar todas las cantidades.
+
+Version 18.0.3.2.1
+-------------------
+
+Incrusta el código de barras y el QR directamente en los reportes, evitando
+que el PO dependa de la URL HTTP local para imprimirlos. Mantiene el formato
+Letter compacto y el enlace QR hacia el documento en Odoo.
+
+Version 18.0.3.2.0
+-------------------
+
+Agrega una vista independiente de Órdenes de Venta emitidas como PO debajo de
+Ventas y permite acceder al proceso de Entregas desde la prefactura confirmada,
+respetando la autorización operativa definida por Cobros.
+
+Version 18.0.3.1.0
+-------------------
+
+El PO utiliza una acción de reporte propia en tamaño Letter con márgenes y
+encabezado compactos, conservando la identidad visual, datos comerciales,
+impuestos, totales y firmas de los documentos DoorAndDoor.
+
+Version 18.0.3.0.1
+-------------------
+
+Oculta las dos variantes estándar de `Crear factura` en las Órdenes de Venta
+del flujo PO y bloquea también en servidor cualquier intento de facturación
+prematura. Las órdenes históricas conservan la acción anterior.
+
+Version 18.0.3.0.0
+-------------------
+
+Corrige la definición del nuevo PO: el registro técnico es la Orden de Venta
+(`sale.order`) y su impreso para el cliente se titula `PO`. Las prefacturas del
+flujo nuevo emiten ese documento y ya no crean directamente la factura; las
+órdenes y Pickup Orders históricos conservan el comportamiento heredado.
+
+Version 18.0.2.8.0
+-------------------
+
+Selecciona automáticamente el almacén proveedor con disponibilidad, conserva
+el almacén comercial como destino y permite continuar cuando ningún almacén
+cubre la venta, dejando el faltante documentado para Logística.
 
 Version 18.0.2.7.1
 -------------------
@@ -225,6 +629,27 @@ Estructura principal
 
 Historial resumido
 ------------------
+
+- 18.0.3.4.4
+  El PO deja de usar la cabecera corporativa flotante que se superponía al
+  contenido. Incorpora dentro de la página un encabezado estable con logo,
+  empresa, dirección y Tax ID, conservando Letter, tabla, totales, QR y firmas.
+
+- 18.0.3.4.3
+  Amplía la reserva superior del PO a 70 mm después de validar el encabezado
+  corporativo real de pruebas, evitando solapamientos con cliente, título,
+  impuestos y tabla de productos.
+
+- 18.0.3.4.2
+  Reserva espacio superior e inferior adecuado en el formato Letter del PO para
+  impedir que cliente, título, tabla y totales se superpongan con el encabezado
+  y pie corporativos.
+
+- 18.0.3.4.1
+  Denominación histórica de la prefactura en formularios, estados, botones, mensajes,
+  secuencia e impreso. Conserva la gestión validada: la prefactura reserva, el PO
+  recibe pagos y autoriza entrega, y la factura fiscal nace automáticamente al
+  cerrar la entrega.
 
 - 18.0.2.1.1
   Activa por migracion el cron horario aun cuando una instalacion historica lo
@@ -461,11 +886,15 @@ Hanoi Calvo Fernández (doorandoor)
         "data/pickup_order_sequence.xml",
         "data/quote_reservation_cron.xml",
         "security/ir.model.access.csv",
+        "data/stock_transfer_request_sequence.xml",
         "views/supply_warehouse_change_wizard_views.xml",
+        "views/stock_transfer_request_views.xml",
         "views/fulfillment_line_views.xml",
         "views/payment_release_log_views.xml",
         "views/pickup_order_views.xml",
         "views/account_move_views.xml",
+        "views/product_product_views.xml",
+        "views/invoice_number_guard_views.xml",
         "views/sale_order_views.xml",
         "views/stock_picking_supply_views.xml",
         "views/res_partner_views.xml",
@@ -473,6 +902,7 @@ Hanoi Calvo Fernández (doorandoor)
         "views/res_config_settings_views.xml",
         "views/menu_views.xml",
         "views/report_signature_templates.xml",
+        "views/po_report_action.xml",
         "views/pickup_order_report.xml",
     ],
     "assets": {

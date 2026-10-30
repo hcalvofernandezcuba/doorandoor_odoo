@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="official_terms_and_conditions" model="ir.ui.view">
+      <field name="name">Políticas oficiales DoorAndDoor</field>
+      <field name="type">qweb</field>
+      <field name="key">doorandoor_policy_acceptance.official_terms_and_conditions</field>
+      <field name="inherit_id" eval="False"/>
+      <field name="arch" type="xml">
+      <t name="Políticas oficiales DoorAndDoor" t-name="doorandoor_policy_acceptance.official_terms_and_conditions">
+        <t t-call="website.layout">
+          <div id="wrap" class="oe_structure">
+            <section class="container py-5 ddpa_policy_page">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                    <div>
+                        <h1 class="mb-1">Políticas de Venta</h1>
+                        <p class="lead mb-0">Documento oficial de AMERICAN GROUP WINDOWS AND DOORS INC.</p>
+                    </div>
+                    <a class="btn btn-primary" t-att-href="document_pdf_url" target="_blank">Download official PDF</a>
+                </div>
+                <div class="btn-group mb-3" role="group" aria-label="Document language">
+                    <a t-att-class="'btn btn-outline-primary%s' % (' active' if document_language == 'en' else '')" href="/terminos-y-condiciones?lang=en">English</a>
+                    <a t-att-class="'btn btn-outline-primary%s' % (' active' if document_language == 'es' else '')" href="/terminos-y-condiciones?lang=es">Español</a>
+                </div>
+                <div class="alert alert-info">
+                    Estas políticas deben ser revisadas y aceptadas antes de confirmar una venta. La aceptación se conserva con la versión exacta del documento, fecha y evidencia técnica.
+                </div>
+                <object t-att-data="document_pdf_url" type="application/pdf" width="100%" height="900" style="border:1px solid #d8dee5;border-radius:8px;">
+                    <p>Your browser cannot display the PDF. <a t-att-href="document_pdf_url">Open the official document here.</a></p>
+                </object>
+            </section>
+          </div>
+        </t>
+      </t>
+      </field>
+    </record>
+
+    <template id="website_footer_policy_link" inherit_id="website.layout" name="Website footer sales policies link">
+        <xpath expr="//footer[@id='bottom']" position="inside">
+            <div class="container py-3 text-center ddpa_website_policy_link">
+                <a href="/terminos-y-condiciones" class="text-decoration-none fw-bold">
+                    Sales Policies / Políticas de venta
+                </a>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="policy_signature_page" name="Aceptar políticas DoorAndDoor">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5">
+                    <div class="mx-auto" style="max-width:1100px;">
+                        <h1>Aceptación de políticas comerciales</h1>
+                        <p class="lead">Cliente: <strong t-out="acceptance.partner_id.display_name"/></p>
+                        <div class="btn-group mb-3" role="group" aria-label="Document language">
+                            <a t-att-class="'btn btn-outline-primary%s' % (' active' if document_language == 'en' else '')" t-att-href="'/politicas/firmar/%s?lang=en' % acceptance.access_token">English</a>
+                            <a t-att-class="'btn btn-outline-primary%s' % (' active' if document_language == 'es' else '')" t-att-href="'/politicas/firmar/%s?lang=es' % acceptance.access_token">Español</a>
+                        </div>
+                        <div t-if="acceptance.state == 'accepted'" class="alert alert-success">
+                            Estas políticas ya fueron aceptadas por <strong t-out="acceptance.signer_name"/> el <span t-field="acceptance.accepted_at"/>. Vigentes hasta <span t-field="acceptance.valid_until"/>.
+                        </div>
+                        <div t-elif="acceptance.state != 'pending'" class="alert alert-warning">Este enlace ya no está disponible. Solicite uno nuevo a su comercial.</div>
+                        <t t-else="">
+                            <div class="alert alert-info">
+                                Lea el documento completo. Al escribir su nombre y pulsar <strong>Acepto y firmo</strong>, usted manifiesta electrónicamente su aceptación de la versión <strong t-out="policy.version"/>.
+                            </div>
+                            <object t-att-data="document_pdf_url" type="application/pdf" width="100%" height="700" style="border:1px solid #d8dee5;border-radius:8px;">
+                                <p>Your browser cannot display the PDF. <a t-att-href="document_pdf_url" target="_blank">Open the official document here.</a></p>
+                            </object>
+                            <form t-att-action="'/politicas/firmar/%s/aceptar' % acceptance.access_token" method="post" class="card mt-4 p-4">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="document_language" t-att-value="document_language"/>
+                                <div t-if="error" class="alert alert-danger" t-out="error"/>
+                                <label for="signer_name" class="form-label fw-bold">Nombre completo de quien acepta</label>
+                                <input id="signer_name" name="signer_name" type="text" required="required" minlength="3" class="form-control form-control-lg"/>
+                                <div class="form-check my-4">
+                                    <input id="accepted" name="accepted" value="1" type="checkbox" required="required" class="form-check-input"/>
+                                    <label for="accepted" class="form-check-label">He leído el documento completo y acepto las políticas de venta de Door &amp; Door correspondientes a la versión indicada.</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg">Acepto y firmo</button>
+                            </form>
+                        </t>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <template id="policy_signature_success" name="Políticas aceptadas">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5 text-center">
+                    <div class="mx-auto card p-5" style="max-width:720px;">
+                        <h1>Políticas aceptadas</h1>
+                        <p class="lead">Gracias, <strong t-out="acceptance.signer_name"/>.</p>
+                        <p>La aceptación de la versión <strong t-out="policy.version"/> quedó registrada el <span t-field="acceptance.accepted_at"/> y es válida hasta <span t-field="acceptance.valid_until"/>.</p>
+                        <p>Ya puede cerrar esta ventana y continuar con su comercial.</p>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

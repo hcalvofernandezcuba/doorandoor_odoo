@@ -17,6 +17,10 @@ class StockLabelWizard(models.TransientModel):
         required=True,
         help="Use tracking data for receipt labels or force labels by product code for supplier preparation.",
     )
+    label_format = fields.Selection(
+        [("small", "Almacén — Zebra 3×1"), ("large", "Entrega — Zebra 4×6")],
+        string="Tamaño de etiqueta", default="small", required=True,
+    )
     include_untracked_qty = fields.Boolean(
         string="Include Untracked Quantities",
         default=True,
@@ -177,5 +181,10 @@ class StockLabelWizard(models.TransientModel):
                     "No se generaron etiquetas. Revise cantidades recibidas, numeros de serie/lote, modo de impresion o configuracion del producto."
                 )
             )
-        action = self.env.ref("doorandoor_stock_labels.action_report_ddsl_stock_labels")
+        action_xmlid = (
+            "doorandoor_stock_labels.action_report_ddsl_stock_labels_large"
+            if self.label_format == "large"
+            else "doorandoor_stock_labels.action_report_ddsl_stock_labels"
+        )
+        action = self.env.ref(action_xmlid)
         return action.report_action(self, data={"labels": payloads, "picking_name": self.picking_id.name})

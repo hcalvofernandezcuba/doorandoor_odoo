@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_inventory_initial_load_report_user,inventory.initial.load.report.user,model_inventory_initial_load_report,doorandoor_inventory_variant_count.group_inventory_count_user,1,0,0,0

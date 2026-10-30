@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_inventory_serial_receipt_form_empty_position" model="ir.ui.view">
+        <field name="name">inventory.serial.receipt.form.empty.position</field>
+        <field name="model">inventory.serial.receipt</field>
+        <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_inventory_serial_receipt_form"/>
+        <field name="arch" type="xml">
+            <field name="warehouse_id" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+                <attribute name="domain">[]</attribute>
+                <attribute name="context">{'ddic_authorized_warehouse_search': True}</attribute>
+                <attribute name="options">{'no_create': True, 'no_create_edit': True, 'no_open': True}</attribute>
+            </field>
+            <field name="picking_id" position="attributes">
+                <attribute name="string">Recepción / traslado existente (opcional)</attribute>
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+            </field>
+            <field name="picking_id" position="after">
+                <field name="picking_created_automatically" invisible="1"/>
+                <field name="new_supplier_id"
+                       invisible="picking_id or operation_type != 'supplier'"
+                       readonly="state != 'draft'"/>
+                <field name="new_document_reference"
+                       invisible="picking_id"
+                       placeholder="Factura, packing list o referencia del origen"
+                       readonly="state != 'draft'"/>
+                <div class="alert alert-info" role="alert" invisible="picking_id">
+                    Si no existe un documento pendiente, el sistema creará una recepción
+                    oficial con el almacén, ITEM y cantidad indicados.
+                </div>
+                <div class="alert alert-warning" role="alert"
+                     invisible="not picking_created_automatically">
+                    Esta recepción fue creada por el sistema y sus productos no traían
+                    labels de origen. Prepare e imprima los nuevos labels antes del conteo.
+                </div>
+            </field>
+            <field name="operation_type" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="label_mode" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="product_id" position="before">
+                <field name="candidate_product_ids" invisible="1"/>
+            </field>
+            <field name="product_id" position="attributes">
+                <attribute name="domain">[('id', 'in', candidate_product_ids)]</attribute>
+                <attribute name="readonly">state != 'draft' or not warehouse_id</attribute>
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+            </field>
+            <field name="recommended_batch_id" position="before">
+                <field name="quantity" position="move"/>
+                <field name="candidate_empty_position_ids" invisible="1"/>
+                <field name="needs_empty_position" invisible="1"/>
+            </field>
+            <field name="recommended_batch_id" position="after">
+                <field name="recommended_position_id"
+                       readonly="1" invisible="not recommended_batch_id"/>
+                <field name="recommended_capacity"
+                       readonly="1" invisible="not recommended_batch_id"/>
+                <field name="recommended_current_quantity"
+                       readonly="1" invisible="not recommended_batch_id"/>
+                <field name="recommended_available_quantity"
+                       readonly="1" invisible="not recommended_batch_id"/>
+                <field name="recommended_batch_is_mixed" invisible="1"/>
+                <div class="alert alert-success" role="alert"
+                     invisible="not recommended_batch_id or recommended_batch_is_mixed">
+                    El mismo ITEM ya existe en esta posición y tiene capacidad suficiente.
+                    Se recomienda completar ese lote antes de abrir otra ubicación.
+                </div>
+                <div class="alert alert-info" role="alert"
+                     invisible="not recommended_batch_id or not recommended_batch_is_mixed">
+                    No existe un lote disponible del mismo ITEM. Se recomienda este lote
+                    mixto como área de consolidación; cada unidad conservará su ITEM y label.
+                </div>
+            </field>
+            <field name="batch_id" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+            </field>
+            <field name="batch_id" position="after">
+                <field name="selected_batch_location"
+                       readonly="1" invisible="not batch_id"/>
+                <field name="create_new_batch"
+                       invisible="destination_purpose != 'storage' or needs_empty_position"
+                       readonly="state != 'draft'"/>
+                <field name="new_storage_type"
+                       invisible="destination_purpose != 'storage' or (not needs_empty_position and not create_new_batch)"
+                       required="destination_purpose == 'storage' and (needs_empty_position or create_new_batch)"
+                       readonly="state != 'draft'"/>
+                <field name="recommended_empty_position_id"
+                       readonly="1"
+                       invisible="not needs_empty_position or new_storage_type != 'fixed'"/>
+                <field name="empty_position_id"
+                       invisible="destination_purpose != 'storage' or (not needs_empty_position and not create_new_batch) or new_storage_type != 'fixed'"
+                       required="destination_purpose == 'storage' and (needs_empty_position or create_new_batch) and new_storage_type == 'fixed' and not batch_id"
+                       context="{'default_warehouse_id': warehouse_id, 'ddwm_receipt_position_create': True}"
+                       options="{'no_quick_create': True, 'no_open': True}"
+                       readonly="state != 'draft'"/>
+                <field name="new_storage_reference"
+                       placeholder="Ej.: PAL-DD-0042 o CONT-MSKU1234567"
+                       invisible="destination_purpose != 'storage' or (not needs_empty_position and not create_new_batch) or new_storage_type == 'fixed'"
+                       required="destination_purpose == 'storage' and (needs_empty_position or create_new_batch) and new_storage_type != 'fixed' and not batch_id"
+                       readonly="state != 'draft'"/>
+                <field name="created_batch_id" readonly="1" invisible="not created_batch_id"/>
+                <field name="increment_session_id" readonly="1" invisible="not increment_session_id"/>
+                <div class="alert alert-info" role="alert"
+                     invisible="destination_purpose != 'storage' or (not needs_empty_position and not create_new_batch)">
+                    Identifique dónde quedará físicamente el lote nuevo. Para una posición fija seleccione
+                    un espacio disponible; para una paleta móvil o contenedor escriba su código físico único.
+                </div>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_picking_form_receipt_empty_position" model="ir.ui.view">
+        <field name="name">stock.picking.form.receipt.empty.position</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_picking_form_serial_receipt"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='move_ids_without_package']/list/field[@name='product_uom_qty']" position="after">
+                <field name="ddwm_operator_location_summary"
+                       string="Ubicación física / destino propuesto"
+                       readonly="1" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='serial_receipt_ids']/ancestor::page[1]" position="before">
+                <page string="Ubicaciones operativas">
+                    <field name="ddwm_operator_locations_html" nolabel="1" readonly="1" widget="html"/>
+                </page>
+            </xpath>
+            <xpath expr="//field[@name='serial_receipt_ids']/list/field[@name='batch_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_create_edit': True}</attribute>
+                <attribute name="string">Lote confirmado por el operador</attribute>
+            </xpath>
+            <xpath expr="//field[@name='serial_receipt_ids']/list/field[@name='recommended_batch_id']" position="attributes">
+                <attribute name="string">Lote propuesto por el sistema</attribute>
+                <attribute name="optional">show</attribute>
+            </xpath>
+            <xpath expr="//field[@name='serial_receipt_ids']/list/field[@name='batch_id']" position="after">
+                <field name="candidate_batch_overview"
+                       string="Lotes compatibles: ITEM / posición / capacidad"
+                       readonly="1" optional="show"/>
+                <field name="selected_batch_location"
+                       readonly="1" optional="show"/>
+                <field name="warehouse_id" column_invisible="True"/>
+                <field name="needs_empty_position" column_invisible="True"/>
+                <field name="create_new_batch" optional="show"/>
+                <field name="new_storage_type"
+                       invisible="not needs_empty_position and not create_new_batch"
+                       optional="show"/>
+                <field name="empty_position_id"
+                       invisible="destination_purpose != 'storage' or (not needs_empty_position and not create_new_batch) or new_storage_type != 'fixed'"
+                       context="{'default_warehouse_id': warehouse_id, 'ddwm_receipt_position_create': True}"
+                       options="{'no_quick_create': True, 'no_open': True}"/>
+                <field name="new_storage_reference"
+                       invisible="destination_purpose != 'storage' or (not needs_empty_position and not create_new_batch) or new_storage_type == 'fixed'"
+                       optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_ddmh_mobile_picking_operator_locations" model="ir.ui.view">
+        <field name="name">stock.picking.form.ddwm.operator.locations.mobile</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="doorandoor_mobile_hanger.view_ddmh_mobile_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='move_ids']/list/field[@name='product_id']" position="after">
+                <field name="ddwm_operator_location_summary"
+                       string="Dónde recoger / ubicar" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids']" position="after">
+                <separator string="Ubicaciones operativas"/>
+                <field name="ddwm_operator_locations_html" nolabel="1" readonly="1" widget="html"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_inventory_serial_batch_storage_tracking" model="ir.ui.view">
+        <field name="name">inventory.serial.label.batch.storage.tracking</field>
+        <field name="model">inventory.serial.label.batch</field>
+        <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_inventory_serial_batch_form"/>
+        <field name="arch" type="xml">
+            <field name="warehouse_id" position="after">
+                <field name="ddwm_storage_type" readonly="state != 'draft'"/>
+                <field name="ddwm_position_id"
+                       context="{'default_warehouse_id': warehouse_id, 'ddic_authorized_warehouse_search': True, 'ddwm_batch_position_create': True}"
+                       invisible="ddwm_storage_type != 'fixed'"
+                       readonly="state != 'draft'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_inventory_serial_batch_list_storage_tracking" model="ir.ui.view">
+        <field name="name">inventory.serial.label.batch.list.storage.tracking</field>
+        <field name="model">inventory.serial.label.batch</field>
+        <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_inventory_serial_batch_list"/>
+        <field name="arch" type="xml">
+            <field name="warehouse_id" position="after">
+                <field name="ddwm_storage_type" optional="show"/>
+            </field>
+        </field>
+    </record>
+</odoo>

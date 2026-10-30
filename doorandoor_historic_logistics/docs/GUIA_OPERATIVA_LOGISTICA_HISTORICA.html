@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía operativa - Logística histórica DoorAndDoor</title>
+<style>
+@page { size: Letter; margin: 12mm 11mm 14mm; }
+* { box-sizing: border-box; }
+body { font: 10.5pt Arial, sans-serif; color:#243342; margin:0; line-height:1.36; }
+h1,h2,h3 { color:#173f65; margin:0 0 8px; }
+h1 { font-size:25pt; } h2 { font-size:17pt; border-bottom:3px solid #7b62a7; padding-bottom:5px; }
+h3 { font-size:12.5pt; margin-top:12px; }
+p { margin:5px 0; } ul,ol { margin:5px 0 8px 21px; } li { margin:3px 0; }
+.page { page-break-after:always; min-height:242mm; position:relative; }
+.page:last-child { page-break-after:auto; }
+.cover { padding:34mm 15mm 0; background:linear-gradient(145deg,#173f65 0 33%,#7b62a7 33% 36%,#f4f7fa 36%); }
+.cover h1 { color:white; max-width:145mm; }
+.cover .sub { color:white; font-size:15pt; margin-top:12px; max-width:135mm; }
+.cover .box { margin-top:65mm; border-left:7px solid #7b62a7; background:white; padding:16px 20px; box-shadow:0 2px 8px #bbb; }
+.tag { display:inline-block; border-radius:14px; padding:3px 9px; background:#e9e4f4; color:#4c3679; font-weight:bold; }
+.ok { background:#ddf3e4; color:#176a36; } .warn { background:#fff1cf; color:#7b5410; } .bad { background:#fde3e3; color:#a32222; }
+.route { background:#eef5fa; border-left:5px solid #286b99; padding:9px 12px; margin:8px 0; font-weight:bold; }
+.notice { background:#fff6dc; border:1px solid #e7c25d; padding:9px 12px; margin:9px 0; }
+.danger { background:#fff0f0; border:1px solid #d95555; padding:9px 12px; }
+.flow { display:flex; align-items:stretch; gap:5px; margin:14px 0; }
+.flow .step { flex:1; border:2px solid #7b62a7; border-radius:7px; padding:9px 6px; text-align:center; background:#faf8ff; font-weight:bold; }
+.flow .arrow { align-self:center; font-size:18pt; color:#7b62a7; }
+table { width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:9.5pt; }
+th { background:#173f65; color:white; padding:6px; text-align:left; }
+td { border:1px solid #cbd5df; padding:6px; vertical-align:top; }
+.ui { border:1px solid #aab4bf; border-radius:5px; overflow:hidden; margin:10px 0; background:#fff; box-shadow:0 1px 4px #ccc; }
+.ui .bar { background:#7358a1; color:white; padding:8px 12px; font-weight:bold; }
+.ui .menu { background:#f5f5f7; padding:7px 12px; border-bottom:1px solid #ddd; color:#5c487c; }
+.ui .actions { padding:8px 12px; background:#fbfbfc; border-bottom:1px solid #ddd; }
+.btn { display:inline-block; background:#7358a1; color:white; border-radius:3px; padding:6px 10px; margin:2px; font-weight:bold; }
+.btn.gray { background:#e3e7ea; color:#263746; } .btn.green { background:#29984b; }
+.ui .body { padding:10px 12px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; }
+.field { border-bottom:1px solid #cfd6dd; padding:5px 2px; }
+.field b { display:block; color:#59636d; font-size:8.5pt; }
+.line { display:grid; grid-template-columns:2fr .65fr .65fr 1.1fr; gap:5px; padding:6px; border-bottom:1px solid #ddd; }
+.line.head { background:#edf1f5; font-weight:bold; }
+.screen-note { text-align:center; color:#607080; font-size:8.5pt; margin-top:-4px; }
+.check { font-size:11pt; }
+.check li { list-style:'☐  '; margin:7px 0; }
+.footer { position:absolute; bottom:0; left:0; right:0; color:#687887; font-size:8pt; border-top:1px solid #ccd4dc; padding-top:4px; }
+.two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.card { border:1px solid #bdc9d3; border-top:5px solid #7b62a7; border-radius:5px; padding:10px; }
+.n { display:inline-block; width:24px; height:24px; text-align:center; padding-top:2px; border-radius:50%; background:#173f65; color:white; font-weight:bold; }
+.small { font-size:8.5pt; color:#687887; }
+.compact { font-size:9.4pt; line-height:1.25; }
+.compact h3 { margin-top:8px; margin-bottom:5px; }
+.compact table { font-size:8.7pt; margin:5px 0 7px; }
+.compact td, .compact th { padding:4px 5px; }
+.compact .flow { margin:8px 0; }
+.compact .step { padding:6px 4px; }
+.compact ul { margin-top:3px; margin-bottom:4px; }
+</style>
+</head>
+<body>
+
+<section class="page cover">
+  <h1>Guía operativa de logística histórica</h1>
+  <div class="sub">Recepción, inventario, labels, traslado, predespacho, camión y entrega con Hanger</div>
+  <div class="box">
+    <p><b>Entorno de validación:</b> Pruebas</p>
+    <p><b>Responsable principal:</b> Yuliet — Supervisora de regularización histórica</p>
+    <p><b>Objetivo:</b> entregar ventas del sistema anterior sin crear facturas nuevas, incorporando únicamente mercancía comprobada físicamente y conservando toda la trazabilidad.</p>
+    <p><span class="tag warn">Documento para corrida controlada</span></p>
+  </div>
+  <div class="footer">DoorAndDoor · Versión operativa 1.4 · 23 de octubre de 2026</div>
+</section>
+
+<section class="page">
+  <h2>1. La regla principal</h2>
+  <div class="danger"><b>Nunca se agrega inventario porque el PDF diga que existe.</b> El PDF crea la venta histórica pendiente. La existencia solo se confirma cuando una persona ve, cuenta, identifica y fotografía la mercancía.</div>
+  <div class="flow">
+    <div class="step">PDF anterior<br><span class="small">lo que se vendió</span></div><div class="arrow">→</div>
+    <div class="step">Revisión OCR<br><span class="small">ITEM y cantidades</span></div><div class="arrow">→</div>
+    <div class="step">Comprobación física<br><span class="small">lo que realmente existe</span></div><div class="arrow">→</div>
+    <div class="step">Labels + entrada<br><span class="small">inventario auditable</span></div><div class="arrow">→</div>
+    <div class="step">Camión + Hanger<br><span class="small">salida trazable</span></div>
+  </div>
+
+  <h3>Quién puede hacer cada cosa</h3>
+  <table>
+    <tr><th>Rol</th><th>Puede hacer</th><th>No puede hacer</th></tr>
+    <tr><td><b>Consulta</b></td><td>Ver panel, documentos, cantidades y estados.</td><td>Preparar labels o cambiar inventario.</td></tr>
+    <tr><td><b>Operador histórico</b></td><td>Importar PDF, revisar coincidencias, registrar mercancía física, evidencia, lote y preparar/imprimir labels.</td><td>Confirmar una entrada real al inventario.</td></tr>
+    <tr><td><b>Supervisor histórico</b><br>Yuliet</td><td>Todo lo anterior, confirmar existencia, liberar logística y preparar camiones.</td><td>No recibe Administración/Ajustes ni permiso general del sistema.</td></tr>
+    <tr><td><b>Responsable local</b><br>Aliuska, Bronly, Yunier o Claudia</td><td>Ver y dar seguimiento a los casos de sus oficinas y almacenes asignados.</td><td>No ve otras ciudades ni asume funciones técnicas de Soporte.</td></tr>
+  </table>
+  <div class="route">Asignar suplente: Ajustes → Usuarios y compañías → Usuarios → [persona] → DoorAndDoor Regularización Histórica = Supervisor → asignar sus almacenes operativos.</div>
+
+  <h3>Menú único</h3>
+  <div class="ui">
+    <div class="bar">Operaciones</div>
+    <div class="menu">Almacén › <b>Arranque histórico</b></div>
+    <div class="body two">
+      <div class="card"><b>Panel de regularización</b><br><span class="small">Localizar mercancía, lote, labels y entrada.</span></div>
+      <div class="card"><b>Ventas históricas y disponibilidad</b><br><span class="small">Ver solicitado, localizado, reservado y pendiente.</span></div>
+      <div class="card"><b>Importar facturas PDF</b><br><span class="small">Cargar uno o varios documentos anteriores.</span></div>
+      <div class="card"><b>Preparación de camiones</b><br><span class="small">Agrupar operaciones físicamente listas.</span></div>
+    </div>
+  </div>
+  <div class="footer">Guía operativa · 2</div>
+</section>
+
+<section class="page compact">
+  <h2>2. Elegir el procedimiento correcto</h2>
+  <div class="danger"><b>No empiece creando inventario.</b> Primero identifique cuál de estos escenarios representa la mercancía real. La ruta incorrecta puede duplicar existencias, reservar un ITEM equivocado o dejar una entrega sin trazabilidad.</div>
+  <table>
+    <tr><th>Lo que existe hoy</th><th>Procedimiento</th><th>Documento que debe continuar</th><th>Resultado</th></tr>
+    <tr><td>PDF del sistema anterior, todavía sin registro en Odoo.</td><td>Importar PDF por OCR, revisar cliente, ITEM y pendientes.</td><td>HIOCR → HDEL</td><td>Venta histórica sin factura contable nueva.</td></tr>
+    <tr><td>Venta histórica ya creada y mercancía existente en Odoo.</td><td>Buscar reserva/operación y continuarla. No regularizar.</td><td>XX/OUT o XX/INT existente</td><td>Se usa inventario real sin duplicarlo.</td></tr>
+    <tr><td>Mercancía física encontrada, pero inexistente en Odoo.</td><td>Regularización con evidencia, lote, labels y confirmación supervisada.</td><td>ISR / regularización histórica</td><td>Entrada auditable y existencia disponible.</td></tr>
+    <tr><td>Mercancía viene de otro almacén para una venta.</td><td>Despachar traslado con Hanger, recibir y enviar a predespacho.</td><td>XX/INT → recepción → XX/OUT</td><td>Entrega lista sin mezclarla con stock general.</td></tr>
+    <tr><td>Mercancía viene de otro almacén para reponer stock.</td><td>Recibir y ubicar con el mismo ITEM o en posición vacía autorizada.</td><td>XX/INT</td><td>Stock y mapa actualizados.</td></tr>
+    <tr><td>Mercancía viene de proveedor y tiene venta asociada.</td><td>Recibir, generar labels faltantes y proponer predespacho.</td><td>XX/IN → XX/OUT</td><td>Queda lista para el cliente.</td></tr>
+    <tr><td>Mercancía viene de proveedor para stock.</td><td>Recibir y ubicar en lote compatible o espacio vacío.</td><td>XX/IN</td><td>Existencia disponible en almacén.</td></tr>
+    <tr><td>Producto especial histórico ya fabricado.</td><td>Identificar la variante final exacta; si no existe, crearla por el flujo autorizado de producto especial antes de regularizar.</td><td>Producto especial → regularización/recepción</td><td>Label y entrega describen el producto real.</td></tr>
+  </table>
+  <h3>Ruta diaria única</h3>
+  <div class="route">Operaciones → Almacén → Arranque histórico → abrir HDEL → trabajar todo el ciclo desde la misma vista</div>
+  <p>La factura histórica es el <b>panel único</b>: muestra recepción, traslado, recepción destino y entrega. Los documentos se pueden abrir desde el panel, pero no es necesario buscarlos en otros menús ni volver a cargar productos.</p>
+  <h3>Antes de pulsar cualquier botón</h3>
+  <ul class="check">
+    <li>Documento exacto y almacén físico confirmados.</li>
+    <li>ITEM completo revisado atributo por atributo.</li>
+    <li>Cantidad pendiente distinta de lo ya entregado.</li>
+    <li>Búsqueda de existencias, reservas, lotes, IC y operaciones abiertas.</li>
+    <li>Destino decidido: stock, traslado, predespacho o entrega.</li>
+  </ul>
+  <div class="footer">Guía operativa · 3</div>
+</section>
+
+<section class="page">
+  <h2>4. Crear la siguiente operación sin repetir productos</h2>
+  <div class="route">Factura histórica HDEL → Ciclo operativo → 2. Elegir siguiente operación</div>
+  <div class="flow">
+    <div class="step">Factura histórica<br><span class="small">ITEM y pendientes aprobados</span></div><div class="arrow">→</div>
+    <div class="step">Recepción + labels<br><span class="small">existencia confirmada</span></div><div class="arrow">→</div>
+    <div class="step">Selector<br><span class="small">traslado o entrega</span></div><div class="arrow">→</div>
+    <div class="step">Hanger<br><span class="small">conteo y validación</span></div>
+  </div>
+  <ol>
+    <li>Abra la factura histórica. No salga a buscar la recepción en otro menú.</li>
+    <li>Confirme que <b>Pendiente físico = 0</b> y que la recepción y sus labels están validados.</li>
+    <li>Pulse <b>2. Elegir siguiente operación</b>.</li>
+    <li>Seleccione <b>Traslado interno</b> si la mercancía debe ir a otro almacén o ubicación. Seleccione destino y ubicación.</li>
+    <li>Seleccione <b>Entrega al cliente</b> si ya está en el almacén desde el cual se entregará.</li>
+    <li>Revise el resumen de productos y pulse <b>Crear y enlazar</b>.</li>
+  </ol>
+  <div class="ui">
+    <div class="bar">Crear siguiente operación</div>
+    <div class="body">
+      <div class="grid">
+        <div class="field"><b>Factura histórica</b>HDEL/2026/000XX</div>
+        <div class="field"><b>Recepción confirmada</b>XX/IN/000XX</div>
+        <div class="field"><b>Siguiente operación</b>○ Traslado interno &nbsp; ○ Entrega al cliente</div>
+        <div class="field"><b>Destino / cliente</b>Se muestra según la opción</div>
+      </div>
+      <h3>Productos y cantidades</h3>
+      <p>Solo lectura: se copian desde la factura histórica y la recepción. <b>No existe botón para agregar líneas.</b></p>
+      <div class="actions"><span class="btn">Crear y enlazar</span><span class="btn gray">Cancelar</span></div>
+    </div>
+  </div>
+  <div class="notice"><b>Uso general:</b> el botón <b>Operaciones enlazadas</b> también funciona en recepciones y operaciones normales. Si todavía no existe una continuación, abre el mismo selector y copia automáticamente las líneas del documento actual.</div>
+  <div class="danger"><b>Protecciones:</b> no crea una segunda continuación si ya existe una; no permite destino igual al origen; no permite crear sin cantidades; toda creación queda registrada en el chatter de ambos documentos.</div>
+  <div class="footer">Guía operativa · Panel único y enlaces</div>
+</section>
+
+<section class="page">
+  <h2>3. Importar y revisar la venta histórica</h2>
+  <div class="route">Operaciones → Almacén → Arranque histórico → Importar facturas PDF</div>
+  <ol>
+    <li>Pulse <b>Nuevo</b> y adjunte el PDF del sistema anterior.</li>
+    <li>Pulse <b>Extraer ahora</b>. Si el archivo tiene texto, se lee directamente; si es imagen, se procesa por OCR.</li>
+    <li>Abra <b>Revisar importaciones OCR</b>. No apruebe hasta revisar todas las líneas.</li>
+    <li>Corrija el cliente, almacén proveedor, almacén de entrega, ITEM y cantidades pendientes.</li>
+    <li>Solo la cantidad <b>Pendiente actual</b> pasa a la entrega. Lo ya entregado no se vuelve a despachar.</li>
+  </ol>
+  <div class="ui">
+    <div class="bar">Revisión de facturas importadas · HIOCR/2026/000001</div>
+    <div class="actions"><span class="btn">Aprobar y crear entrega</span><span class="btn gray">Abrir PDF</span></div>
+    <div class="body">
+      <div class="grid">
+        <div class="field"><b>Cliente</b>MP INVESTMENT &amp; DEVELOPMENT LLC</div>
+        <div class="field"><b>Almacén proveedor</b>Doorandoor–Tampa Producción</div>
+        <div class="field"><b>Almacén de entrega</b>Doorandoor–Tampa</div>
+        <div class="field"><b>Estado anterior</b>In Production</div>
+      </div>
+      <h3>Productos y cantidades pendientes</h3>
+      <div class="line head"><span>Descripción / ITEM</span><span>Facturado</span><span>Pendiente</span><span>Coincidencia</span></div>
+      <div class="line"><span>SINGLE HUNG / Impact windows (SH...)</span><span>3</span><span>3</span><span class="tag ok">95% Coincide</span></div>
+      <div class="line"><span>MULLION / sin ITEM elegido</span><span>1</span><span>1</span><span class="tag bad">Ambigua</span></div>
+    </div>
+  </div>
+  <p class="screen-note">Vista de referencia: toda línea roja o ambigua se corrige antes de aprobar.</p>
+
+  <table>
+    <tr><th>Campo</th><th>Significado</th></tr>
+    <tr><td>Facturado</td><td>Cantidad original del documento anterior.</td></tr>
+    <tr><td>Ya entregado</td><td>Cantidad que el documento indica como entregada anteriormente.</td></tr>
+    <tr><td>Pendiente actual</td><td>Facturado menos ya entregado. Es lo único que se prepara ahora.</td></tr>
+    <tr><td>ITEM</td><td>Variante exacta en Odoo. Debe coincidir en todos sus atributos.</td></tr>
+    <tr><td>Confianza</td><td>Ayuda del parser. 95% no sustituye la revisión humana.</td></tr>
+  </table>
+  <div class="footer">Guía operativa · 4</div>
+</section>
+
+<section class="page">
+  <h2>4. Saber qué falta realmente</h2>
+  <div class="route">Operaciones → Almacén → Arranque histórico → Ventas históricas y disponibilidad</div>
+  <p>Use cuatro cifras distintas. No confunda una operación creada con mercancía lista:</p>
+  <table>
+    <tr><th>Cifra</th><th>Qué responde</th></tr>
+    <tr><td><b>Solicitado</b></td><td>¿Cuántas unidades debe entregar la venta histórica?</td></tr>
+    <tr><td><b>Localizado</b></td><td>¿Cuántas unidades fueron vistas, contadas y regularizadas con evidencia?</td></tr>
+    <tr><td><b>Reservado</b></td><td>¿Cuántas unidades están realmente asignadas por Odoo a la operación?</td></tr>
+    <tr><td><b>Pendiente físico</b></td><td>¿Cuánto falta localizar o reservar antes del despacho?</td></tr>
+  </table>
+  <div class="ui">
+    <div class="bar">Ventas históricas y disponibilidad</div>
+    <div class="menu">Filtros: <span class="tag bad">Falta mercancía</span> <span class="tag ok">Lista físicamente</span> · Agrupar por almacén</div>
+    <div class="body">
+      <div class="line head"><span>Venta / cliente</span><span>Solicitado</span><span>Localizado</span><span>Diagnóstico</span></div>
+      <div class="line"><span>HDEL/2026/00005 · AWI WINDOWS</span><span>18</span><span>17</span><span class="tag warn">Falta 1</span></div>
+      <div class="line"><span>HDEL/2026/00011 · STRONG HOUSE</span><span>2</span><span>0</span><span class="tag ok">2 reservadas en DD/OUT/00043</span></div>
+    </div>
+  </div>
+  <h3>Decisión</h3>
+  <div class="two">
+    <div class="card"><b>Ya existe en inventario y está disponible</b><br>No cree una entrada nueva. Abra la entrega/traslado y reserve las unidades existentes.</div>
+    <div class="card"><b>Existe físicamente pero no está en Odoo</b><br>Use <b>Registrar existencia física</b>, adjunte evidencia y siga el proceso de regularización.</div>
+  </div>
+  <div class="notice"><b>Control contra duplicados:</b> si un producto ya está cargado en inventario, no lo regularice de nuevo. Primero revise mapa, existencias, lote, sesiones IC y operaciones abiertas.</div>
+  <div class="footer">Guía operativa · 5</div>
+</section>
+
+<section class="page compact">
+  <h2>5. Antes de regularizar: diagnosticar el documento</h2>
+  <div class="danger"><b>Problema de arrancada:</b> una venta histórica pendiente no demuestra que falte inventario. El producto puede existir, estar reservado, estar en otro almacén, venir en traslado, encontrarse físicamente sin registrar o no haber llegado todavía.</div>
+
+  <h3>Qué resuelve y qué no resuelve la regularización</h3>
+  <table>
+    <tr><th>La regularización sí resuelve</th><th>La regularización no debe usarse para</th></tr>
+    <tr><td>Mercancía comprobada físicamente que todavía no existe en Odoo.</td><td>Volver a crear mercancía que ya existe o está reservada.</td></tr>
+    <tr><td>Creación auditable de labels, entrada, lote y ubicación.</td><td>Sustituir una recepción, traslado o entrega que ya está abierta.</td></tr>
+    <tr><td>Enviar lo encontrado a stock o a un predespacho real configurado.</td><td>Declarar como recibida mercancía que todavía viene de proveedor u otro almacén.</td></tr>
+  </table>
+
+  <h3>Diagnóstico obligatorio por cada ITEM</h3>
+  <table>
+    <tr><th>Situación encontrada</th><th>Acción correcta</th></tr>
+    <tr><td>Existe y está reservada en una operación.</td><td>Abrir y continuar esa entrega o traslado con Hanger. <b>No regularizar.</b></td></tr>
+    <tr><td>Existe disponible en el almacén correcto.</td><td>Reservar la existencia y crear o continuar la operación.</td></tr>
+    <tr><td>Existe en otro almacén.</td><td>Crear o continuar el traslado interno hacia el almacén de entrega.</td></tr>
+    <tr><td>Se encontró físicamente, pero no existe en Odoo.</td><td>Contar, documentar evidencia, preparar labels y regularizar.</td></tr>
+    <tr><td>Viene de proveedor o de otro almacén.</td><td>Mantener pendiente y procesar la recepción. No crear existencia ficticia.</td></tr>
+    <tr><td>No está física ni contablemente.</td><td>Registrar incidencia y mantener la línea pendiente.</td></tr>
+  </table>
+
+  <h3>Caso de referencia: HDEL/2026/00011</h3>
+  <div class="notice"><b>Lo observado:</b> 2 unidades solicitadas y 2 unidades ya reservadas en <b>DD/OUT/00043</b>. Aunque la venta aparezca activa, no necesita una entrada nueva. La acción correcta es abrir DD/OUT/00043 y completar el conteo/entrega con Hanger.</div>
+  <div class="flow">
+    <div class="step">Venta histórica</div><div class="arrow">→</div>
+    <div class="step">Buscar operaciones y reservas</div><div class="arrow">→</div>
+    <div class="step">Continuar la existente</div><div class="arrow">→</div>
+    <div class="step">Hanger + validar</div>
+  </div>
+  <div class="danger"><b>Riesgo evitado:</b> regularizar esas dos unidades produciría inventario duplicado. “Sin proceso” tampoco significa automáticamente “mercancía encontrada”: siempre hace falta comprobación física.</div>
+
+  <h3>Cuándo detenerse y avisar</h3>
+  <ul>
+    <li>La venta tiene una entrega, traslado, recepción o sesión IC abierta que no se entiende.</li>
+    <li>La cantidad disponible, reservada y físicamente encontrada no coincide.</li>
+    <li>El sistema propone DD/Stock como predespacho o no existe una ubicación real de predespacho.</li>
+    <li>El ITEM físico se parece, pero sus atributos no coinciden exactamente.</li>
+  </ul>
+  <div class="footer">Guía operativa · 6</div>
+</section>
+
+<section class="page">
+  <h2>6. Registrar existencia física y preparar labels</h2>
+  <div class="route">Abra la venta histórica → Registrar existencia física</div>
+  <div class="ui">
+    <div class="bar">Recepción histórica de arrancada · RH/2026/00001</div>
+    <div class="actions"><span class="btn gray">Cargar pendientes</span><span class="btn">1. Preparar labels</span><span class="btn gray">2. Imprimir labels</span><span class="btn green">3. Confirmar existencia</span></div>
+    <div class="body">
+      <div class="grid">
+        <div class="field"><b>Venta histórica</b>HDEL/2026/00015</div>
+        <div class="field"><b>Referencia de prueba</b>TEST/GUIDE/20261020-01</div>
+        <div class="field"><b>Almacén físico</b>Doorandoor–Doral</div>
+        <div class="field"><b>Destino</b>Almacenar en inventario</div>
+        <div class="field"><b>Ubicación</b>D33G2</div>
+        <div class="field"><b>Responsable</b>Yuliet</div>
+      </div>
+      <h3>Mercancía localizada</h3>
+      <div class="line head"><span>ITEM</span><span>Pendiente</span><span>Físico</span><span>Lote / posición</span></div>
+      <div class="line"><span>ITEM exacto comprobado para la prueba</span><span>2</span><span>2</span><span>Ubicación autorizada</span></div>
+    </div>
+  </div>
+
+  <ol>
+    <li><span class="n">1</span> Seleccione el <b>almacén donde está físicamente</b>, no el que aparece por error en el documento.</li>
+    <li><span class="n">2</span> Seleccione destino:
+      <ul><li><b>Almacenar:</b> mercancía para stock o reposición.</li><li><b>Predespacho:</b> mercancía ya vendida que solo espera carga/entrega.</li></ul>
+    </li>
+    <li><span class="n">3</span> Escriba la cantidad que realmente contó. Nunca mayor que lo pendiente.</li>
+    <li><span class="n">4</span> Elija un lote compatible del mismo ITEM y almacén. Si no existe, escriba una nueva posición vacía autorizada.</li>
+    <li><span class="n">5</span> Compruebe que la factura histórica o documento de respaldo esté adjunto. La nota de comprobación física es opcional y se usa solamente para incidencias o detalles extraordinarios.</li>
+    <li><span class="n">6</span> Pulse <b>Preparar labels</b>. No necesita escribir una descripción manual. Esto todavía no cambia el inventario.</li>
+    <li><span class="n">7</span> Pulse <b>Imprimir labels</b>, verifique códigos y péguelos.</li>
+    <li><span class="n">8</span> La supervisora pulsa <b>Confirmar existencia</b>. Solo aquí se crea y valida la entrada de inventario.</li>
+  </ol>
+  <div class="footer">Guía operativa · 7</div>
+</section>
+
+<section class="page">
+  <h2>7. Los cuatro casos de ubicación</h2>
+  <h3>Caso A — Venta y entrega en el mismo almacén</h3>
+  <div class="flow"><div class="step">Localizar físicamente</div><div class="arrow">→</div><div class="step">Predespacho del almacén</div><div class="arrow">→</div><div class="step">Entrega cliente</div></div>
+  <p>Si el producto ya está vendido y completo, use <b>Predespacho</b>. No lo mezcle con stock general.</p>
+
+  <h3>Caso B — Traslado entre almacenes para una venta</h3>
+  <div class="flow"><div class="step">Almacén proveedor</div><div class="arrow">→</div><div class="step">Despacho interno + Hanger</div><div class="arrow">→</div><div class="step">Recepción destino</div><div class="arrow">→</div><div class="step">Predespacho</div></div>
+  <p>El documento completo llega al área de predespacho. No se obliga a ubicar cada unidad en un lote de stock si ya tiene cliente.</p>
+
+  <h3>Caso C — Traslado para reponer stock</h3>
+  <div class="flow"><div class="step">Recepción destino</div><div class="arrow">→</div><div class="step">Buscar mismo ITEM</div><div class="arrow">→</div><div class="step">Lote compatible</div><div class="arrow">→</div><div class="step">Mapa actualizado</div></div>
+  <p>Debe unirse a sus similares. Si no existe lote compatible, se elige una posición vacía autorizada.</p>
+
+  <h3>Caso D — Recepción de proveedor</h3>
+  <div class="flow"><div class="step">Documento proveedor</div><div class="arrow">→</div><div class="step">Conteo + labels</div><div class="arrow">→</div><div class="step">Lote similar o vacío</div><div class="arrow">→</div><div class="step">Validar recepción</div></div>
+  <p>Use el lote del mismo ITEM. Si no existe, seleccione entre las ubicaciones vacías y cree la posición según nomenclatura.</p>
+
+  <table>
+    <tr><th>Pregunta</th><th>Sí</th><th>No</th></tr>
+    <tr><td>¿Tiene cliente y entrega definida?</td><td>Predespacho.</td><td>Ubicación de stock.</td></tr>
+    <tr><td>¿Existe lote del mismo ITEM?</td><td>Usar ese lote.</td><td>Elegir posición vacía autorizada.</td></tr>
+    <tr><td>¿Ya existe en Odoo?</td><td>No crear entrada; reservar.</td><td>Regularizar con evidencia.</td></tr>
+  </table>
+  <div class="footer">Guía operativa · 8</div>
+</section>
+
+<section class="page">
+  <h2>8. Labels y PDF de prueba</h2>
+  <h3>Producto serializado</h3>
+  <p>Cada unidad tiene código único. Para 6 puertas deben existir 6 códigos distintos. Un código repetido se rechaza.</p>
+  <h3>Producto por lote compartido</h3>
+  <p>Bisagras, jambs u otros artículos pequeños pueden usar un label común. El mismo código se dispara una vez por cada pieza o se registra la cantidad permitida por el flujo.</p>
+  <div class="ui">
+    <div class="bar">PDF de labels · RH/2026/00001</div>
+    <div class="body two">
+      <div class="card" style="text-align:center"><b>00020816</b><div style="font:30pt monospace;letter-spacing:-5px">|||| ||| |||| ||</div>Interior doors · D33G2<br><span class="tag">Único</span></div>
+      <div class="card" style="text-align:center"><b>00020564</b><div style="font:30pt monospace;letter-spacing:-5px">||| |||| ||| |||</div>Hardware hinges black · D30A1<br><span class="tag warn">Compartido</span></div>
+    </div>
+  </div>
+  <h3>Cómo preparar la prueba</h3>
+  <ol>
+    <li>Imprima el PDF al 100%, sin “ajustar a página”.</li>
+    <li>Separe el <b>código del documento</b> de los <b>códigos de productos</b>.</li>
+    <li>Primero escanee el documento para abrir la operación.</li>
+    <li>Después escanee únicamente los labels listados para ese caso.</li>
+    <li>Observe en el monitor administrativo cada lectura aceptada o rechazada.</li>
+  </ol>
+  <div class="danger"><b>No use labels de Gestión en la corrida de Pruebas.</b> El paquete que acompaña esta guía se generará dentro de Pruebas después de instalar el módulo sobre la copia actualizada.</div>
+
+  <h3>Si el PDF no imprime o el código no lee</h3>
+  <ul>
+    <li>Confirme escala 100%, orientación y que no se recortó el código.</li>
+    <li>Suba el brillo del móvil si el Hanger está leyendo la pantalla.</li>
+    <li>Compruebe que el label pertenece al almacén y al ITEM esperado.</li>
+    <li>No cree otro label hasta revisar el historial de lecturas.</li>
+  </ul>
+  <div class="footer">Guía operativa · 9</div>
+</section>
+
+<section class="page">
+  <h2>9. Preparar el camión</h2>
+  <div class="route">Operaciones → Almacén → Arranque histórico → Preparación de camiones</div>
+  <ol>
+    <li>Seleccione almacén de salida, vehículo, conductor y fecha.</li>
+    <li>Agregue las entregas y traslados que pertenecen a la ruta.</li>
+    <li>Revise paradas y orden de carga. Lo último que se entrega suele cargarse primero.</li>
+    <li>Imprima los documentos: manifiesto, orden físico, hoja de ruta, actas y cierre.</li>
+    <li>Marque cargado solamente después del conteo con Hanger.</li>
+  </ol>
+  <div class="ui">
+    <div class="bar">Plan de carga · LOAD/2026/00001</div>
+    <div class="actions"><span class="btn gray">Imprimir paquete</span><span class="btn">Iniciar carga</span><span class="btn green">Marcar cargado</span></div>
+    <div class="body">
+      <div class="grid">
+        <div class="field"><b>Origen</b>Doorandoor–Doral</div><div class="field"><b>Vehículo</b>Camión 01</div>
+        <div class="field"><b>Operaciones</b>DD/OUT/… · DD/INT/…</div><div class="field"><b>Unidades</b>24</div>
+      </div>
+      <p><span class="tag ok">Reservado completo</span> <span class="tag ok">Conteo Hanger completo</span></p>
+    </div>
+  </div>
+  <div class="notice"><b>Bloqueo de seguridad:</b> una operación histórica no puede marcarse cargada si no está asignada, reservada por completo y contada con Hanger.</div>
+
+  <h3>Qué hacer si falta mercancía</h3>
+  <ul>
+    <li>No sustituya por un ITEM “parecido” desde el Hanger.</li>
+    <li>Registre la incidencia y vuelva al Panel de regularización.</li>
+    <li>Si el producto físico es equivalente, un supervisor decide y documenta el cambio de ITEM antes de continuar.</li>
+    <li>Reimprima el label si el código fue cambiado; no conserve dos identidades para una unidad.</li>
+  </ul>
+  <div class="footer">Guía operativa · 10</div>
+</section>
+
+<section class="page">
+  <h2>10. Conteo y validación con Hanger</h2>
+  <div class="flow"><div class="step">Escanear documento</div><div class="arrow">→</div><div class="step">Abrir conteo</div><div class="arrow">→</div><div class="step">Escanear labels</div><div class="arrow">→</div><div class="step">Revisar 100%</div><div class="arrow">→</div><div class="step">Validar</div></div>
+  <ol>
+    <li>Abra la pantalla inicial del Hanger y escanee el barcode de la operación.</li>
+    <li>Confirme número, cliente, origen y destino antes de contar.</li>
+    <li>Dispare cada label. Espere vibración y mensaje verde antes del siguiente.</li>
+    <li>Para label compartido, repita el disparo por cada pieza autorizada.</li>
+    <li>Si aparece rojo, deténgase y lea el motivo; no continúe acumulando errores.</li>
+    <li>Cuando contado = esperado y diferencia = 0, pulse <b>Validar</b>.</li>
+    <li>La operación debe quedar cerrada en el Hanger y reflejar su movimiento en Odoo/mapa.</li>
+  </ol>
+
+  <h3>Acompañamiento desde una computadora</h3>
+  <div class="route">Operaciones → Monitoreo Hanger → buscar la operación</div>
+  <table>
+    <tr><th>Color/resultado</th><th>Acción</th></tr>
+    <tr><td><span class="tag ok">Aceptado</span></td><td>El ITEM pertenece a la operación y sumó al conteo.</td></tr>
+    <tr><td><span class="tag bad">Rechazado</span></td><td>Lea el producto real, esperado, código y causa. No borre evidencia.</td></tr>
+    <tr><td><span class="tag warn">Similar pendiente</span></td><td>Supervisor revisa equivalencia; aceptar solo con trazabilidad.</td></tr>
+    <tr><td><span class="tag">Conteo abierto</span></td><td>El Hanger está esperando el próximo disparo.</td></tr>
+  </table>
+  <div class="danger"><b>Cierre completo:</b> después de validar, escanee el siguiente documento. Si el equipo vuelve a la operación anterior, actualice la pantalla; no vuelva a contar productos ya validados.</div>
+  <div class="footer">Guía operativa · 11</div>
+</section>
+
+<section class="page">
+  <h2>11. Corrida completa de aceptación</h2>
+  <p>Ejecute estos casos en Pruebas y anote el documento generado.</p>
+  <table>
+    <tr><th>#</th><th>Caso</th><th>Resultado obligatorio</th></tr>
+    <tr><td>1</td><td>Venta histórica directa; mercancía no cargada</td><td>Labels → entrada → reserva → Hanger → entrega validada.</td></tr>
+    <tr><td>2</td><td>Venta histórica con traslado entre almacenes</td><td>Despacho → Hanger → recepción destino → predespacho → entrega.</td></tr>
+    <tr><td>3</td><td>Reposición de stock</td><td>Recepción ubicada junto al mismo ITEM y mapa actualizado.</td></tr>
+    <tr><td>4</td><td>Proveedor sin lote similar</td><td>Elegir ubicación vacía, crear lote/labels y validar recepción.</td></tr>
+    <tr><td>5</td><td>Producto serializado</td><td>Códigos únicos; repetición rechazada.</td></tr>
+    <tr><td>6</td><td>Producto de lote compartido</td><td>Mismo código suma una pieza por lectura hasta completar.</td></tr>
+    <tr><td>7</td><td>Camión con operación incompleta</td><td>Odoo bloquea “Marcar cargado”.</td></tr>
+    <tr><td>8</td><td>Camión completo</td><td>Paquete PDF, conteo, carga y salida trazables.</td></tr>
+  </table>
+
+  <h3>Hoja de control</h3>
+  <ul class="check">
+    <li>El PDF histórico conserva cliente, referencia, fecha y evidencia.</li>
+    <li>Cada línea tiene el ITEM exacto y cantidad pendiente correcta.</li>
+    <li>No se duplicó inventario que ya existía.</li>
+    <li>Todos los labels impresos pertenecen al entorno Pruebas.</li>
+    <li>La entrada identifica almacén, lote, ubicación, responsable y supervisora.</li>
+    <li>La operación quedó 100% reservada antes de cargar.</li>
+    <li>El Hanger aceptó seriales únicos y repeticiones controladas de lotes compartidos.</li>
+    <li>La validación generó salida visible en movimientos, existencias y mapa.</li>
+    <li>El Hanger salió de la operación cerrada.</li>
+    <li>Las incidencias quedaron en chatter/monitor y no fueron borradas.</li>
+  </ul>
+  <h3>Aprobación</h3>
+  <table>
+    <tr><td>Prueba realizada por</td><td style="height:28px"></td><td>Fecha</td><td></td></tr>
+    <tr><td>Revisada por Yuliet</td><td></td><td>Resultado</td><td>☐ Aprobada ☐ Con incidencias</td></tr>
+    <tr><td>Observaciones</td><td colspan="3" style="height:55px"></td></tr>
+  </table>
+  <div class="footer">Guía operativa · 12</div>
+</section>
+
+<section class="page">
+  <h2>12. Errores: qué hacer sin detener la operación</h2>
+  <table>
+    <tr><th>Mensaje o situación</th><th>Qué significa</th><th>Qué hacer</th></tr>
+    <tr><td>No existe columna / RPC_ERROR</td><td>Módulo actualizado sin migración completa o servicio sin recargar.</td><td>Detener la prueba, conservar captura y avisar a soporte. No crear datos alternos.</td></tr>
+    <tr><td>El serial ya fue leído</td><td>Código único repetido o lectura anterior conservada.</td><td>Revise historial. Si es lote compartido debe estar marcado como tal; si es único, no repetir.</td></tr>
+    <tr><td>ITEM no pertenece</td><td>El label corresponde a otra variante o documento.</td><td>Compare atributos completos; no acepte solo porque la descripción se parece.</td></tr>
+    <tr><td>Falta lote</td><td>Se intentó validar sin posición/lote compatible.</td><td>Seleccione lote existente o nueva posición vacía antes de confirmar.</td></tr>
+    <tr><td>Contado menor que esperado</td><td>Faltan unidades físicas.</td><td>No valide. Localice la diferencia o divida/documente el pendiente.</td></tr>
+    <tr><td>Operación validada sigue abierta</td><td>La pantalla del Hanger no liberó la sesión.</td><td>Actualizar, comprobar estado en Odoo y escanear un nuevo documento; no recontar.</td></tr>
+  </table>
+  <div class="notice"><b>Regla de soporte:</b> toda corrección de datos, permisos, código o despliegue debe quedar en ticket con entorno, documento, impacto, diagnóstico, causa, solución, responsable y verificación.</div>
+
+  <h3>Datos que debe enviar a soporte</h3>
+  <ul>
+    <li>Número exacto: HDEL, DD/OUT, DD/INT, DTP/OUT, recepción o plan de carga.</li>
+    <li>Usuario, almacén, hora y código leído.</li>
+    <li>Foto del mensaje completo o detalles técnicos.</li>
+    <li>Qué debía ocurrir y qué ocurrió.</li>
+    <li>Si el operador puede continuar con otro documento.</li>
+  </ul>
+  <h3>Resultado final correcto</h3>
+  <div class="flow"><div class="step">Documento histórico</div><div class="arrow">✓</div><div class="step">Existencia real</div><div class="arrow">✓</div><div class="step">Label trazable</div><div class="arrow">✓</div><div class="step">Movimiento Odoo</div><div class="arrow">✓</div><div class="step">Entrega cerrada</div></div>
+  <p style="margin-top:25px;text-align:center;font-size:14pt;color:#173f65"><b>Fin de la guía de pruebas</b></p>
+  <div class="footer">Guía operativa · 13</div>
+</section>
+</body>
+</html>

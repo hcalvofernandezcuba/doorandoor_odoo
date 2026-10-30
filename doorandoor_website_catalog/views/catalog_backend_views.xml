@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_catalog_item_list" model="ir.ui.view">
+        <field name="name">doorandoor.website.catalog.item.list</field>
+        <field name="model">doorandoor.website.catalog.item</field>
+        <field name="arch" type="xml">
+            <list multi_edit="1">
+                <field name="sequence" widget="handle"/>
+                <field name="image_1920" widget="image" options="{'size': [48, 48]}"/>
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="made_to_order"/>
+                <field name="featured"/>
+                <field name="website_published" widget="boolean_toggle"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_product_template_form_catalog" model="ir.ui.view">
+        <field name="name">product.template.form.catalog.doorandoor</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="ddwc_catalog_visible"/>
+                <field name="ddwc_catalog_category_id" invisible="not ddwc_catalog_visible"/>
+                <field name="ddwc_catalog_featured" invisible="not ddwc_catalog_visible"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_catalog_item_form" model="ir.ui.view">
+        <field name="name">doorandoor.website.catalog.item.form</field>
+        <field name="model">doorandoor.website.catalog.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="website_published" widget="website_redirect_button"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" text="Archivado" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Nombre comercial del artículo"/></h1>
+                        <field name="subtitle" placeholder="Descripción breve"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="category_id"/>
+                            <field name="lead_time_note" placeholder="Ej.: Fabricación estimada: 4 a 6 semanas"/>
+                        </group>
+                        <group>
+                            <field name="made_to_order"/>
+                            <field name="featured"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Presentación"><field name="description" widget="html"/></page>
+                        <page string="Especificaciones"><field name="specifications" widget="html"/></page>
+                        <page string="SEO">
+                            <group>
+                                <field name="website_meta_title"/>
+                                <field name="website_meta_description"/>
+                                <field name="website_meta_keywords"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_catalog_category_list" model="ir.ui.view">
+        <field name="name">doorandoor.website.catalog.category.list</field>
+        <field name="model">doorandoor.website.catalog.category</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="slug"/>
+                <field name="description" optional="show"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_catalog_items" model="ir.actions.act_window">
+        <field name="name">Catálogo DoorAndDoor</field>
+        <field name="res_model">doorandoor.website.catalog.item</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_catalog_categories" model="ir.actions.act_window">
+        <field name="name">Categorías del catálogo</field>
+        <field name="res_model">doorandoor.website.catalog.category</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <menuitem id="menu_catalog_items" name="Catálogo DoorAndDoor"
+              parent="website.menu_content" action="action_catalog_items" sequence="45"
+              groups="website.group_website_designer"/>
+    <menuitem id="menu_catalog_categories" name="Categorías del catálogo"
+              parent="website.menu_website_configuration" action="action_catalog_categories" sequence="45"
+              groups="website.group_website_designer"/>
+</odoo>

@@ -1,0 +1,322 @@
+.ddwc_catalog,
+.ddwc_detail {
+    --ddwc-navy: #0b1f33;
+    --ddwc-gold: #c9a96b;
+    --ddwc-gray: #d9d9d9;
+    --ddwc-white: #fff;
+    color: var(--ddwc-navy);
+}
+
+.ddwc_hero {
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 88% 15%, rgba(201, 169, 107, 0.22), transparent 28%),
+        linear-gradient(125deg, #071625, var(--ddwc-navy) 62%, #183a59);
+    color: var(--ddwc-white);
+}
+
+.ddwc_hero h1 {
+    max-width: 850px;
+    margin: 0.8rem 0 1rem;
+    color: var(--ddwc-white) !important;
+    font-size: clamp(2.25rem, 5vw, 4.75rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+}
+
+.ddwc_hero h1::after {
+    display: none !important;
+}
+
+.ddwc_hero p {
+    max-width: 720px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 1.15rem;
+}
+
+.ddwc_eyebrow,
+.ddwc_category {
+    color: var(--ddwc-gold);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.ddwc_btn_gold {
+    border-color: var(--ddwc-gold);
+    background: var(--ddwc-gold);
+    color: var(--ddwc-navy);
+    font-weight: 800;
+}
+
+.ddwc_btn_gold:hover,
+.ddwc_btn_gold:focus {
+    border-color: #ddc18b;
+    background: #ddc18b;
+    color: var(--ddwc-navy);
+}
+
+.ddwc_filters {
+    display: flex;
+    gap: 0.65rem;
+    overflow-x: auto;
+    padding-bottom: 0.45rem;
+}
+
+.ddwc_filter {
+    flex: 0 0 auto;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--ddwc-gray);
+    border-radius: 999px;
+    color: var(--ddwc-navy);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ddwc_filter.active,
+.ddwc_filter:hover {
+    border-color: var(--ddwc-navy);
+    background: var(--ddwc-navy);
+    color: var(--ddwc-white) !important;
+}
+
+.ddwc_card {
+    overflow: hidden;
+    border: 1px solid rgba(11, 31, 51, 0.1);
+    border-radius: 4px;
+    background: var(--ddwc-white);
+    box-shadow: 0 16px 45px rgba(11, 31, 51, 0.07);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.ddwc_card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 55px rgba(11, 31, 51, 0.14);
+}
+
+.ddwc_card_media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #eef0f2;
+}
+
+.ddwc_card_media img,
+.ddwc_detail_media > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 350ms ease;
+}
+
+.ddwc_card:hover .ddwc_card_media img {
+    transform: scale(1.035);
+}
+
+.ddwc_placeholder {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    background: linear-gradient(145deg, #f4f4f3, #d9d9d9);
+    color: var(--ddwc-navy);
+    font-size: 3rem;
+    font-weight: 900;
+}
+
+.ddwc_placeholder span span {
+    color: var(--ddwc-gold);
+}
+
+.ddwc_badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.4rem 0.7rem;
+    background: var(--ddwc-gold);
+    color: var(--ddwc-navy);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.ddwc_card_body {
+    padding: 1.35rem;
+}
+
+.ddwc_card h2 {
+    margin: 0.55rem 0;
+    font-size: 1.45rem;
+}
+
+.ddwc_card h2::after {
+    display: none !important;
+}
+
+.ddwc_card h2 a {
+    color: var(--ddwc-navy);
+    text-decoration: none;
+}
+
+.ddwc_card_body > p {
+    min-height: 3rem;
+    color: #52606d;
+}
+
+.ddwc_card_footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eceff1;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.ddwc_card_footer > span {
+    color: #62707e;
+}
+
+.ddwc_card_footer a,
+.ddwc_back {
+    color: var(--ddwc-navy);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.ddwc_empty img {
+    width: 76px;
+    margin-bottom: 1.2rem;
+}
+
+.ddwc_detail_media {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #eef0f2;
+}
+
+.ddwc_detail h1 {
+    margin-top: 0.65rem;
+    font-size: clamp(2.35rem, 4vw, 4.25rem);
+    line-height: 1;
+}
+
+.ddwc_lead {
+    color: #52606d;
+    font-size: 1.2rem;
+}
+
+.ddwc_made_to_order,
+.ddwc_lead_time {
+    margin: 1.2rem 0;
+    padding: 0.9rem 1rem;
+    border-left: 4px solid var(--ddwc-gold);
+    background: #f6f4ef;
+    font-weight: 700;
+}
+
+.ddwc_richtext {
+    color: #344454;
+    line-height: 1.75;
+}
+
+.ddwc_configurator h2 {
+    margin: 1.5rem 0 0.25rem;
+    font-size: 1.8rem;
+}
+
+.ddwc_configurator_intro {
+    margin-bottom: 1.25rem;
+    color: #62707e;
+}
+
+.ddwc_option_group {
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+}
+
+.ddwc_option_group legend {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.55rem;
+    color: var(--ddwc-navy);
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.ddwc_selected_value {
+    color: #6b7785;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.ddwc_option_values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ddwc_option {
+    min-width: 3.2rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid #ccd3d9;
+    border-radius: 4px;
+    background: #fff;
+    color: var(--ddwc-navy);
+    font-weight: 700;
+}
+
+.ddwc_option:hover:not(:disabled),
+.ddwc_option.active {
+    border-color: var(--ddwc-navy);
+    background: var(--ddwc-navy);
+    color: #fff;
+}
+
+.ddwc_option:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.ddwc_variant_result {
+    margin-top: 1.2rem;
+    padding: 0.85rem 1rem;
+    border-left: 4px solid var(--ddwc-gold);
+    background: #f6f4ef;
+    font-weight: 700;
+}
+
+.ddwc_quote_button.disabled {
+    pointer-events: none;
+    opacity: 0.55;
+}
+
+.ddwc_note {
+    margin-top: 0.8rem;
+    color: #6b7785;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.ddwc_specs {
+    border-top: 1px solid var(--ddwc-gray);
+    background: #f6f7f7;
+}
+
+@media (max-width: 767.98px) {
+    .ddwc_card_body > p {
+        min-height: auto;
+    }
+
+    .ddwc_card_footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

@@ -11,6 +11,11 @@ class AccountPaymentRegister(models.TransientModel):
         string="Enviar a espera de pago",
         compute="_compute_ddc_sales_report_mode",
     )
+    ddc_report_amount = fields.Monetary(
+        string="Monto a reportar",
+        currency_field="currency_id",
+        compute="_compute_ddc_report_amount",
+    )
     ddc_authorized_credit_mode = fields.Boolean(
         string="Pago con credito autorizado",
         compute="_compute_ddc_authorized_credit_mode",
@@ -96,6 +101,20 @@ class AccountPaymentRegister(models.TransientModel):
             wizard.ddc_sales_report_mode = bool(
                 wizard.journal_id.ddc_requires_payment_control
             )
+
+    @api.depends(
+        "journal_id",
+        "line_ids.amount_residual",
+        "line_ids.amount_residual_currency",
+        "line_ids.move_id.amount_residual",
+        "line_ids.move_id.ddtp_payment_plan",
+        "line_ids.move_id.ddtp_payment_due_amount",
+        "line_ids.move_id.payment_ids",
+    )
+    def _compute_ddc_report_amount(self):
+        for wizard in self:
+            amount_map = wizard._ddc_get_invoice_amount_map()
+            wizard.ddc_report_amount = sum(amount_map.values())
 
     def _create_payments(self):
         self.ensure_one()
@@ -311,4 +330,21 @@ class AccountPaymentRegister(models.TransientModel):
         for line in self.line_ids.filtered(lambda line: line.move_id.move_type == "out_invoice"):
             amount_map.setdefault(line.move_id.id, 0.0)
             amount_map[line.move_id.id] += abs(line.amount_residual_currency or line.amount_residual)
+        for invoice in self.line_ids.move_id.filtered(
+            lambda move: move.move_type == "out_invoice"
+        ):
+            residual = amount_map.get(invoice.id, 0.0)
+            # The first controlled payment (Zelle, bank transfer, etc.) of a
+            # partial-plan invoice must report the agreed deposit, not the
+            # complete receivable.  After a real payment is reconciled, Odoo's
+            # residual is the authoritative amount for every later payment.
+            if (
+                invoice.ddtp_payment_plan == "partial"
+                and not invoice.payment_ids
+                and invoice.ddtp_payment_due_amount > 0
+                and invoice.currency_id.compare_amounts(
+                    residual, invoice.ddtp_payment_due_amount
+                ) >= 0
+            ):
+                amount_map[invoice.id] = invoice.ddtp_payment_due_amount
         return amount_map

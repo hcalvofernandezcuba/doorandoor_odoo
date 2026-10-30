@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_doorandoor_web_registration" model="ir.ui.view">
+        <field name="name">res.partner.form.doorandoor.web.registration</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Registro web" name="doorandoor_web_registration">
+                    <group>
+                        <group>
+                            <field name="ddwr_customer_type"/>
+                            <field name="ddwr_registration_status"/>
+                            <field name="ddwr_builder_name_claim" invisible="ddwr_customer_type != 'builder_client'"/>
+                            <field name="ddwr_builder_license" invisible="ddwr_customer_type != 'builder'"/>
+                        </group>
+                        <group>
+                            <field name="ddwr_state_name"/>
+                            <field name="ddwr_privacy_consent" readonly="1"/>
+                            <field name="ddwr_privacy_consent_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Proyecto declarado">
+                        <field name="ddwr_project_interest" nolabel="1"/>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="ddwr_customer_type != 'builder_client'">
+                        El nombre de la constructora proviene de una declaración pública. Verifíquelo antes de enlazar el campo Constructor asociado.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

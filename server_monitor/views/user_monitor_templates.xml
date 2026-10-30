@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="user_monitor_page" name="Active Odoo Users">
+        <t t-call="web.layout">
+            <div class="container-fluid p-4 dd-monitor" style="font-family:Arial,sans-serif;background:#f3f6fa;min-height:100vh;color:#102f4f;">
+                <style>
+                    .dd-monitor .dd-kpi {border:0;border-radius:14px;box-shadow:0 5px 18px rgba(16,47,79,.09);border-top:5px solid #0b4778;background:#fff}
+                    .dd-monitor .dd-kpi.gold {border-top-color:#d6aa43}.dd-monitor .dd-kpi.green {border-top-color:#239b62}
+                    .dd-monitor .dd-kpi-label {font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:#66798b;font-weight:700}
+                    .dd-monitor .dd-kpi-value {font-size:2.1rem;line-height:1.1;font-weight:800;color:#082f54;margin-top:.35rem}
+                    .dd-monitor .dd-panel {border:0;border-radius:14px;box-shadow:0 5px 18px rgba(16,47,79,.09);background:#fff;height:100%}
+                    .dd-monitor .dd-panel-title {font-size:1rem;font-weight:800;color:#082f54}
+                    .dd-user-bar {display:grid;grid-template-columns:minmax(125px,1.2fr) 4fr 65px;gap:12px;align-items:center;margin:13px 0}
+                    .dd-user-name {font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+                    .dd-bar-track {height:18px;background:#e7edf3;border-radius:9px;overflow:hidden}
+                    .dd-bar-fill {height:100%;min-width:3px;border-radius:9px;background:linear-gradient(90deg,#0b4778,#277fb7);transition:width .35s ease}
+                    .dd-bar-value {text-align:right;font-weight:800;color:#0b4778}
+                    .dd-device-row {display:grid;grid-template-columns:120px 1fr 50px;gap:10px;align-items:center;margin:14px 0}
+                    .dd-device-track {height:13px;background:#edf1f5;border-radius:8px;overflow:hidden}.dd-device-fill {height:100%;background:#d6aa43;border-radius:8px}
+                    .dd-monitor table thead {background:#082f54;color:#fff}.dd-monitor table tbody tr:hover {background:#edf6fc}
+                    @media(max-width:768px){.dd-user-bar{grid-template-columns:95px 1fr 48px}.dd-device-row{grid-template-columns:100px 1fr 38px}}
+                </style>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div><h1 class="fw-bold mb-1">Monitor de actividad</h1><p class="mb-0 text-muted">Usuarios y tráfico de los últimos 90 segundos · actualización cada 15 segundos.</p></div>
+                    <a class="btn btn-primary" href="/odoo">Volver a Odoo</a>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6 col-xl-3"><div class="card dd-kpi p-3"><div class="dd-kpi-label">Usuarios conectados</div><div class="dd-kpi-value" id="dd-users">0</div></div></div>
+                    <div class="col-6 col-xl-3"><div class="card dd-kpi p-3"><div class="dd-kpi-label">Pestañas activas</div><div class="dd-kpi-value" id="dd-tabs">0</div></div></div>
+                    <div class="col-6 col-xl-3"><div class="card dd-kpi gold p-3"><div class="dd-kpi-label">Consumo total</div><div class="dd-kpi-value" id="dd-consumption">0</div><small class="text-muted">latidos registrados</small></div></div>
+                    <div class="col-6 col-xl-3"><div class="card dd-kpi green p-3"><div class="dd-kpi-label">Tráfico total</div><div class="dd-kpi-value" id="dd-traffic">0</div><small class="text-muted">navegaciones</small></div></div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-8"><div class="dd-panel p-4"><div class="dd-panel-title">Consumo y tráfico por usuario</div><div class="small text-muted mb-3">La barra combina actividad periódica y cambios de pantalla.</div><div id="dd-user-chart"><div class="text-muted">Cargando gráfica...</div></div></div></div>
+                    <div class="col-lg-4"><div class="dd-panel p-4"><div class="dd-panel-title">Pestañas por dispositivo</div><div class="small text-muted mb-3">Distribución del tráfico activo.</div><div id="dd-device-chart"><div class="text-muted">Cargando gráfica...</div></div></div></div>
+                </div>
+                <div class="card dd-panel"><div class="p-3 dd-panel-title">Detalle operativo</div><div class="table-responsive"><table class="table table-striped mb-0">
+                    <thead><tr><th>Usuario</th><th>Dispositivo</th><th>Pestañas</th><th>Ubicaciones activas</th><th>Navegaciones</th><th>Consumo (latidos)</th><th>Última actividad</th></tr></thead>
+                    <tbody id="dd-user-rows"><tr><td colspan="7">Cargando...</td></tr></tbody>
+                </table></div></div>
+            </div>
+            <script type="text/javascript"><![CDATA[
+                async function ddLoadUsers() {
+                    const response = await fetch('/server_monitor/users/data', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({jsonrpc: '2.0', method: 'call', params: {}, id: Date.now()})
+                    });
+                    const payload = await response.json(); const data = payload.result || {};
+                    document.getElementById('dd-users').textContent = data.active_users || 0;
+                    document.getElementById('dd-tabs').textContent = data.active_tabs || 0;
+                    document.getElementById('dd-consumption').textContent = (data.total_heartbeats || 0).toLocaleString();
+                    document.getElementById('dd-traffic').textContent = (data.total_navigations || 0).toLocaleString();
+                    const users = data.users || [];
+                    const maximum = Math.max(1, ...users.map(u => u.heartbeats + u.navigations));
+                    document.getElementById('dd-user-chart').innerHTML = users.map(u => {
+                        const total = u.heartbeats + u.navigations;
+                        const width = Math.max(2, Math.round(total * 100 / maximum));
+                        return `<div class="dd-user-bar" title="${u.heartbeats} latidos · ${u.navigations} navegaciones"><div class="dd-user-name">${u.name}</div><div class="dd-bar-track"><div class="dd-bar-fill" style="width:${width}%"></div></div><div class="dd-bar-value">${total}</div></div>`;
+                    }).join('') || '<div class="text-muted">No hay tráfico activo.</div>';
+                    const devices = data.devices || [];
+                    const maxDevice = Math.max(1, ...devices.map(d => d.value));
+                    document.getElementById('dd-device-chart').innerHTML = devices.map(d => `<div class="dd-device-row"><strong>${d.name}</strong><div class="dd-device-track"><div class="dd-device-fill" style="width:${Math.round(d.value * 100 / maxDevice)}%"></div></div><strong>${d.value}</strong></div>`).join('') || '<div class="text-muted">No hay dispositivos activos.</div>';
+                    const rows = users.map(u => `<tr><td><strong>${u.name}</strong></td><td>${u.devices.join(', ')}</td><td>${u.tabs}</td><td>${u.paths.join('<br/>')}</td><td>${u.navigations}</td><td>${u.heartbeats}</td><td>${u.last_seen}</td></tr>`).join('');
+                    document.getElementById('dd-user-rows').innerHTML = rows || '<tr><td colspan="7">No hay usuarios activos.</td></tr>';
+                }
+                ddLoadUsers(); setInterval(ddLoadUsers, 15000);
+            ]]></script>
+        </t>
+    </template>
+</odoo>

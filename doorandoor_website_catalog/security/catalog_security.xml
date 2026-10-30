@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="catalog_item_public_rule" model="ir.rule">
+        <field name="name">Catálogo DoorAndDoor: público solo ve publicados</field>
+        <field name="model_id" ref="model_doorandoor_website_catalog_item"/>
+        <field name="domain_force">[('active', '=', True), ('website_published', '=', True)]</field>
+        <field name="groups" eval="[(4, ref('base.group_public'))]"/>
+    </record>
+</odoo>
+

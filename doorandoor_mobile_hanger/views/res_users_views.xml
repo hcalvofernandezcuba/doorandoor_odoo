@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_inherit_ddmh_role" model="ir.ui.view">
+        <field name="name">res.users.form.ddmh.role</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="doorandoor_process_control.view_users_form_inherit_ddpc_warehouses"/>
+        <field name="arch" type="xml">
+            <field name="ddpc_warehouse_ids" position="before">
+                <field name="ddmh_operational_role"/>
+                <field name="ddmh_live_scan_notifications"/>
+            </field>
+            <div class="alert alert-info" role="alert" position="replace">
+                El perfil Hanger define la función; los almacenes delimitan dónde
+                puede trabajar. Un perfil operativo nunca sustituye Administración/Ajustes.
+            </div>
+        </field>
+    </record>
+</odoo>

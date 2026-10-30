@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="reason_product_out_of_stock" model="doorandoor.stripe.refund.reason">
+        <field name="name">Producto agotado</field>
+        <field name="code">product_out_of_stock</field>
+        <field name="sequence">10</field>
+        <field name="description">El producto facturado dejó de estar disponible.</field>
+    </record>
+    <record id="reason_raw_material_unavailable" model="doorandoor.stripe.refund.reason">
+        <field name="name">Materia prima no disponible</field>
+        <field name="code">raw_material_unavailable</field>
+        <field name="sequence">20</field>
+        <field name="description">No existen insumos para producir nuevamente el artículo.</field>
+    </record>
+    <record id="reason_partial_non_delivery" model="doorandoor.stripe.refund.reason">
+        <field name="name">Entrega parcial o producto no entregado</field>
+        <field name="code">partial_non_delivery</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="reason_damaged_product" model="doorandoor.stripe.refund.reason">
+        <field name="name">Producto dañado</field>
+        <field name="code">damaged_product</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="reason_wrong_product" model="doorandoor.stripe.refund.reason">
+        <field name="name">Producto incorrecto</field>
+        <field name="code">wrong_product</field>
+        <field name="sequence">50</field>
+    </record>
+    <record id="reason_billing_error" model="doorandoor.stripe.refund.reason">
+        <field name="name">Error de facturación</field>
+        <field name="code">billing_error</field>
+        <field name="sequence">60</field>
+        <field name="requires_details" eval="True"/>
+    </record>
+    <record id="reason_duplicate_charge" model="doorandoor.stripe.refund.reason">
+        <field name="name">Cobro duplicado</field>
+        <field name="code">duplicate_charge</field>
+        <field name="sequence">70</field>
+    </record>
+    <record id="reason_customer_cancellation" model="doorandoor.stripe.refund.reason">
+        <field name="name">Cancelación solicitada por el cliente</field>
+        <field name="code">customer_cancellation</field>
+        <field name="sequence">80</field>
+    </record>
+    <record id="reason_commercial_agreement" model="doorandoor.stripe.refund.reason">
+        <field name="name">Acuerdo comercial</field>
+        <field name="code">commercial_agreement</field>
+        <field name="sequence">90</field>
+        <field name="requires_details" eval="True"/>
+    </record>
+</odoo>

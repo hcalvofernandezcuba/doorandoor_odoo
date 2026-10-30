@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_historic_startup_root"
+              name="Arranque histórico"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              sequence="23"
+              groups="doorandoor_historic_logistics.group_historic_logistics_viewer"/>
+
+    <menuitem id="menu_historic_regularizations"
+              name="Panel de regularización"
+              parent="menu_historic_startup_root"
+              action="action_historic_regularizations"
+              sequence="10"
+              groups="doorandoor_historic_logistics.group_historic_logistics_viewer"/>
+
+    <menuitem id="menu_historic_deliveries_control"
+              name="Ventas históricas y disponibilidad"
+              parent="menu_historic_startup_root"
+              action="doorandoor_process_control.action_ddpc_historical_deliveries"
+              sequence="20"
+              groups="doorandoor_historic_logistics.group_historic_logistics_viewer"/>
+
+    <menuitem id="menu_historic_pdf_import"
+              name="Importar facturas PDF"
+              parent="menu_historic_startup_root"
+              action="doorandoor_import_historic_invoices.action_legacy_delivery_import_batches"
+              sequence="30"
+              groups="doorandoor_historic_logistics.group_historic_logistics_operator"/>
+
+    <menuitem id="menu_historic_pdf_review"
+              name="Revisar importaciones OCR"
+              parent="menu_historic_startup_root"
+              action="doorandoor_import_historic_invoices.action_legacy_delivery_ocr_documents"
+              sequence="40"
+              groups="doorandoor_historic_logistics.group_historic_logistics_operator"/>
+
+    <menuitem id="menu_historic_load_plans"
+              name="Preparación de camiones"
+              parent="menu_historic_startup_root"
+              action="doorandoor_cargas_control.action_load_plan"
+              sequence="50"
+              groups="doorandoor_historic_logistics.group_historic_logistics_supervisor"/>
+</odoo>

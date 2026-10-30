@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddpc_promotion_website_editor,doorandoor.customer.display.promotion.website.editor,model_doorandoor_customer_display_promotion,website.group_website_designer,1,1,1,1
+access_ddpc_promotion_website_restricted_editor,doorandoor.customer.display.promotion.website.restricted.editor,model_doorandoor_customer_display_promotion,website.group_website_restricted_editor,1,1,1,1
+access_ddpc_promotion_system,doorandoor.customer.display.promotion.system,model_doorandoor_customer_display_promotion,base.group_system,1,1,1,1

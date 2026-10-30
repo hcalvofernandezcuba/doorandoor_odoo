@@ -64,7 +64,7 @@
         <record id="rule_ddpc_sales_reservation_operator" model="ir.rule">
             <field name="name">Reservas limitadas a almacenes asignados</field>
             <field name="model_id" ref="model_doorandoor_sales_reservation_analysis"/>
-            <field name="domain_force">([('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [('company_id', 'in', company_ids)])</field>
+            <field name="domain_force">([('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [(1, '=', 0)])</field>
             <field name="groups" eval="[(4, ref('doorandoor_process_control.group_ddpc_warehouse_operator'))]"/>
         </record>
 
@@ -78,7 +78,7 @@
         <record id="rule_ddpc_warehouse_prereservation_operator" model="ir.rule">
             <field name="name">Prereservas limitadas a almacenes asignados</field>
             <field name="model_id" ref="model_doorandoor_warehouse_prereservation"/>
-            <field name="domain_force">([('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [('company_id', 'in', company_ids)])</field>
+            <field name="domain_force">([('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [(1, '=', 0)])</field>
             <field name="groups" eval="[(4, ref('doorandoor_process_control.group_ddpc_warehouse_operator'))]"/>
         </record>
 
@@ -92,7 +92,7 @@
         <record id="rule_ddpc_pending_delivery_operator" model="ir.rule">
             <field name="name">Entregas limitadas a almacenes asignados</field>
             <field name="model_id" ref="model_doorandoor_pending_delivery"/>
-            <field name="domain_force">([('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [('company_id', 'in', company_ids)])</field>
+            <field name="domain_force">([('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [(1, '=', 0)])</field>
             <field name="groups" eval="[(4, ref('doorandoor_process_control.group_ddpc_warehouse_operator'))]"/>
         </record>
 
@@ -103,10 +103,31 @@
             <field name="groups" eval="[(4, ref('doorandoor_process_control.group_ddpc_manager')), (4, ref('base.group_system'))]"/>
         </record>
 
+        <record id="rule_ddpc_historical_delivery_company" model="ir.rule">
+            <field name="name">Entregas históricas visibles por compañía</field>
+            <field name="model_id" ref="model_doorandoor_historical_delivery"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(5, 0, 0)]"/>
+        </record>
+
+        <record id="rule_ddpc_historical_delivery_operator" model="ir.rule">
+            <field name="name">Entregas históricas limitadas a almacenes asignados</field>
+            <field name="model_id" ref="model_doorandoor_historical_delivery"/>
+            <field name="domain_force">([('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [('id', '=', 0)])</field>
+            <field name="groups" eval="[(4, ref('doorandoor_process_control.group_ddpc_warehouse_operator'))]"/>
+        </record>
+
+        <record id="rule_ddpc_historical_delivery_manager" model="ir.rule">
+            <field name="name">Gerencia ve todas las entregas históricas</field>
+            <field name="model_id" ref="model_doorandoor_historical_delivery"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('doorandoor_process_control.group_ddpc_manager')), (4, ref('stock.group_stock_manager')), (4, ref('base.group_system'))]"/>
+        </record>
+
         <record id="rule_ddpc_stock_picking_operator_warehouses" model="ir.rule">
             <field name="name">Operaciones limitadas a almacenes asignados</field>
             <field name="model_id" ref="stock.model_stock_picking"/>
-            <field name="domain_force">(['|', ('ddpc_source_warehouse_id', 'in', user.ddpc_warehouse_ids.ids), ('ddpc_dest_warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [('company_id', 'in', company_ids)])</field>
+            <field name="domain_force">(['|', ('ddpc_source_warehouse_id', 'in', user.ddpc_warehouse_ids.ids), ('ddpc_dest_warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [(1, '=', 0)])</field>
             <field name="groups" eval="[(4, ref('doorandoor_process_control.group_ddpc_warehouse_operator'))]"/>
         </record>
 

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_register_form_ddcc_cash" model="ir.ui.view">
+        <field name="name">account.payment.register.form.ddcc.cash.denominations</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="priority">1100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='journal_id']" position="after">
+                <field name="ddcc_cash_mode" invisible="1"/>
+                <field name="ddcc_cash_session_id" invisible="1"/>
+                <div class="alert alert-warning mt-2" role="status" invisible="not ddcc_cash_mode or ddcc_cash_session_id">
+                    <strong>Debe abrir la caja antes de cobrar efectivo.</strong>
+                    Registre el fondo de cambio por denominación desde Facturación › Control de caja › Abrir caja.
+                </div>
+                <group string="Control de efectivo" colspan="2" col="2" invisible="not ddcc_cash_mode" groups="doorandoor_cierre_caja.group_cashier">
+                    <group col="2" colspan="2">
+                        <group string="Billetes recibidos del cliente" col="1">
+                            <field name="ddcc_tender_amount" readonly="1"/>
+                            <field name="ddcc_tender_line_ids" nolabel="1">
+                                <list editable="bottom" create="false" delete="false">
+                                    <field name="denomination_id" readonly="1" force_save="1"/>
+                                    <field name="quantity"/>
+                                    <field name="subtotal" readonly="1"/>
+                                </list>
+                            </field>
+                        </group>
+                        <group string="Billetes entregados como vuelto" col="1">
+                            <field name="ddcc_change_amount" readonly="1"/>
+                            <field name="ddcc_change_line_ids" nolabel="1">
+                                <list editable="bottom" create="false" delete="false">
+                                    <field name="denomination_id" readonly="1" force_save="1"/>
+                                    <field name="quantity"/>
+                                    <field name="subtotal" readonly="1"/>
+                                </list>
+                            </field>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="status" colspan="2">
+                        El cobro aplicado a la factura sigue siendo el importe indicado arriba. Si el cliente entrega más,
+                        declare el vuelto exacto; Odoo validará que esos billetes estén realmente disponibles en la caja.
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -5,6 +5,18 @@ from odoo.exceptions import ValidationError
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    ddsn_bonus_percent = fields.Float(string="Applied Bonus %", readonly=True, copy=False)
+    ddsn_bonus_source = fields.Selection(
+        [("fixed_price", "Fixed Price"), ("product", "Product"),
+         ("partner", "Customer"), ("constructor", "Constructor"),
+         ("group", "Group"), ("manual", "Manual")],
+        string="Bonus Source", readonly=True, copy=False,
+    )
+    ddsn_bonus_rule_reference = fields.Char(string="Bonus Rule", readonly=True, copy=False)
+    ddsn_bonus_authorized_by_id = fields.Many2one(
+        "res.users", string="Bonus Authorized By", readonly=True, copy=False
+    )
+
     ddsn_supply_warehouse_id = fields.Many2one(
         "stock.warehouse",
         string="Almacén proveedor",
@@ -422,6 +434,14 @@ class AccountMoveLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        if (
+            not self.env.context.get("ddsn_automatic_pricing")
+            and not self.env.user.has_group("base.group_system")
+        ):
+            vals_list = [
+                {key: value for key, value in vals.items() if key not in {"price_unit", "discount"}}
+                for vals in vals_list
+            ]
         move_ids = {vals.get("move_id") for vals in vals_list if vals.get("move_id")}
         locked_moves = self.env["account.move"].browse(move_ids).filtered(
             lambda move: move.is_invoice(include_receipts=True)

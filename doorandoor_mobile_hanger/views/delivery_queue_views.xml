@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddmh_delivery_queue_kanban" model="ir.ui.view">
+        <field name="name">stock.picking.kanban.ddmh.delivery.queue</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <kanban string="Mis entregas" create="0" edit="0" delete="0"
+                    quick_create="false" records_draggable="false">
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="partner_id"/>
+                <field name="state"/>
+                <field name="scheduled_date"/>
+                <field name="ddpc_source_warehouse_id"/>
+                <field name="ddmh_product_summary"/>
+                <field name="ddmh_total_units"/>
+                <field name="ddmh_pickup_order_ids"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="border-start border-4 {{record.state.raw_value === 'assigned' ? 'border-success' : 'border-warning'}}">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <strong class="fs-4"><field name="name"/></strong>
+                                <field name="state" widget="badge"/>
+                            </div>
+                            <div class="fw-bold mt-2"><i class="fa fa-user me-1" title="Cliente"/><field name="partner_id"/></div>
+                            <div class="mt-2" t-if="record.origin.raw_value">
+                                <i class="fa fa-file-text-o me-1" title="Documento de origen"/><field name="origin"/>
+                            </div>
+                            <div class="mt-2"><i class="fa fa-building me-1" title="Almacén"/><field name="ddpc_source_warehouse_id"/></div>
+                            <div class="mt-2 text-primary fw-bold"><field name="ddmh_product_summary"/></div>
+                            <div class="mt-1"><strong><field name="ddmh_total_units"/></strong> unidades</div>
+                            <div class="text-muted mt-2"><field name="scheduled_date"/></div>
+                            <button name="action_ddmh_open_mobile" type="object"
+                                    string="Abrir y contar" class="btn-primary btn-lg w-100 mt-3"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_ddmh_delivery_queue_list" model="ir.ui.view">
+        <field name="name">stock.picking.list.ddmh.delivery.queue</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <list string="Mis entregas" create="0" edit="0" delete="0"
+                  decoration-success="state == 'assigned'">
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="partner_id"/>
+                <field name="ddpc_source_warehouse_id"/>
+                <field name="ddmh_product_summary"/>
+                <field name="ddmh_total_units"/>
+                <field name="scheduled_date"/>
+                <field name="state" widget="badge"/>
+                <button name="action_ddmh_open_mobile" type="object"
+                        string="Abrir" icon="fa-barcode"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddmh_delivery_queue_search" model="ir.ui.view">
+        <field name="name">stock.picking.search.ddmh.delivery.queue</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <search string="Buscar entrega">
+                <field name="name" string="Entrega / código"/>
+                <field name="origin" string="Factura / referencia histórica"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="move_ids" string="Producto" filter_domain="[('move_ids.product_id', 'ilike', self)]"/>
+                <field name="ddmh_pickup_order_ids" string="Pickup Order"/>
+                <field name="ddmh_work_stage" string="Paso actual"/>
+                <filter name="ready" string="Listas para entregar" domain="[('state','=','assigned')]"/>
+                <filter name="preparing" string="Por preparar" domain="[('state','in',('draft','waiting','confirmed'))]"/>
+                <separator/>
+                <filter name="today" string="Programadas hoy" domain="[('scheduled_date','&gt;=',context_today().strftime('%Y-%m-%d 00:00:00')),('scheduled_date','&lt;=',context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_warehouse" string="Almacén" context="{'group_by':'ddpc_source_warehouse_id'}"/>
+                    <filter name="group_work_stage" string="Paso actual" context="{'group_by':'ddmh_work_stage'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by':'state'}"/>
+                    <filter name="group_date" string="Fecha" context="{'group_by':'scheduled_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddmh_delivery_queue" model="ir.actions.act_window">
+        <field name="name">Mis entregas</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">kanban,list</field>
+        <field name="search_view_id" ref="view_ddmh_delivery_queue_search"/>
+        <field name="domain">[('ddpc_operation_category','=','delivery'),('state','not in',('done','cancel'))]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p>Escanee, busque o abra una entrega de sus almacenes asignados.</p>
+        </field>
+    </record>
+
+    <record id="view_ddmh_daily_work_kanban" model="ir.ui.view">
+        <field name="name">ddmh.daily.task.kanban</field>
+        <field name="model">ddmh.daily.task</field>
+        <field name="arch" type="xml">
+            <kanban string="Trabajo diario de almacén" create="0" edit="0" delete="0"
+                    quick_create="false" records_draggable="false" groups_draggable="false"
+                    default_group_by="work_stage">
+                <field name="name"/>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <field name="scheduled_date"/>
+                <field name="warehouse_id"/>
+                <field name="destination_warehouse_id"/>
+                <field name="assigned_user_id"/>
+                <field name="summary"/>
+                <field name="total_units"/>
+                <field name="work_stage"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="border-start border-5 {{record.work_stage.raw_value === 'dispatch' ? 'border-warning' : record.work_stage.raw_value === 'receipt' ? 'border-info' : record.work_stage.raw_value === 'delivery' ? 'border-success' : record.work_stage.raw_value === 'completed' ? 'border-secondary' : 'border-primary'}}">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <strong class="fs-4"><field name="name"/></strong>
+                                <field name="work_stage" widget="badge"/>
+                            </div>
+                            <div class="fw-bold mt-2" t-if="record.partner_id.raw_value">
+                                <i class="fa fa-user me-1"/><field name="partner_id"/>
+                            </div>
+                            <div class="fw-bold mt-2" t-if="record.assigned_user_id.raw_value">
+                                <i class="fa fa-user-circle me-1"/><field name="assigned_user_id"/>
+                            </div>
+                            <div class="mt-2" t-if="record.reference.raw_value">
+                                <i class="fa fa-file-text-o me-1"/><field name="reference"/>
+                            </div>
+                            <div class="mt-2">
+                                <i class="fa fa-building me-1"/><field name="warehouse_id"/>
+                                <t t-if="record.destination_warehouse_id.raw_value">
+                                    <i class="fa fa-arrow-right mx-2"/><field name="destination_warehouse_id"/>
+                                </t>
+                            </div>
+                            <div class="mt-2 text-primary fw-bold"><field name="summary"/></div>
+                            <div class="mt-1" t-if="record.work_stage.raw_value !== 'count'"><strong><field name="total_units"/></strong> unidades</div>
+                            <div class="text-muted mt-2"><field name="scheduled_date"/></div>
+                            <button name="action_open_task" type="object" string="Despachar"
+                                    invisible="work_stage != 'dispatch'" class="btn-warning btn-lg w-100 mt-3"/>
+                            <button name="action_open_task" type="object" string="Recibir"
+                                    invisible="work_stage != 'receipt'" class="btn-info btn-lg w-100 mt-3"/>
+                            <button name="action_open_task" type="object" string="Entregar"
+                                    invisible="work_stage != 'delivery'" class="btn-success btn-lg w-100 mt-3"/>
+                            <button name="action_open_task" type="object" string="Contar"
+                                    invisible="work_stage != 'count'" class="btn-primary btn-lg w-100 mt-3"/>
+                            <div invisible="work_stage != 'completed'" class="alert alert-secondary text-center fw-bold mt-3 mb-0">
+                                <i class="fa fa-check-circle me-1"/> Validado
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_ddmh_daily_work_list" model="ir.ui.view">
+        <field name="name">ddmh.daily.task.list</field>
+        <field name="model">ddmh.daily.task</field>
+        <field name="arch" type="xml">
+            <list string="Trabajo diario de almacén" create="0" edit="0" delete="0"
+                  decoration-success="work_stage == 'delivery'"
+                  decoration-info="work_stage == 'receipt'"
+                  decoration-warning="work_stage == 'dispatch'"
+                  decoration-primary="work_stage == 'count'"
+                  decoration-muted="work_stage == 'completed'">
+                <field name="name"/>
+                <field name="work_stage" widget="badge"/>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <field name="assigned_user_id"/>
+                <field name="warehouse_id"/>
+                <field name="destination_warehouse_id"/>
+                <field name="summary"/>
+                <field name="total_units"/>
+                <field name="scheduled_date"/>
+                <button name="action_open_task" type="object" string="Abrir" icon="fa-barcode"
+                        invisible="work_stage == 'completed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddmh_daily_work_search" model="ir.ui.view">
+        <field name="name">ddmh.daily.task.search</field>
+        <field name="model">ddmh.daily.task</field>
+        <field name="arch" type="xml">
+            <search string="Buscar trabajo diario">
+                <field name="name"/>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <field name="assigned_user_id"/>
+                <field name="warehouse_id"/>
+                <field name="summary"/>
+                <filter name="only_counts" string="Conteos" domain="[('task_type','=','count')]"/>
+                <filter name="only_operations" string="Operaciones" domain="[('task_type','=','operation')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_work_stage" string="Trabajo" context="{'group_by':'work_stage'}"/>
+                    <filter name="group_warehouse" string="Almacén" context="{'group_by':'warehouse_id'}"/>
+                    <filter name="group_assigned" string="Responsable" context="{'group_by':'assigned_user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddmh_daily_work" model="ir.actions.act_window">
+        <field name="name">Trabajo diario</field>
+        <field name="res_model">ddmh.daily.task</field>
+        <field name="view_mode">kanban,list</field>
+        <field name="search_view_id" ref="view_ddmh_daily_work_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_group_work_stage': 1}</field>
+        <field name="help" type="html">
+            <p>Abra el paso que corresponde: despachar, recibir, entregar o contar.</p>
+        </field>
+    </record>
+
+    <record id="action_ddmh_daily_work_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_ddmh_daily_work_kanban"/>
+        <field name="act_window_id" ref="action_ddmh_daily_work"/>
+    </record>
+
+    <record id="action_ddmh_daily_work_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_ddmh_daily_work_list"/>
+        <field name="act_window_id" ref="action_ddmh_daily_work"/>
+    </record>
+
+    <record id="view_ddmh_unified_monitor_list" model="ir.ui.view">
+        <field name="name">ddmh.daily.task.unified.monitor.list</field>
+        <field name="model">ddmh.daily.task</field>
+        <field name="arch" type="xml">
+            <list string="Monitoreo Hanger" create="0" edit="0" delete="0"
+                  js_class="ddmh_live_monitor_list"
+                  decoration-success="work_stage == 'completed'"
+                  decoration-warning="work_stage in ('count', 'dispatch', 'receipt', 'delivery')">
+                <field name="name"/>
+                <field name="task_type" widget="badge"/>
+                <field name="work_stage" widget="badge"/>
+                <field name="warehouse_id"/>
+                <field name="destination_warehouse_id" optional="hide"/>
+                <field name="assigned_user_id"/>
+                <field name="hanger_state" widget="badge"/>
+                <field name="hanger_progress"/>
+                <field name="last_hanger_at"/>
+                <field name="last_hanger_result"/>
+                <field name="accepted_scan_count" string="Positivas"/>
+                <field name="failed_scan_count" string="Negativas"/>
+                <field name="reserved_labels" optional="show"/>
+                <field name="scanned_labels" optional="show"/>
+                <field name="reference"/>
+                <field name="summary"/>
+                <field name="total_units"/>
+                <field name="scheduled_date"/>
+                <button name="action_open_monitor_task" type="object"
+                        string="Abrir monitoreo" icon="fa-external-link"
+                        class="btn-link"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddmh_unified_monitor_search" model="ir.ui.view">
+        <field name="name">ddmh.daily.task.unified.monitor.search</field>
+        <field name="model">ddmh.daily.task</field>
+        <field name="arch" type="xml">
+            <search string="Monitorear procesos Hanger">
+                <field name="name"/>
+                <field name="reference"/>
+                <field name="warehouse_id"/>
+                <field name="assigned_user_id"/>
+                <field name="hanger_state"/>
+                <field name="reserved_labels"/>
+                <field name="scanned_labels"/>
+                <filter name="inventory_counts" string="Sesiones IC"
+                        domain="[('task_type','=','count')]"/>
+                <filter name="warehouse_operations" string="Operaciones"
+                        domain="[('task_type','=','operation')]"/>
+                <filter name="active_work" string="En proceso"
+                        domain="[('work_stage','!=','completed')]"/>
+                <filter name="waiting_scan" string="Esperando lectura"
+                        domain="[('hanger_state','=','waiting_scan')]"/>
+                <filter name="hanger_attention" string="Requiere atención"
+                        domain="[('hanger_state','=','attention')]"/>
+                <filter name="completed" string="Validados"
+                        domain="[('work_stage','=','completed')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_type" string="Tipo" context="{'group_by':'task_type'}"/>
+                    <filter name="group_stage" string="Estado" context="{'group_by':'work_stage'}"/>
+                    <filter name="group_warehouse" string="Almacén" context="{'group_by':'warehouse_id'}"/>
+                    <filter name="group_user" string="Operador" context="{'group_by':'assigned_user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddmh_unified_hanger_monitor" model="ir.actions.act_window">
+        <field name="name">Monitoreo Hanger</field>
+        <field name="res_model">ddmh.daily.task</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_ddmh_unified_monitor_list"/>
+        <field name="search_view_id" ref="view_ddmh_unified_monitor_search"/>
+        <field name="context">{'search_default_active_work': 1}</field>
+    </record>
+</odoo>

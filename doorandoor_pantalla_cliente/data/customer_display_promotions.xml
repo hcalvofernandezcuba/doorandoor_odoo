@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="promotion_arch_window" model="doorandoor.customer.display.promotion">
+        <field name="name">Ventana arqueada DoorAndDoor</field>
+        <field name="sequence">10</field>
+        <field name="media_type">image</field>
+        <field name="image" type="base64" file="doorandoor_pantalla_cliente/static/src/img/promotions/arch_window_doorandoor.png"/>
+    </record>
+    <record id="promotion_denver_door" model="doorandoor.customer.display.promotion">
+        <field name="name">Puerta Denver DoorAndDoor</field>
+        <field name="sequence">20</field>
+        <field name="media_type">image</field>
+        <field name="image" type="base64" file="doorandoor_pantalla_cliente/static/src/img/promotions/denver_doorandoor.png"/>
+    </record>
+    <record id="promotion_shaker_door" model="doorandoor.customer.display.promotion">
+        <field name="name">Puerta Shaker DoorAndDoor</field>
+        <field name="sequence">30</field>
+        <field name="media_type">image</field>
+        <field name="image" type="base64" file="doorandoor_pantalla_cliente/static/src/img/promotions/shaker_doorandoor.png"/>
+    </record>
+</odoo>

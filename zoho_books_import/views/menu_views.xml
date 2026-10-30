@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <menuitem id="menu_zoho_root" name="Zoho Books" 
+        <menuitem id="menu_zoho_root" name="Zoho Books"
+                  groups="zoho_books_import.group_zoho_manager"
                   sequence="50"/>
         
-        <menuitem id="menu_zoho_connectors" name="Connectors" 
-                  parent="menu_zoho_root" sequence="10"/>
-        <menuitem id="menu_zoho_connectors_list" name="Connector List" 
-                  parent="menu_zoho_connectors" action="action_zoho_connector" sequence="10"/>
+        <menuitem id="menu_zoho_connectors" name="Connectors"
+                  parent="menu_zoho_root"
+                  groups="zoho_books_import.group_zoho_manager" sequence="10"/>
+        <menuitem id="menu_zoho_connectors_list" name="Connector List"
+                  parent="menu_zoho_connectors" action="action_zoho_connector"
+                  groups="zoho_books_import.group_zoho_manager" sequence="10"/>
         
-        <menuitem id="menu_zoho_import" name="Import Data" 
-                  parent="menu_zoho_root" sequence="20"/>
-        <menuitem id="menu_zoho_import_wizard" name="Import from Zoho" 
-                  parent="menu_zoho_import" action="action_zoho_import_wizard" sequence="10"/>
+        <menuitem id="menu_zoho_import" name="Import Data"
+                  parent="menu_zoho_root"
+                  groups="zoho_books_import.group_zoho_manager" sequence="20"/>
+        <menuitem id="menu_zoho_import_wizard" name="Import from Zoho"
+                  parent="menu_zoho_import" action="action_zoho_import_wizard"
+                  groups="zoho_books_import.group_zoho_manager" sequence="10"/>
         
         <!-- Logs temporarily disabled due to view overlap issue -->
         <!--

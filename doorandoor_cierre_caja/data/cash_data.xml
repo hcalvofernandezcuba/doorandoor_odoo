@@ -1,0 +1,17 @@
+<odoo noupdate="1">
+    <record id="seq_cash_collection_request" model="ir.sequence"><field name="name">Solicitud de efectivo</field><field name="code">doorandoor.cash.collection.request</field><field name="prefix">SOL-EFE/%(year)s/</field><field name="padding">5</field></record>
+    <record id="seq_cash_session" model="ir.sequence"><field name="name">Cierre diario de caja</field><field name="code">doorandoor.cash.session</field><field name="prefix">CAJA/%(year)s/</field><field name="padding">5</field></record>
+    <record id="seq_cash_audit" model="ir.sequence"><field name="name">Auditoría sorpresa de caja</field><field name="code">doorandoor.cash.audit</field><field name="prefix">AUD-CAJA/%(year)s/</field><field name="padding">5</field></record>
+    <record id="denomination_100" model="doorandoor.cash.denomination"><field name="name">USD 100</field><field name="value">100</field></record>
+    <record id="denomination_50" model="doorandoor.cash.denomination"><field name="name">USD 50</field><field name="value">50</field></record>
+    <record id="denomination_20" model="doorandoor.cash.denomination"><field name="name">USD 20</field><field name="value">20</field></record>
+    <record id="denomination_10" model="doorandoor.cash.denomination"><field name="name">USD 10</field><field name="value">10</field></record>
+    <record id="denomination_5" model="doorandoor.cash.denomination"><field name="name">USD 5</field><field name="value">5</field></record>
+    <record id="denomination_2" model="doorandoor.cash.denomination"><field name="name">USD 2</field><field name="value">2</field></record>
+    <record id="denomination_1" model="doorandoor.cash.denomination"><field name="name">USD 1</field><field name="value">1</field></record>
+    <record id="denomination_50_cent" model="doorandoor.cash.denomination"><field name="name">USD 0,50</field><field name="value">0.50</field></record>
+    <record id="denomination_25_cent" model="doorandoor.cash.denomination"><field name="name">USD 0,25</field><field name="value">0.25</field></record>
+    <record id="denomination_10_cent" model="doorandoor.cash.denomination"><field name="name">USD 0,10</field><field name="value">0.10</field></record>
+    <record id="denomination_5_cent" model="doorandoor.cash.denomination"><field name="name">USD 0,05</field><field name="value">0.05</field></record>
+    <record id="denomination_1_cent" model="doorandoor.cash.denomination"><field name="name">USD 0,01</field><field name="value">0.01</field></record>
+</odoo>

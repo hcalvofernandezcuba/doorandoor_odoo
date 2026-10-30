@@ -19,7 +19,9 @@
                 <header>
                     <button name="action_validate_token" string="Validar token" type="object" class="btn-primary" invisible="state == 'running'"/>
                     <button name="action_register_webhook" string="Registrar webhook" type="object" class="btn-primary" invisible="state not in ('validated', 'stopped', 'error')"/>
+                    <button name="action_start_polling" string="Activar recepción local" type="object" class="btn-primary" invisible="environment != 'local' or state == 'running'"/>
                     <button name="action_check_webhook" string="Comprobar webhook" type="object" invisible="state != 'running'"/>
+                    <button name="action_poll_now" string="Recibir ahora" type="object" invisible="state != 'running' or delivery_mode != 'polling'"/>
                     <button name="action_remove_webhook" string="Retirar webhook" type="object" invisible="state != 'running'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,validated,running,stopped,error"/>
                 </header>
@@ -27,15 +29,18 @@
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="action" name="%(action_ddtg_user_link_all)d" icon="fa-users"><field name="link_count" widget="statinfo" string="Usuarios"/></button>
                         <button class="oe_stat_button" type="action" name="%(action_ddtg_notification_all)d" icon="fa-paper-plane"><field name="notification_count" widget="statinfo" string="Notificaciones"/></button>
+                        <button class="oe_stat_button" type="object" name="action_open_polls" icon="fa-check-square-o"><field name="poll_count" widget="statinfo" string="Aprobaciones"/></button>
                     </div>
                     <div class="oe_title"><label for="name"/><h1><field name="name"/></h1></div>
                     <group>
                         <group>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="environment"/>
+                            <field name="delivery_mode" readonly="state == 'running'"/>
                             <field name="username" readonly="1"/>
                             <field name="telegram_bot_id" readonly="1"/>
                             <field name="active"/>
+                            <field name="support_channel_id" options="{'no_create': True}"/>
                         </group>
                         <group string="Token">
                             <field name="token_source"/>
@@ -43,7 +48,7 @@
                             <field name="token" password="True" invisible="token_source != 'database'"/>
                         </group>
                     </group>
-                    <group string="Webhook HTTPS">
+                    <group string="Webhook HTTPS" invisible="delivery_mode != 'webhook'">
                         <group><field name="public_base_url" placeholder="https://subdominio-publico.example"/><field name="webhook_url" readonly="1" widget="url"/></group>
                         <group><field name="endpoint_key" readonly="1"/><field name="webhook_secret" readonly="1"/><field name="last_webhook_at" readonly="1"/></group>
                     </group>

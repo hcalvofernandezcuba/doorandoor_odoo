@@ -3,38 +3,54 @@
     <data>
         <template id="document_labels_report">
             <t t-call="web.html_container">
-                <div style="padding:8mm;font-size:0;">
-                    <t t-foreach="labels" t-as="label">
-                        <div style="display:inline-block;vertical-align:top;width:88mm;height:128mm;margin:0 4mm 8mm 0;padding:0;box-sizing:border-box;page-break-inside:avoid;color:#000;">
-                            <div style="border:1px solid #d9d9d9;height:100%;padding:6mm 7mm;box-sizing:border-box;background:#fff;">
-                                <div style="text-align:center;font-size:16px;font-weight:700;letter-spacing:0.5px;">DOOR AND DOOR</div>
-                                <div style="text-align:center;font-size:9px;margin-top:1mm;">WWW.DOORANDOOR.COM</div>
+                <style>
+                    html, body.o_body_html, body.o_body_html.container, #wrapwrap, #wrapwrap main {width:76mm !important;margin:0 !important;padding:0 !important;}
+                    .ddsl-document-3x1 {display:block !important;width:76mm !important;height:25mm !important;margin:0 !important;padding:1mm 2mm !important;box-sizing:border-box !important;overflow:hidden !important;position:relative !important;page-break-inside:avoid !important;}
+                </style>
+                <t t-foreach="labels" t-as="label">
+                    <div class="page ddsl-document-3x1" t-attf-style="page-break-after:#{'auto' if label_last else 'always'} !important;">
+                        <div style="position:absolute;left:1.5mm;top:0.8mm;width:73mm;height:9.8mm;overflow:hidden;color:#000;font-size:8.5px;line-height:1.1;">
+                            <div style="font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><t t-esc="label.get('product_name')"/></div>
+                            <div style="font-size:8.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><t t-esc="label.get('document_name')"/> · <t t-esc="label.get('customer_name')"/></div>
+                        </div>
+                        <div style="position:absolute;left:1.5mm;right:1.5mm;bottom:0.7mm;text-align:center;white-space:nowrap;overflow:hidden;">
+                            <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')" style="width:73mm !important;max-width:none !important;height:11.5mm !important;display:block;margin:0 auto;"/>
+                            <div style="font-size:8px;font-weight:700;line-height:1;"><t t-esc="label.get('product_code')"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
 
-                                <div style="margin-top:8mm;font-size:12px;line-height:1.45;">
-                                    <div><strong>INV:</strong> <t t-esc="label.get('document_name')"/></div>
-                                    <div><strong>CUSTOMER:</strong> <t t-esc="label.get('customer_name')"/></div>
-                                    <div t-if="label.get('label_model')"><strong>MODEL:</strong> <t t-esc="label.get('label_model')"/></div>
-                                    <div t-if="label.get('label_design')"><strong>DESIGN:</strong> <t t-esc="label.get('label_design')"/></div>
-                                    <div t-if="label.get('label_size')"><strong>SIZE:</strong> <t t-esc="label.get('label_size')"/></div>
-                                    <div t-if="label.get('label_swing')"><strong>SWING:</strong> <t t-esc="label.get('label_swing')"/></div>
-                                    <div t-if="label.get('label_hinge')"><strong>HINGE:</strong> <t t-esc="label.get('label_hinge')"/></div>
-                                </div>
-
-                                <div style="margin-top:12mm;font-size:9px;line-height:1.25;">
-                                    <div><strong>PREPARED BY:</strong> <t t-esc="label.get('prepared_by')"/></div>
-                                    <div><strong>PRINTED BY:</strong> <t t-esc="label.get('printed_by')"/></div>
-                                </div>
-
-                                <div style="margin-top:18mm;text-align:center;">
-                                    <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')" style="max-width:72mm;width:auto;height:16mm;display:inline-block;"/>
-                                    <div style="font-size:9px;margin-top:1mm;">
-                                        <t t-esc="label.get('product_code')"/>
-                                    </div>
-                                </div>
+        <template id="document_labels_report_large">
+            <t t-call="web.html_container">
+                <style>
+                    html, body.o_body_html, body.o_body_html.container, #wrapwrap, #wrapwrap main {width:101.6mm !important;min-width:101.6mm !important;max-width:101.6mm !important;margin:0 !important;padding:0 !important;}
+                    .ddsl-document-large {display:block !important;width:101.6mm !important;height:151.8mm !important;margin:0 !important;padding:3mm !important;box-sizing:border-box !important;overflow:hidden !important;position:relative !important;page-break-inside:avoid !important;}
+                </style>
+                <t t-foreach="labels" t-as="label">
+                    <div class="page ddsl-document-large" t-attf-style="font-size:0;page-break-after:#{'auto' if label_last else 'always'} !important;">
+                        <div style="border:0.35mm solid #222;height:145.8mm;padding:5mm;box-sizing:border-box;background:#fff;color:#000;overflow:hidden;position:relative;">
+                            <div style="text-align:center;font-size:22px;font-weight:700;">DOORANDOOR</div>
+                            <div style="text-align:center;font-size:11px;">WWW.DOORANDOOR.COM</div>
+                            <div style="margin-top:5mm;font-size:13px;line-height:1.35;max-height:80mm;overflow:hidden;">
+                                <div><strong>INV:</strong> <t t-esc="label.get('document_name')"/></div>
+                                <div t-if="label.get('dispatch_name')"><strong>DISPATCH:</strong> <t t-esc="label.get('dispatch_name')"/></div>
+                                <div><strong>CUSTOMER:</strong> <t t-esc="label.get('customer_name')"/></div>
+                                <div><strong>PRODUCT:</strong> <t t-esc="label.get('product_name')"/></div>
+                                <t t-foreach="label.get('variant_attributes', [])" t-as="attribute">
+                                    <div><strong><t t-esc="attribute.get('name')"/>:</strong> <t t-esc="attribute.get('value')"/></div>
+                                </t>
+                                <div style="margin-top:3mm;"><strong>PREPARED BY:</strong> <t t-esc="label.get('prepared_by')"/></div>
+                                <div><strong>PRINTED BY:</strong> <t t-esc="label.get('printed_by')"/></div>
+                            </div>
+                            <div style="position:absolute;left:7mm;right:7mm;bottom:7mm;text-align:center;">
+                                <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')" style="max-width:80mm;height:25mm;"/>
+                                <div style="font-size:13px;font-weight:700;"><t t-esc="label.get('product_code')"/></div>
                             </div>
                         </div>
-                    </t>
-                </div>
+                    </div>
+                </t>
             </t>
         </template>
 
@@ -44,7 +60,17 @@
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">doorandoor_stock_labels.document_labels_report</field>
             <field name="report_file">doorandoor_stock_labels.document_labels_report</field>
+            <field name="paperformat_id" ref="doorandoor_stock_labels.paperformat_ddsl_zebra_3x1_landscape"/>
             <field name="print_report_name">'Document Labels'</field>
+        </record>
+        <record id="action_report_ddsl_document_labels_large" model="ir.actions.report">
+            <field name="name">Document Labels — Large 4×6</field>
+            <field name="model">ddsl.document.label.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">doorandoor_stock_labels.document_labels_report_large</field>
+            <field name="report_file">doorandoor_stock_labels.document_labels_report_large</field>
+            <field name="paperformat_id" ref="doorandoor_stock_labels.paperformat_ddsl_zebra_4x6_portrait"/>
+            <field name="print_report_name">'Document Labels Large'</field>
         </record>
     </data>
 </odoo>

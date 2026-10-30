@@ -4,3 +4,11 @@ access_ddmh_document_scan_system,access.ddmh.document.scan.system,model_doorando
 access_ddmh_count_session_system,access.ddmh.count.session.system,doorandoor_inventory_variant_count.model_inventory_count_session,base.group_system,1,1,1,1
 access_ddmh_count_line_system,access.ddmh.count.line.system,doorandoor_inventory_variant_count.model_inventory_count_line,base.group_system,1,1,1,1
 access_ddmh_count_item_line_system,access.ddmh.count.item.line.system,doorandoor_inventory_variant_count.model_inventory_count_item_line,base.group_system,1,1,1,1
+access_ddmh_daily_task_operator,access.ddmh.daily.task.operator,model_ddmh_daily_task,doorandoor_process_control.group_ddpc_warehouse_operator,1,0,0,0
+access_ddmh_daily_task_stock_manager,access.ddmh.daily.task.stock.manager,model_ddmh_daily_task,stock.group_stock_manager,1,0,0,0
+access_ddmh_daily_task_system,access.ddmh.daily.task.system,model_ddmh_daily_task,base.group_system,1,0,0,0
+access_ddmh_picking_serial_scan_operator,access.ddmh.picking.serial.scan.operator,model_ddmh_picking_serial_scan,doorandoor_process_control.group_ddpc_warehouse_operator,1,0,1,0
+access_ddmh_picking_serial_scan_system,access.ddmh.picking.serial.scan.system,model_ddmh_picking_serial_scan,base.group_system,1,1,1,1
+access_ddmh_scan_event_operator,access.ddmh.scan.event.operator,model_ddmh_hanger_scan_event,doorandoor_process_control.group_ddpc_warehouse_operator,0,0,1,0
+access_ddmh_scan_event_stock_manager,access.ddmh.scan.event.stock.manager,model_ddmh_hanger_scan_event,stock.group_stock_manager,1,0,0,0
+access_ddmh_scan_event_system,access.ddmh.scan.event.system,model_ddmh_hanger_scan_event,base.group_system,1,1,1,1

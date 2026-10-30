@@ -1,0 +1,178 @@
+<odoo>
+    <record id="view_inventory_serial_campaign_list" model="ir.ui.view">
+        <field name="name">inventory.serial.campaign.list</field>
+        <field name="model">inventory.serial.campaign</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'open'" decoration-muted="state == 'closed'">
+                <field name="name"/>
+                <field name="serial_count"/>
+                <field name="claimed_count"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_inventory_serial_campaign_form" model="ir.ui.view">
+        <field name="name">inventory.serial.campaign.form</field>
+        <field name="model">inventory.serial.campaign</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_close" type="object" string="Cerrar campaña" invisible="state != 'open'"/>
+                    <button name="action_reopen" type="object" string="Reabrir" invisible="state != 'closed'" groups="doorandoor_inventory_variant_count.group_inventory_count_manager"/>
+                    <button name="action_print_serial_audit" type="object" string="Control de seriales"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="serial_count"/>
+                        <field name="claimed_count"/>
+                    </group>
+                    <field name="batch_ids" context="{'default_campaign_id': id}">
+                        <list>
+                            <field name="name"/>
+                            <field name="warehouse_id"/>
+                            <field name="product_id"/>
+                            <field name="is_mixed_batch" optional="show"/>
+                            <field name="quantity"/>
+                            <field name="serial_count"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_inventory_serial_campaign" model="ir.actions.act_window">
+        <field name="name">Campañas serializadas</field>
+        <field name="res_model">inventory.serial.campaign</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_inventory_serial_batch_list" model="ir.ui.view">
+        <field name="name">inventory.serial.label.batch.list</field>
+        <field name="model">inventory.serial.label.batch</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'generated'" decoration-muted="state in ('vacated', 'cancel')">
+                <field name="name"/>
+                <field name="campaign_id"/>
+                <field name="warehouse_id"/>
+                <field name="product_id"/>
+                <field name="is_mixed_batch" optional="show"/>
+                <field name="quantity"/>
+                <field name="shared_serial" optional="show"/>
+                <field name="serial_count"/>
+                <field name="counted_serial_count"/>
+                <field name="validated_serial_count"/>
+                <field name="pending_serial_count"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_inventory_serial_batch_search" model="ir.ui.view">
+        <field name="name">inventory.serial.label.batch.search</field>
+        <field name="model">inventory.serial.label.batch</field>
+        <field name="arch" type="xml">
+            <search string="Buscar lotes y labels serializados">
+                <field name="name" string="Referencia del lote"/>
+                <field name="warehouse_id"/>
+                <field name="campaign_id"/>
+                <field name="product_id"/>
+                <field name="state"/>
+                <field name="create_date" string="Fecha de creación"/>
+                <separator/>
+                <filter name="filter_draft" string="Borradores" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_generated" string="Generados" domain="[('state', '=', 'generated')]"/>
+                <filter name="filter_cancelled" string="Anulados" domain="[('state', '=', 'cancel')]"/>
+                <separator/>
+                <filter name="filter_pending" string="Pendientes de contar"
+                        domain="[('state', '=', 'generated'), ('pending_serial_count', '&gt;', 0)]"/>
+                <filter name="filter_fully_counted" string="Conteo completo"
+                        domain="[('state', '=', 'generated'), ('pending_serial_count', '=', 0)]"/>
+                <filter name="filter_with_validations" string="Con labels validados"
+                        domain="[('validated_serial_count', '&gt;', 0)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_warehouse" string="Almacén"
+                            context="{'group_by': 'warehouse_id'}"/>
+                    <filter name="group_campaign" string="Campaña"
+                            context="{'group_by': 'campaign_id'}"/>
+                    <filter name="group_product" string="Producto"
+                            context="{'group_by': 'product_id'}"/>
+                    <filter name="group_state" string="Estado"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_create_date" string="Fecha de creación"
+                            context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_inventory_serial_batch_form" model="ir.ui.view">
+        <field name="name">inventory.serial.label.batch.form</field>
+        <field name="model">inventory.serial.label.batch</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate_serials" type="object" string="Generar seriales" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_print_labels" type="object" string="Imprimir labels serializados" class="btn-primary" invisible="state != 'generated'"/>
+                    <button name="action_print_unloaded_labels" type="object" string="Imprimir labels nuevos" invisible="state != 'generated'"/>
+                    <button name="action_vacate" type="object" string="Liberar posición" invisible="state != 'generated'" groups="doorandoor_inventory_variant_count.group_inventory_count_manager" confirm="Confirme que la posición está físicamente vacía. Las sesiones y labels históricos se conservarán."/>
+                    <button name="action_cancel" type="object" string="Anular" invisible="state in ('vacated', 'cancel')" groups="doorandoor_inventory_variant_count.group_inventory_count_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" placeholder="TAMPA-LOTE-001"/></h1></div>
+                    <div class="alert alert-info" role="alert" invisible="shared_serial">
+                        Generar o imprimir no modifica inventario. Cada label contiene un serial único.
+                    </div>
+                    <div class="alert alert-info" role="alert" invisible="not shared_serial">
+                        Producto por lote: todas las etiquetas usan el mismo código. Cada disparo suma la cantidad indicada en el conteo.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not is_mixed_batch">
+                        Área mixta: el ITEM seleccionado se procesa como primera carga y después puede agregar otros ITEM al mismo lote.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="allowed_warehouse_ids" invisible="1"/>
+                            <field name="campaign_id" readonly="state != 'draft'"/>
+                            <field name="warehouse_id"
+                                   readonly="state != 'draft'"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="is_mixed_batch" readonly="state != 'draft'"/>
+                            <field name="product_id" readonly="state != 'draft'"
+                                   required="not is_mixed_batch or quantity &gt; 0"/>
+                        </group>
+                        <group>
+                            <field name="quantity" readonly="state != 'draft'"/>
+                            <field name="shared_serial"/>
+                            <field name="serial_count"/>
+                            <field name="mixed_product_count" invisible="not is_mixed_batch"/>
+                            <field name="counted_serial_count"/>
+                            <field name="validated_serial_count"/>
+                            <field name="pending_serial_count"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <field name="serial_ids" readonly="1">
+                        <list>
+                            <field name="code"/>
+                            <field name="product_id"/>
+                            <field name="inventory_loaded"/>
+                            <field name="loaded_session_id"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_inventory_serial_batch" model="ir.actions.act_window">
+        <field name="name">Lotes y labels serializados</field>
+        <field name="res_model">inventory.serial.label.batch</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_inventory_serial_batch_search"/>
+    </record>
+</odoo>

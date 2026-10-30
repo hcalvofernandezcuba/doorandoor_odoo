@@ -37,6 +37,13 @@ class ProductTemplate(models.Model):
     ddsp_default_special_component_qty = fields.Float(
         string="Cantidad automatica", default=3.0
     )
+    ddsp_allow_vendor_price = fields.Boolean(
+        string="Permitir precio de proveedor en Especial",
+        help=(
+            "Permite al comercial introducir el precio cotizado por el proveedor "
+            "al crear un producto Especial desde esta plantilla."
+        ),
+    )
     ddsp_source_bom_template_id = fields.Many2one(
         "mrp.bom", string="LDM maestra utilizada", copy=False, readonly=True
     )
@@ -114,6 +121,14 @@ class ProductTemplate(models.Model):
     ddsp_sale_date = fields.Date(string="Fecha de venta transformada", copy=False, readonly=True)
     ddsp_last_activity_date = fields.Date(string="Ultima actividad", copy=False, readonly=True)
     ddsp_archive_after_date = fields.Date(string="Archivar despues de", copy=False, readonly=True, index=True)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        today = fields.Date.context_today(self)
+        for vals in vals_list:
+            if vals.get("ddsp_is_special") and not vals.get("ddsp_archive_after_date"):
+                vals["ddsp_archive_after_date"] = today + timedelta(days=30)
+        return super().create(vals_list)
 
     @api.model
     def _ddsp_next_special_barcode(self):
@@ -283,7 +298,7 @@ class ProductTemplate(models.Model):
                 "uom_id": base_template.uom_id.id,
                 "uom_po_id": base_template.uom_po_id.id,
                 "list_price": price_unit,
-                "standard_price": base_template.standard_price,
+                "standard_price": base_template.sudo().standard_price,
                 "sale_ok": True,
                 "purchase_ok": False,
                 "route_ids": [(6, 0, base_template.route_ids.ids)],
@@ -420,10 +435,32 @@ class ProductTemplate(models.Model):
         activity_date = fields.Date.to_date(activity_date or fields.Date.context_today(self))
         special_products = self.filtered("ddsp_is_special")
         if special_products:
-            special_products.write(
+            # This bookkeeping is triggered when a commercial user adds a
+            # special product to a quotation or invoice.  Salespeople must not
+            # receive general write access to the product catalogue just to
+            # update these two technical lifecycle fields.
+            special_products.sudo().write(
                 {
                     "ddsp_last_activity_date": activity_date,
                     "ddsp_archive_after_date": activity_date + timedelta(days=30),
+                }
+            )
+
+    def _ddsp_mark_sold(self, sale_date=None):
+        """Update only the technical lifecycle dates after invoice posting.
+
+        A salesperson is allowed to post the commercial invoice but must not
+        receive generic write access to ``product.template``.  Keep the
+        elevation confined to the three lifecycle fields of special products.
+        """
+        sale_date = fields.Date.to_date(sale_date or fields.Date.context_today(self))
+        special_products = self.filtered("ddsp_is_special")
+        if special_products:
+            special_products.sudo().write(
+                {
+                    "ddsp_sale_date": sale_date,
+                    "ddsp_last_activity_date": sale_date,
+                    "ddsp_archive_after_date": sale_date + timedelta(days=30),
                 }
             )
 

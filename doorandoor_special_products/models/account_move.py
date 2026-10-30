@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from odoo import _, fields, models
 from odoo.exceptions import UserError
 
@@ -42,15 +40,7 @@ class AccountMove(models.Model):
                 )
         result = super().action_post()
         today = fields.Date.context_today(self)
-        for line in special_lines:
-            product = line.product_id.product_tmpl_id
-            product.write(
-                {
-                    "ddsp_sale_date": today,
-                    "ddsp_last_activity_date": today,
-                    "ddsp_archive_after_date": today + timedelta(days=30),
-                }
-            )
+        special_lines.mapped("product_id.product_tmpl_id")._ddsp_mark_sold(today)
         return result
 
     def _ddsn_get_line_route(self, line, qty_released):

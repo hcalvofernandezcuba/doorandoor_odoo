@@ -32,6 +32,22 @@ class MrpProduction(models.Model):
         string="Entregas a Ensamblaje", compute="_compute_ddfc_machining_handoff_count"
     )
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        prepared = []
+        for source_vals in vals_list:
+            vals = dict(source_vals)
+            if vals.get("product_id") and not vals.get("bom_id"):
+                product = self.env["product.product"].browse(vals["product_id"]).exists()
+                company = self.env["res.company"].browse(
+                    vals.get("company_id") or self.env.company.id
+                )
+                bom = product._ddfc_ensure_configured_bom(company) if product else False
+                if bom:
+                    vals["bom_id"] = bom.id
+            prepared.append(vals)
+        return super().create(prepared)
+
     @api.depends("ddfc_machining_handoff_ids")
     def _compute_ddfc_machining_handoff_count(self):
         for production in self:

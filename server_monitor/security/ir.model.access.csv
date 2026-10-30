@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_server_monitor_wireguard_peer_user,server.monitor.wireguard.peer user,model_server_monitor_wireguard_peer,server_monitor.group_server_monitor_user,1,0,0,0
 access_server_monitor_wireguard_peer_manager,server.monitor.wireguard.peer manager,model_server_monitor_wireguard_peer,base.group_system,1,1,1,1
+access_server_monitor_user_session_manager,server.monitor.user.session manager,model_server_monitor_user_session,base.group_system,1,1,1,1

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="customer_display" name="DoorAndDoor Customer Display">
+        <html lang="es">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <title>Pantalla de cliente | Door &amp; Door</title>
+                <link rel="stylesheet" href="/doorandoor_pantalla_cliente/static/src/css/customer_display.css?v=18.0.1.8.8"/>
+            </head>
+            <body class="ddpc-display" t-att-data-url="data_url">
+                <header class="ddpc-header">
+                    <img class="ddpc-brand-logo"
+                         src="/doorandoor_website_brand/static/src/img/doorandoor_wordmark.svg"
+                         alt="Door &amp; Door"/>
+                    <div>Pantalla de cliente</div>
+                </header>
+                <main class="ddpc-main">
+                    <section id="ddpc-promotions" class="ddpc-promotions d-none"></section>
+                    <section class="ddpc-cart">
+                        <div class="ddpc-heading"><span>PRODUCTO</span><span>CANT.</span><span>PRECIO</span><span>TOTAL</span></div>
+                        <div id="ddpc-lines" class="ddpc-lines"><div class="ddpc-empty">Esperando productos…</div></div>
+                    </section>
+                    <aside class="ddpc-summary">
+                        <div id="ddpc-payment-state" class="ddpc-payment-state">Pendiente de pago</div>
+                        <div id="ddpc-payment-detail" class="ddpc-payment-detail">Puede continuar cuando esté listo.</div>
+                        <div id="ddpc-last-product" class="ddpc-last-product"><div class="ddpc-empty">El último producto aparecerá aquí.</div></div>
+                        <div class="ddpc-totals">
+                            <div><span>Subtotal</span><strong id="ddpc-untaxed">—</strong></div>
+                            <div><span id="ddpc-tax-label">Impuesto sobre ventas</span><strong id="ddpc-tax">—</strong></div>
+                            <div class="ddpc-total"><span>Total</span><strong id="ddpc-total">—</strong></div>
+                            <div id="ddpc-payment-due-row" class="d-none"><span>Primer pago</span><strong id="ddpc-payment-due">—</strong></div>
+                            <div id="ddpc-fee-row" class="d-none"><span id="ddpc-fee-label">Cargo por pago con tarjeta</span><strong id="ddpc-fee">—</strong></div>
+                            <div id="ddpc-card-total-row" class="ddpc-total d-none"><span>Total a cobrar ahora</span><strong id="ddpc-card-total">—</strong></div>
+                            <div id="ddpc-payment-pending-row" class="ddpc-total d-none"><span>Saldo pendiente</span><strong id="ddpc-payment-pending">—</strong></div>
+                        </div>
+                    </aside>
+                </main>
+                <footer class="ddpc-footer">Gracias por su compra</footer>
+                <script src="/doorandoor_pantalla_cliente/static/src/js/customer_display.js?v=18.0.1.8.8"></script>
+            </body>
+        </html>
+    </template>
+</odoo>

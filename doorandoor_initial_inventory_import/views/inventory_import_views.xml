@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ddii_inventory_import_tree" model="ir.ui.view">
+        <field name="name">ddii.inventory.import.tree</field>
+        <field name="model">ddii.inventory.import</field>
+        <field name="arch" type="xml">
+            <list string="Initial Inventory Imports">
+                <field name="name"/>
+                <field name="source_format"/>
+                <field name="location_id"/>
+                <field name="inventory_date"/>
+                <field name="parsed_line_count"/>
+                <field name="matched_line_count"/>
+                <field name="pending_line_count"/>
+                <field name="ambiguous_line_count"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddii_inventory_import_form" model="ir.ui.view">
+        <field name="name">ddii.inventory.import.form</field>
+        <field name="model">ddii.inventory.import</field>
+        <field name="arch" type="xml">
+            <form string="Initial Inventory Import">
+                <header>
+                    <button name="action_analyze" string="Analyze file" type="object" class="btn-primary" invisible="state not in ('draft', 'analyzed')"/>
+                    <button name="action_analyze" string="Reanalyze file" type="object" confirm="This removes all corrected lines and parses the original document again. Continue?" invisible="state != 'review'"/>
+                    <button name="action_match_variants" string="Match ITEMs again" type="object" invisible="state not in ('analyzed', 'review')"/>
+                    <button name="action_confirm_reviewed_lines" string="Confirm reviewed defaults" type="object" confirm="Confirm that every value marked for review was checked?" invisible="state != 'review' or review_line_count == 0"/>
+                    <button name="action_force_matched_only" string="Force matched ITEMs only" type="object" confirm="Untouched pending and ambiguous lines will be excluded from this load but preserved as evidence. No stock will be changed yet. Continue?" invisible="state != 'review' or (pending_line_count == 0 and ambiguous_line_count == 0)"/>
+                    <button name="action_mark_ready" string="Validate lines" type="object" class="btn-primary" invisible="state != 'review'"/>
+                    <button name="action_back_to_review" string="Back to review" type="object" invisible="state != 'ready'"/>
+                    <button name="action_apply_inventory" string="Apply initial inventory" type="object" class="btn-primary" confirm="This will replace the physical on-hand quantity for every listed ITEM at the selected location. Continue?" invisible="state != 'ready'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,analyzed,review,ready,applied"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="alert" invisible="state == 'applied'">
+                        Correct the captured values and ITEM mappings directly in the table. Stock changes only after Validate lines and Apply initial inventory.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="source_format" readonly="state != 'draft'"/>
+                            <field name="location_id" readonly="state != 'draft'"/>
+                            <field name="inventory_date" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="source_file" filename="source_filename" readonly="state != 'draft'"/>
+                            <field name="source_filename" invisible="1"/>
+                            <field name="parsed_line_count"/>
+                            <field name="matched_line_count"/>
+                            <field name="pending_line_count"/>
+                            <field name="ambiguous_line_count"/>
+                            <field name="review_line_count"/>
+                            <field name="excluded_line_count"/>
+                        </group>
+                    </group>
+                    <field name="note" nolabel="1" readonly="1"/>
+                    <notebook>
+                        <page string="Prepared lines">
+                            <field name="line_ids" readonly="state in ('ready', 'applied', 'cancel')">
+                                <list editable="bottom" multi_edit="1" decoration-muted="excluded" decoration-success="not excluded and match_state == 'matched' and not (review_required and not review_confirmed)" decoration-warning="not excluded and (match_state == 'pending' or (review_required and not review_confirmed))" decoration-danger="not excluded and match_state == 'ambiguous'">
+                                    <field name="source_line"/>
+                                    <field name="raw_text" readonly="1"/>
+                                    <field name="source_model"/>
+                                    <field name="source_width"/>
+                                    <field name="source_height"/>
+                                    <field name="source_configuration"/>
+                                    <field name="source_color"/>
+                                    <field name="source_glass"/>
+                                    <field name="quantity"/>
+                                    <field name="quantity_present" optional="show"/>
+                                    <field name="review_required" readonly="1" optional="show"/>
+                                    <field name="review_confirmed" optional="show"/>
+                                    <field name="review_note" readonly="1" optional="show"/>
+                                    <field name="manually_edited" readonly="1" optional="hide"/>
+                                    <field name="excluded" optional="show"/>
+                                    <field name="exclusion_reason" readonly="1" optional="show"/>
+                                    <field name="product_id"/>
+                                    <field name="manual_match" readonly="1" optional="hide"/>
+                                    <field name="candidate_count" readonly="1" optional="hide"/>
+                                    <field name="match_state" readonly="1"/>
+                                    <field name="match_message" readonly="1" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddii_inventory_import" model="ir.actions.act_window">
+        <field name="name">Initial Inventory Imports</field>
+        <field name="res_model">ddii.inventory.import</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

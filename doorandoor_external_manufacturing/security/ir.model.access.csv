@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddem_external_order_sales,ddem.external.order sales,model_ddem_external_order,sales_team.group_sale_salesman,1,1,1,0
+access_ddem_external_order_purchase,ddem.external.order purchase,model_ddem_external_order,purchase.group_purchase_user,1,1,1,0
+access_ddem_external_order_admin,ddem.external.order admin,model_ddem_external_order,base.group_system,1,1,1,1
+access_ddem_external_order_line_sales,ddem.external.order.line sales,model_ddem_external_order_line,sales_team.group_sale_salesman,1,1,1,0
+access_ddem_external_order_line_purchase,ddem.external.order.line purchase,model_ddem_external_order_line,purchase.group_purchase_user,1,1,1,0
+access_ddem_external_order_line_admin,ddem.external.order.line admin,model_ddem_external_order_line,base.group_system,1,1,1,1

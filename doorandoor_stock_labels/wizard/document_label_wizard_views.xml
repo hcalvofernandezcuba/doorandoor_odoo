@@ -10,10 +10,11 @@
                         <field name="move_id" invisible="not move_id"/>
                         <field name="production_id" invisible="not production_id"/>
                         <field name="quantity"/>
+                        <field name="label_format" widget="radio"/>
                     </group>
                     <footer>
-                        <button name="action_print_labels" type="object" string="Print" class="btn-primary"/>
-                        <button string="Cancel" special="cancel"/>
+                        <button name="action_print_labels" type="object" string="Imprimir" class="btn-primary"/>
+                        <button string="Cancelar" special="cancel"/>
                     </footer>
                 </form>
             </field>

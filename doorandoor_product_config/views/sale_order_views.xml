@@ -19,6 +19,12 @@
                     <attribute name="optional">show</attribute>
                     <attribute name="domain">[('sale_ok', '=', True)]</attribute>
                 </xpath>
+                <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']" position="after">
+                    <field name="ddpc_item_variant"
+                           string="ITEM / Variante"
+                           readonly="1"
+                           optional="show"/>
+                </xpath>
 
                 <!-- El formulario expandido de la linea nativa solo incluye
                      product_id. Se agrega el selector por plantilla y se
@@ -44,6 +50,9 @@
                            required="not display_type and not is_downpayment"
                            force_save="1"
                            widget="sol_product_many2one"/>
+                    <field name="ddpc_item_variant"
+                           string="ITEM / Variante"
+                           readonly="1"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="attributes">
                     <attribute name="invisible">1</attribute>

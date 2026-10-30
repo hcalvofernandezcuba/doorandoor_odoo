@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_ddcc_letter" model="report.paperformat">
+        <field name="name">DoorAndDoor Cargas Letter</field>
+        <field name="default" eval="False"/>
+        <field name="format">Letter</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">12</field><field name="margin_bottom">12</field>
+        <field name="margin_left">10</field><field name="margin_right">10</field>
+        <field name="header_line" eval="False"/><field name="header_spacing">8</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_load_manifest" model="ir.actions.report">
+        <field name="name">01 - Manifiesto general de carga</field>
+        <field name="model">doorandoor.load.plan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_cargas_control.report_load_manifest</field>
+        <field name="report_file">doorandoor_cargas_control.report_load_manifest</field>
+        <field name="binding_model_id" ref="model_doorandoor_load_plan"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_ddcc_letter"/>
+        <field name="print_report_name">'Manifiesto_%s' % (object.name.replace('/', '_'))</field>
+    </record>
+    <record id="action_report_loading_order" model="ir.actions.report">
+        <field name="name">02 - Orden físico de carga</field><field name="model">doorandoor.load.plan</field>
+        <field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_cargas_control.report_loading_order</field>
+        <field name="report_file">doorandoor_cargas_control.report_loading_order</field><field name="binding_model_id" ref="model_doorandoor_load_plan"/>
+        <field name="binding_type">report</field><field name="paperformat_id" ref="paperformat_ddcc_letter"/>
+        <field name="print_report_name">'Orden_Carga_%s' % (object.name.replace('/', '_'))</field>
+    </record>
+    <record id="action_report_route_sheet" model="ir.actions.report">
+        <field name="name">03 - Hoja de ruta y puntos de control</field><field name="model">doorandoor.load.plan</field>
+        <field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_cargas_control.report_route_sheet</field>
+        <field name="report_file">doorandoor_cargas_control.report_route_sheet</field><field name="binding_model_id" ref="model_doorandoor_load_plan"/>
+        <field name="binding_type">report</field><field name="paperformat_id" ref="paperformat_ddcc_letter"/>
+        <field name="print_report_name">'Hoja_Ruta_%s' % (object.name.replace('/', '_'))</field>
+    </record>
+    <record id="action_report_delivery_control" model="ir.actions.report">
+        <field name="name">04 - Actas de entrega, recepción y conteo</field><field name="model">doorandoor.load.plan</field>
+        <field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_cargas_control.report_delivery_control</field>
+        <field name="report_file">doorandoor_cargas_control.report_delivery_control</field><field name="binding_model_id" ref="model_doorandoor_load_plan"/>
+        <field name="binding_type">report</field><field name="paperformat_id" ref="paperformat_ddcc_letter"/>
+        <field name="print_report_name">'Actas_Entrega_%s' % (object.name.replace('/', '_'))</field>
+    </record>
+    <record id="action_report_route_close" model="ir.actions.report">
+        <field name="name">05 - Incidencias y cierre de ruta</field><field name="model">doorandoor.load.plan</field>
+        <field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_cargas_control.report_route_close</field>
+        <field name="report_file">doorandoor_cargas_control.report_route_close</field><field name="binding_model_id" ref="model_doorandoor_load_plan"/>
+        <field name="binding_type">report</field><field name="paperformat_id" ref="paperformat_ddcc_letter"/>
+        <field name="print_report_name">'Cierre_Ruta_%s' % (object.name.replace('/', '_'))</field>
+    </record>
+
+    <template id="ddcc_document_header">
+        <div style="border-bottom:4px solid #e8bd28;padding-bottom:8px;margin-bottom:14px;">
+            <table style="width:100%;border:0;"><tr>
+                <td style="width:65%;"><h2 style="margin:0;color:#082f50;font-weight:800;" t-esc="document_title"/></td>
+                <td style="text-align:right;"><strong t-esc="o.name"/><br/><span t-esc="o.company_id.name"/></td>
+            </tr></table>
+        </div>
+        <table class="table table-sm" style="font-size:11px;">
+            <tr><th>Origen</th><td t-esc="o.origin_warehouse_id.name"/><th>Salida prevista</th><td><span t-field="o.scheduled_departure"/></td></tr>
+            <tr><th>Vehículo</th><td t-esc="o.vehicle_name"/><th>Matrícula</th><td t-esc="o.license_plate or 'Pendiente'"/></tr>
+            <tr><th>Chofer</th><td t-esc="o.driver_id.name or 'Pendiente'"/><th>Responsable de carga</th><td t-esc="o.responsible_id.name"/></tr>
+        </table>
+    </template>
+
+    <template id="report_load_manifest">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.basic_layout"><div class="page">
+            <t t-set="document_title" t-value="'MANIFIESTO GENERAL DE CARGA'"/><t t-call="doorandoor_cargas_control.ddcc_document_header"/>
+            <p><strong>Resumen:</strong> <span t-esc="o.stop_count"/> paradas · <span t-esc="o.picking_count"/> documentos · <span t-esc="o.total_units"/> unidades previstas.</p>
+            <t t-foreach="o.stop_ids.sorted(lambda s: (s.sequence, s.id))" t-as="stop">
+                <h4 style="background:#082f50;color:white;padding:6px;">Parada <span t-esc="stop.sequence"/> · <span t-esc="stop.destination_display_name"/></h4>
+                <p><strong>Dirección:</strong> <span t-esc="stop.destination_address"/> · <strong>Zona:</strong> <span t-esc="stop.load_zone or 'Sin asignar'"/> · <strong>Orden de carga:</strong> <span t-esc="stop.load_sequence"/></p>
+                <table class="table table-sm table-bordered" style="font-size:10px;"><thead><tr><th>Documento</th><th>Origen</th><th>Producto</th><th style="text-align:right;">Cantidad</th></tr></thead><tbody>
+                    <t t-foreach="stop.picking_ids" t-as="p"><t t-foreach="p.move_ids" t-as="m"><tr t-if="m.state != 'cancel'">
+                        <td t-esc="p.name"/><td t-esc="p.origin or '-'"/><td t-esc="m.product_id.display_name"/><td style="text-align:right;" t-esc="m.product_uom_qty"/>
+                    </tr></t></t>
+                </tbody></table>
+            </t>
+            <div style="margin-top:35px;"><table style="width:100%;"><tr><td>_________________________<br/>Responsable de carga</td><td style="text-align:center;">_________________________<br/>Chofer</td><td style="text-align:right;">_________________________<br/>Verificación</td></tr></table></div>
+        </div></t></t></t>
+    </template>
+
+    <template id="report_loading_order">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.basic_layout"><div class="page">
+            <t t-set="document_title" t-value="'ORDEN FÍSICO DE CARGA'"/><t t-call="doorandoor_cargas_control.ddcc_document_header"/>
+            <div style="background:#fff3c4;border:1px solid #e8bd28;padding:9px;margin-bottom:12px;"><strong>Regla:</strong> la última parada se carga primero, al fondo; la primera parada se carga al final, cerca de la puerta.</div>
+            <table class="table table-bordered"><thead style="background:#082f50;color:white;"><tr><th>Orden de carga</th><th>Zona</th><th>Destino</th><th>Documentos</th><th>Unidades</th><th>Verificado</th></tr></thead><tbody>
+                <tr t-foreach="o.stop_ids.sorted(lambda s: (s.load_sequence, s.sequence))" t-as="stop">
+                    <td style="font-size:20px;font-weight:bold;text-align:center;" t-esc="stop.load_sequence"/><td t-esc="stop.load_zone or 'Por definir'"/><td t-esc="stop.destination_display_name"/><td t-esc="', '.join(stop.picking_ids.mapped('name'))"/><td t-esc="stop.total_units"/><td>□</td>
+                </tr>
+            </tbody></table>
+            <h4>Control de carga</h4><p>□ Documentos comprobados &#160; □ Cantidades comprobadas &#160; □ Carga asegurada &#160; □ Puertas cerradas</p>
+            <div style="margin-top:50px;"><table style="width:100%;"><tr><td>_________________________<br/>Preparó</td><td style="text-align:center;">_________________________<br/>Contó</td><td style="text-align:right;">_________________________<br/>Chofer recibió</td></tr></table></div>
+        </div></t></t></t>
+    </template>
+
+    <template id="report_route_sheet">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.basic_layout"><div class="page">
+            <t t-set="document_title" t-value="'HOJA DE RUTA Y PUNTOS DE CONTROL'"/><t t-call="doorandoor_cargas_control.ddcc_document_header"/>
+            <table class="table table-bordered" style="font-size:10px;"><thead style="background:#082f50;color:white;"><tr><th>#</th><th>Parada / dirección</th><th>Llegada prevista</th><th>Llegada real</th><th>Inicio conteo</th><th>Fin conteo</th><th>Salida</th></tr></thead><tbody>
+                <tr t-foreach="o.stop_ids.sorted(lambda s: (s.sequence, s.id))" t-as="stop"><td t-esc="stop.sequence"/><td><strong t-esc="stop.destination_display_name"/><br/><span t-esc="stop.destination_address"/></td><td><span t-field="stop.planned_arrival"/></td><td><span t-field="stop.actual_arrival"/></td><td><span t-field="stop.count_started_at"/></td><td><span t-field="stop.count_finished_at"/></td><td><span t-field="stop.departed_at"/></td></tr>
+            </tbody></table>
+            <h4>Control del chofer</h4><p>Odómetro inicial: __________ &#160; Odómetro final: __________ &#160; Combustible: __________</p>
+            <p>Observaciones del recorrido:</p><div style="height:150px;border:1px solid #9baab5;"/>
+        </div></t></t></t>
+    </template>
+
+    <template id="report_delivery_control">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-foreach="o.stop_ids.sorted(lambda s: (s.sequence, s.id))" t-as="stop"><t t-call="web.basic_layout"><div class="page">
+            <t t-set="document_title" t-value="'ACTA DE ENTREGA, RECEPCIÓN Y CONTEO'"/><t t-call="doorandoor_cargas_control.ddcc_document_header"/>
+            <h3 style="color:#082f50;">Destino: <span t-esc="stop.destination_display_name"/></h3><p t-esc="stop.destination_address"/>
+            <table class="table table-bordered"><thead><tr><th>Documento</th><th>Referencia</th><th>Producto</th><th>Cantidad prevista</th><th>Cantidad recibida</th></tr></thead><tbody>
+                <t t-foreach="stop.picking_ids" t-as="p"><t t-foreach="p.move_ids" t-as="m"><tr t-if="m.state != 'cancel'"><td t-esc="p.name"/><td t-esc="p.origin or '-'"/><td t-esc="m.product_id.display_name"/><td t-esc="m.product_uom_qty"/><td/></tr></t></t>
+            </tbody></table>
+            <p><strong>Resultado:</strong> □ Conforme &#160; □ Diferencia &#160; □ Daño &#160; □ Documento pendiente</p>
+            <p>Incidencias / observaciones:</p><div style="height:95px;border:1px solid #9baab5;"/>
+            <div style="margin-top:45px;"><table style="width:100%;"><tr><td>_________________________<br/>Entrega / chofer</td><td style="text-align:center;">_________________________<br/>Recibe</td><td style="text-align:right;">_________________________<br/>Valida</td></tr></table></div>
+        </div></t></t></t></t>
+    </template>
+
+    <template id="report_route_close">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.basic_layout"><div class="page">
+            <t t-set="document_title" t-value="'RESUMEN DE INCIDENCIAS Y CIERRE DE RUTA'"/><t t-call="doorandoor_cargas_control.ddcc_document_header"/>
+            <table class="table table-sm table-bordered"><tr><th>Salida real</th><td><span t-field="o.actual_departure"/></td><th>Cierre real</th><td><span t-field="o.actual_arrival"/></td></tr><tr><th>Último punto</th><td t-esc="o.last_checkpoint_warehouse_id.name or '-'"/><th>Documentos / unidades</th><td><span t-esc="o.picking_count"/> / <span t-esc="o.total_units"/></td></tr></table>
+            <h4>Resultado por parada</h4><table class="table table-bordered"><thead><tr><th>Destino</th><th>Estado</th><th>Tránsito (min)</th><th>Conteo (min)</th><th>Observaciones</th></tr></thead><tbody><tr t-foreach="o.stop_ids.sorted(lambda s: (s.sequence, s.id))" t-as="stop"><td t-esc="stop.destination_display_name"/><td t-esc="stop.state"/><td t-esc="stop.transit_minutes"/><td t-esc="stop.counting_minutes"/><td t-esc="stop.notes or ''"/></tr></tbody></table>
+            <h4>Incidencias generales y decisión</h4><div style="min-height:140px;border:1px solid #9baab5;padding:8px;" t-field="o.notes"/>
+            <p style="margin-top:18px;">□ Ruta cerrada sin diferencias &#160; □ Requiere ajuste documental &#160; □ Requiere ajuste de inventario &#160; □ Escalada a Gerencia</p>
+            <div style="margin-top:50px;"><table style="width:100%;"><tr><td>_________________________<br/>Chofer</td><td style="text-align:center;">_________________________<br/>Logística</td><td style="text-align:right;">_________________________<br/>Gerencia</td></tr></table></div>
+        </div></t></t></t>
+    </template>
+</odoo>

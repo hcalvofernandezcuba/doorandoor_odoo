@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_load_control_root" name="Control de cargas" sequence="56" web_icon="doorandoor_cargas_control,static/description/icon.png" groups="doorandoor_cargas_control.group_load_control_user"/>
+    <menuitem id="menu_load_plans" name="Planes de carga y ruta" parent="menu_load_control_root" action="action_load_plan" sequence="10"/>
+    <menuitem id="menu_dispatch_preparation" name="Preparación de despachos" parent="menu_load_control_root" action="action_dispatch_preparation" sequence="5" groups="doorandoor_cargas_control.group_load_control_planner"/>
+    <menuitem id="menu_pending_dispatches" name="Despachos pendientes" parent="menu_load_control_root" action="action_ddcc_pending_dispatches" sequence="7"/>
+    <record id="action_load_route_map" model="ir.actions.client">
+        <field name="name">Mapa</field>
+        <field name="tag">doorandoor_cargas_control.route_map</field>
+    </record>
+    <menuitem id="menu_load_route_map" name="Mapa" parent="menu_load_control_root" action="action_load_route_map" sequence="20"/>
+    <menuitem id="menu_ddcc_fleet" name="Flota" parent="menu_load_control_root" sequence="30"/>
+    <menuitem id="menu_ddcc_vehicles" name="Camiones" parent="menu_ddcc_fleet" action="action_ddcc_fleet_vehicles" sequence="10"/>
+    <menuitem id="menu_ddcc_drivers" name="Choferes" parent="menu_ddcc_fleet" action="action_ddcc_driver_profiles" sequence="20"/>
+    <menuitem id="menu_load_reports" name="Reportes" parent="menu_load_control_root" sequence="80"/>
+    <menuitem id="menu_load_report_plans" name="Manifiestos y hojas de ruta" parent="menu_load_reports" action="action_load_plan_reports" sequence="10"/>
+    <menuitem id="menu_load_report_pickings" name="Documentos asociados" parent="menu_load_reports" action="action_ddcc_linked_pickings" sequence="20"/>
+    <menuitem id="menu_load_control_configuration" name="Configuración" parent="menu_load_control_root" sequence="90" groups="doorandoor_cargas_control.group_load_control_manager"/>
+    <menuitem id="menu_warehouse_coordinates" name="Almacenes y coordenadas" parent="menu_load_control_configuration" action="action_ddcc_warehouse_coordinates" sequence="10" groups="doorandoor_cargas_control.group_load_control_manager"/>
+</odoo>

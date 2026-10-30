@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddhd_ticket_user,access.ddhd.ticket.user,model_doorandoor_helpdesk_ticket,base.group_user,1,1,1,0
+access_ddhd_ticket_technician,access.ddhd.ticket.technician,model_doorandoor_helpdesk_ticket,group_ddhd_technician,1,1,1,0
+access_ddhd_ticket_manager,access.ddhd.ticket.manager,model_doorandoor_helpdesk_ticket,group_ddhd_manager,1,1,1,1
+access_ddhd_daily_report_manager,access.ddhd.daily.report.manager,model_doorandoor_helpdesk_daily_report,group_ddhd_manager,1,1,1,1
+access_ddhd_daily_report_system,access.ddhd.daily.report.system,model_doorandoor_helpdesk_daily_report,base.group_system,1,1,1,1
+access_ddhd_summary_report_manager,access.ddhd.summary.report.manager,model_doorandoor_helpdesk_summary_report,group_ddhd_manager,1,1,1,1
+access_ddhd_summary_report_system,access.ddhd.summary.report.system,model_doorandoor_helpdesk_summary_report,base.group_system,1,1,1,1

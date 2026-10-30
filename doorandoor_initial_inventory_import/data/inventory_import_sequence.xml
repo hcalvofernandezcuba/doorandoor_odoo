@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="seq_ddii_inventory_import" model="ir.sequence">
+        <field name="name">Initial Inventory Import</field>
+        <field name="code">ddii.inventory.import</field>
+        <field name="prefix">INV-INITIAL-</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

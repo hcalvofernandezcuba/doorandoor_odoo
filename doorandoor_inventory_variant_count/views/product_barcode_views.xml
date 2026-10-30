@@ -9,6 +9,8 @@
                 <attribute name="invisible">False</attribute>
             </xpath>
             <xpath expr="//field[@name='barcode']" position="after">
+                <field name="ddic_shared_lot_serial"
+                       groups="doorandoor_inventory_variant_count.group_inventory_count_manager,base.group_system"/>
                 <button name="action_generate_doorandoor_barcode"
                         string="Generate Barcode"
                         type="object"

@@ -1,0 +1,44 @@
+.ddom_manual_center {
+    min-height: 100vh;
+    background: #f4f7fa;
+    color: #243342;
+}
+.ddom_manual_hero {
+    color: #fff;
+    background: linear-gradient(125deg, #173f65 0%, #173f65 58%, #7358a1 100%);
+}
+.ddom_manual_hero h1 {
+    color: #fff;
+    font-weight: 700;
+}
+.ddom_kicker {
+    letter-spacing: .12em;
+    font-weight: 700;
+    opacity: .85;
+}
+.ddom_manual_card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.4rem;
+    border: 1px solid #d8e0e7;
+    border-top: 5px solid #7358a1;
+    border-radius: .6rem;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(23, 63, 101, .09);
+}
+.ddom_manual_card h2 {
+    color: #173f65;
+    font-size: 1.3rem;
+    margin: .4rem 0 .8rem;
+}
+.ddom_manual_area {
+    color: #7358a1;
+    font-size: .82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.ddom_manual_meta {
+    color: #647482;
+    font-size: .9rem;
+}
+

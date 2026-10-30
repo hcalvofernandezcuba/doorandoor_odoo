@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_stripe_refund_requests"
+              name="Devoluciones Stripe"
+              parent="doorandoor_control_cobros.menu_ddc_root"
+              action="action_stripe_refund_requests"
+              sequence="35"
+              groups="doorandoor_control_cobros.group_ddc_user,base.group_system"/>
+    <menuitem id="menu_stripe_refund_configuration"
+              name="Configuración"
+              parent="doorandoor_control_cobros.menu_ddc_root"
+              sequence="90"
+              groups="base.group_system"/>
+    <menuitem id="menu_stripe_refund_reasons"
+              name="Causas de devoluciones"
+              parent="menu_stripe_refund_configuration"
+              action="action_stripe_refund_reasons"
+              sequence="10"
+              groups="base.group_system"/>
+</odoo>

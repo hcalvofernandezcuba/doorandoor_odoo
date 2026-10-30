@@ -10,7 +10,7 @@
                     <button
                         name="action_open_ddsl_document_label_wizard"
                         type="object"
-                        string="Labels de factura"
+                        string="Preparar despacho e imprimir labels"
                         invisible="move_type not in ('out_invoice', 'out_refund')"/>
                 </xpath>
             </field>

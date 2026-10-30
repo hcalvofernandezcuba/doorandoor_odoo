@@ -93,6 +93,47 @@ cero, mercancía disponible y traslados necesarios recibidos.
 - Entrega parcial: crea backorder y muestra solamente el saldo restante.
 - Pago parcial o en revisión: no libera una entrega comercial.
 
+## Captación de bisagras y otros insumos por lote
+
+Las bisagras y otros insumos consumidos por cantidad no usan un serial por
+unidad. Deben configurarse como **producto almacenable** con seguimiento
+**Por lotes**. Cada partida física recibe un número y una sola etiqueta de
+lote; sus consumos se descuentan parcialmente hasta agotarla.
+
+### Carga inicial de una partida
+
+1. Confirme producto, variante, unidad de medida y ubicación física.
+2. Cree o seleccione un lote exclusivo para esa partida. No reutilice el mismo
+   número en otro producto.
+3. Imprima una sola etiqueta del lote; su Code128 representa el lote completo.
+4. Cree la sesión en **Carga inicial por lote** con una referencia única.
+5. Inicie la sesión, escriba la cantidad total en **Cantidad por lectura** y
+   escanee una vez la etiqueta.
+6. Compruebe producto, lote, contado y existencia resultante antes de revisar.
+7. La cantidad se incorpora solamente cuando el responsable valida el ajuste.
+
+### Conteo físico posterior
+
+1. Cree la sesión en **Conteo físico total** para la ubicación exacta.
+2. Cuente las unidades restantes del lote.
+3. Escriba el total físico en **Cantidad por lectura** y escanee una vez la
+   etiqueta del lote.
+4. Confirme que la línea corresponde al producto y lote correctos.
+5. Al validar, el total contado sustituye la existencia teórica de ese lote.
+
+### Entradas y consumos de fabricación
+
+- Una recepción agrega cantidad mediante su movimiento nativo; imprimir o
+  escanear la etiqueta no aumenta inventario.
+- Producción consume la cantidad real desde el mismo lote hasta agotarlo.
+- Una nueva partida física requiere un lote nuevo, aunque sus atributos sean
+  iguales.
+- No valide consumos que produzcan existencia negativa; revise primero
+  recepción, lote y ubicación.
+- Registre en el chatter documento, lote, cantidad, ubicación, usuario y motivo.
+- Nunca imprima una etiqueta por cada bisagra ni use una campaña de seriales
+  unitarios para estos insumos.
+
 ## Controles operativos
 
 - No crear manualmente entregas comerciales.
@@ -100,4 +141,3 @@ cero, mercancía disponible y traslados necesarios recibidos.
 - No modificar existencias para ocultar diferencias de recepción.
 - No validar una salida antes de que la mercancía abandone el almacén.
 - No entregar una factura sin pago total.
-

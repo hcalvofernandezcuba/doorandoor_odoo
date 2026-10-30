@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_inventory_count_variant_selector_form" model="ir.ui.view">
+        <field name="name">inventory.count.variant.selector.form</field>
+        <field name="model">inventory.count.variant.selector</field>
+        <field name="arch" type="xml">
+            <form string="Agregar producto configurado">
+                <sheet>
+                    <field name="session_id" invisible="1"/>
+                    <div class="row align-items-start mb-3">
+                        <div class="col-12 col-md-2 text-center">
+                            <field name="product_image" widget="image" options="{'preview_image': 'product_image'}"/>
+                        </div>
+                        <div class="col-12 col-md-7">
+                            <label for="product_template_id" string="Producto" class="fw-bold"/>
+                            <field name="product_template_id" class="fs-5 fw-bold" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="attribute_line_ids" nolabel="1" class="mt-3">
+                                <list create="0" delete="0" editable="bottom">
+                                    <field name="attribute_line_id" column_invisible="1" force_save="1"/>
+                                    <field name="available_template_value_ids" column_invisible="1"/>
+                                    <field name="attribute_id"/>
+                                    <field name="selected_template_value_id"
+                                           required="1"
+                                           context="{'show_attribute': False}"
+                                           options="{'no_create': True, 'no_open': True}"
+                                           placeholder="Seleccione un valor..."/>
+                                </list>
+                            </field>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <field name="currency_id" invisible="1"/>
+                            <group>
+                                <field name="location_id" readonly="1" string="Ubicación"/>
+                                <field name="expected_qty" readonly="1" string="Existencia actual"/>
+                                <field name="counted_qty" string="Cantidad contada"/>
+                                <field name="generate_barcode" string="Generar código de barras"/>
+                            </group>
+                        </div>
+                    </div>
+                    <group string="Resultado">
+                        <field name="variant_id" invisible="1"/>
+                        <field name="variant_preview" readonly="1"/>
+                        <field name="selection_summary" readonly="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_add_and_continue" string="Agregar y continuar" type="object" class="btn-primary"/>
+                    <button name="action_add_and_close" string="Agregar y cerrar" type="object" class="btn-secondary"/>
+                    <button string="Cancelar" special="cancel" class="btn-link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

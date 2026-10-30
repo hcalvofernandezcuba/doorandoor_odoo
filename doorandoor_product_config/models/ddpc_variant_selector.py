@@ -17,6 +17,7 @@ class DdpcVariantSelector(models.TransientModel):
         readonly=True,
     )
     move_line_id = fields.Many2one("account.move.line", required=True, readonly=True)
+    remove_line_on_cancel = fields.Boolean(default=False, readonly=True)
     product_template_id = fields.Many2one(
         "product.template", string="Producto", required=True
     )
@@ -30,6 +31,20 @@ class DdpcVariantSelector(models.TransientModel):
     quantity = fields.Float(string="Cantidad", required=True, default=1.0)
     option_line_ids = fields.One2many(
         "ddpc.variant.selector.option", "wizard_id", string="Opciones disponibles"
+    )
+    requires_hinges = fields.Boolean(
+        string="Requiere bisagras",
+        compute="_compute_hinge_configuration",
+    )
+    available_hinge_template_value_ids = fields.Many2many(
+        "product.template.attribute.value",
+        string="Bisagras disponibles",
+        compute="_compute_hinge_configuration",
+    )
+    hinge_template_value_id = fields.Many2one(
+        "product.template.attribute.value",
+        string="Hinges",
+        domain="[('id', 'in', available_hinge_template_value_ids)]",
     )
     attribute_selection_line_ids = fields.One2many(
         "ddpc.variant.selector.attribute",
@@ -78,6 +93,7 @@ class DdpcVariantSelector(models.TransientModel):
         "selection_mode",
         "option_line_ids.selected",
         "attribute_selection_line_ids.selected_template_value_id",
+        "hinge_template_value_id",
         "custom_attribute_id",
         "custom_value",
         "custom_extra_price",
@@ -100,6 +116,13 @@ class DdpcVariantSelector(models.TransientModel):
                 "%s: %s" % (option.attribute_id.display_name, option.value_id.display_name)
                 for option in selected_options
             ]
+            if wizard.requires_hinges and wizard.hinge_template_value_id:
+                summary_lines.append(
+                    "%s: %s" % (
+                        wizard.hinge_template_value_id.attribute_id.display_name,
+                        wizard.hinge_template_value_id.product_attribute_value_id.display_name,
+                    )
+                )
             wizard.selection_summary = "\n".join(summary_lines)
             variant = False
             if wizard.product_template_id and wizard.selection_mode == "guided":
@@ -145,7 +168,9 @@ class DdpcVariantSelector(models.TransientModel):
     def _ddpc_option_commands(self, template):
         commands = [Command.clear()]
         for attribute_line in template.attribute_line_ids.filtered(
-            lambda line: line.active and line.attribute_id.create_variant == "no_variant"
+            lambda line: line.active
+            and line.attribute_id.create_variant == "no_variant"
+            and (line.attribute_id.name or "").strip().casefold() not in ("hinge", "hinges")
         ):
             for template_value in attribute_line.product_template_value_ids.filtered("ptav_active"):
                 commands.append(
@@ -163,13 +188,86 @@ class DdpcVariantSelector(models.TransientModel):
                 )
         return commands
 
-    def _ddpc_attribute_commands(self, template):
-        return [Command.clear()] + [
-            Command.create({"attribute_line_id": attribute_line.id})
-            for attribute_line in template.attribute_line_ids.filtered(
-                lambda line: line.active and line.attribute_id.create_variant != "no_variant"
+    @api.depends(
+        "product_template_id",
+        "product_template_id.attribute_line_ids",
+        "product_template_id.attribute_line_ids.product_template_value_ids",
+        "attribute_selection_line_ids.selected_template_value_id",
+    )
+    def _compute_hinge_configuration(self):
+        for wizard in self:
+            selected_type = wizard.attribute_selection_line_ids.filtered(
+                lambda line: (line.attribute_id.name or "").strip().casefold()
+                in ("tipo", "type", "door type")
+                and line.selected_template_value_id
+            )[:1].selected_template_value_id.product_attribute_value_id
+            type_name = (selected_type.name or "").strip().casefold()
+            wizard.requires_hinges = "pre-hung" in type_name or "prehung" in type_name
+
+            hinge_line = wizard.product_template_id.attribute_line_ids.filtered(
+                lambda line: line.active
+                and (line.attribute_id.name or "").strip().casefold() in ("hinge", "hinges")
+                and line.attribute_id.create_variant == "no_variant"
+            )[:1]
+            wizard.available_hinge_template_value_ids = (
+                hinge_line.product_template_value_ids.filtered(
+                    lambda value: value.ptav_active
+                    and value.product_attribute_value_id.active
+                )
             )
+            if not wizard.requires_hinges:
+                wizard.hinge_template_value_id = False
+
+    @api.onchange("attribute_selection_line_ids")
+    def _onchange_attribute_selection_line_ids_hinges(self):
+        self._compute_hinge_configuration()
+
+    def _ddpc_attribute_commands(self, template):
+        ordered_lines = template.attribute_line_ids.filtered(
+            lambda line: line.active and line.attribute_id.create_variant != "no_variant"
+        ).sorted(key=self._ddpc_attribute_sort_key)
+        return [Command.clear()] + [
+            Command.create(
+                {
+                    "attribute_line_id": attribute_line.id,
+                    "sequence": self._ddpc_attribute_display_sequence(attribute_line),
+                }
+            )
+            for attribute_line in ordered_lines
         ]
+
+    @api.model
+    def _ddpc_attribute_display_sequence(self, attribute_line):
+        """Return the commercial order used by every guided configurator."""
+        name = (attribute_line.attribute_id.name or "").strip().casefold()
+        if name.endswith(" color"):
+            name = "color"
+        priority = {
+            "marca": 10,
+            "brand": 10,
+            "modelo": 20,
+            "model": 20,
+            "ancho": 30,
+            "width": 30,
+            "alto": 40,
+            "height": 40,
+            "color": 50,
+            "colour": 50,
+            "swing": 60,
+            "swin": 60,
+            "hand": 60,
+            "mano": 60,
+            "ph mano": 60,
+        }
+        return priority.get(name, 1000 + (attribute_line.sequence or 0))
+
+    @api.model
+    def _ddpc_attribute_sort_key(self, attribute_line):
+        return (
+            self._ddpc_attribute_display_sequence(attribute_line),
+            attribute_line.sequence or 0,
+            attribute_line.id,
+        )
 
     def _ddpc_load_options(self):
         for wizard in self:
@@ -305,12 +403,23 @@ class DdpcVariantSelector(models.TransientModel):
         self._ddpc_apply_variant_to_line(variant)
         return {"type": "ir.actions.act_window_close"}
 
+    def action_cancel_configuration(self):
+        self.ensure_one()
+        line = self.move_line_id
+        if self.remove_line_on_cancel and line and not line.product_id:
+            line.unlink()
+        return {"type": "ir.actions.act_window_close"}
+
     def _ddpc_apply_variant_to_line(self, variant):
         self.ensure_one()
         line = self.move_line_id
         informational_values = self.option_line_ids.filtered(
             lambda option: option.selected and not option.creates_variant
         ).mapped("template_value_id")
+        if self.requires_hinges:
+            if not self.hinge_template_value_id:
+                raise UserError(_("Seleccione Hinges para la puerta Pre-Hung."))
+            informational_values |= self.hinge_template_value_id
         description = variant.get_product_multiline_description_sale() or variant.display_name
         if informational_values:
             description += "\n" + _("Opciones: %s") % ", ".join(
@@ -350,11 +459,12 @@ class DdpcVariantSelectorOption(models.TransientModel):
 class DdpcVariantSelectorAttribute(models.TransientModel):
     _name = "ddpc.variant.selector.attribute"
     _description = "Atributo del configurador guiado"
-    _order = "attribute_line_id"
+    _order = "sequence, id"
 
     wizard_id = fields.Many2one(
         "ddpc.variant.selector", required=True, ondelete="cascade"
     )
+    sequence = fields.Integer(default=1000, readonly=True)
     attribute_line_id = fields.Many2one(
         "product.template.attribute.line", required=True, readonly=True
     )
@@ -365,21 +475,26 @@ class DdpcVariantSelectorAttribute(models.TransientModel):
         "product.template.attribute.value",
         string="Valores disponibles",
         compute="_compute_available_template_value_ids",
+        compute_sudo=True,
         readonly=True,
     )
     selected_template_value_id = fields.Many2one(
         "product.template.attribute.value",
         string="Valor",
-        domain="[('id', 'in', available_template_value_ids)]",
+        domain="[('attribute_line_id', '=', attribute_line_id), ('ptav_active', '=', True)]",
     )
 
     @api.depends(
         "attribute_line_id",
         "attribute_line_id.product_template_value_ids",
         "attribute_line_id.product_template_value_ids.ptav_active",
+        "attribute_line_id.product_template_value_ids.product_attribute_value_id.active",
     )
     def _compute_available_template_value_ids(self):
         for line in self:
             line.available_template_value_ids = (
-                line.attribute_line_id.product_template_value_ids.filtered("ptav_active")
+                line.attribute_line_id.product_template_value_ids.filtered(
+                    lambda value: value.ptav_active
+                    and value.product_attribute_value_id.active
+                )
             )

@@ -1,0 +1,23 @@
+.ddpa-policy-alert {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 2px solid #d6ae57;
+    border-radius: 12px;
+    background: #fff7df;
+    color: #08233c;
+    font-size: clamp(14px, 1.35vw, 20px);
+}
+.ddpa-policy-alert strong { font-size: clamp(17px, 1.7vw, 25px); }
+.ddpa-policy-alert a {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 7px;
+    background: #08233c;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 700;
+}

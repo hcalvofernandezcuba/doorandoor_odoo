@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Applies the online card method to existing Clover providers on every
+         module upgrade; it does not modify credentials, journals or history. -->
+    <function model="payment.provider" name="_ddcl_enable_card_method_on_clover_providers"/>
+</odoo>

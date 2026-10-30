@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_doorandoor_pickup_order_form_ddmh_count" model="ir.ui.view">
+        <field name="name">doorandoor.pickup.order.form.ddmh.count</field>
+        <field name="model">doorandoor.pickup.order</field>
+        <field name="inherit_id" ref="doorandoor_sales_new.view_doorandoor_pickup_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ddmh_count_delivery"
+                        type="object" string="Contar entrega con hanger"
+                        class="btn-primary"
+                        invisible="not picking_id or state in ('delivered', 'cancelled')"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

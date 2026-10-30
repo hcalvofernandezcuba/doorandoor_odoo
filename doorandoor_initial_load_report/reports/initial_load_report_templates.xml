@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_initial_load_selection" model="ir.actions.report">
+        <field name="name">Carga inicial seleccionada</field>
+        <field name="model">inventory.initial.load.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_initial_load_report.report_initial_load_selection</field>
+        <field name="report_file">doorandoor_initial_load_report.report_initial_load_selection</field>
+        <field name="binding_model_id" ref="model_inventory_initial_load_report"/>
+        <field name="binding_type">report</field>
+        <field name="multi" eval="True"/>
+        <field name="print_report_name">'Carga inicial - seleccion'</field>
+    </record>
+
+    <template id="report_initial_load_selection">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Reporte de carga inicial</h2>
+                    <p>
+                        <strong>Registros seleccionados:</strong>
+                        <span t-esc="len(docs)"/>
+                    </p>
+                    <table class="table table-sm table-bordered" style="font-size: 9pt;">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Referencia</th>
+                                <th>Lote</th>
+                                <th>Almacén</th>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th class="text-end">Cargado</th>
+                                <th class="text-end">Corrección técnica (-)</th>
+                                <th class="text-end">Cantidad neta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="docs" t-as="line">
+                                <td><span t-field="line.date" t-options="{'widget': 'datetime'}"/></td>
+                                <td><span t-field="line.reference"/></td>
+                                <td><span t-field="line.load_reference"/></td>
+                                <td><span t-field="line.warehouse_id"/></td>
+                                <td><span t-field="line.product_id"/></td>
+                                <td><span t-field="line.direction"/></td>
+                                <td class="text-end"><span t-field="line.quantity_in"/></td>
+                                <td class="text-end"><span t-field="line.quantity_out"/></td>
+                                <td class="text-end"><span t-field="line.net_quantity"/></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="6" class="text-end">Totales</th>
+                                <th class="text-end"><span t-esc="sum(docs.mapped('quantity_in'))"/></th>
+                                <th class="text-end"><span t-esc="sum(docs.mapped('quantity_out'))"/></th>
+                                <th class="text-end"><span t-esc="sum(docs.mapped('net_quantity'))"/></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <p class="text-muted" style="font-size: 8pt;">
+                        Este documento refleja únicamente los movimientos seleccionados al momento de imprimir.
+                    </p>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

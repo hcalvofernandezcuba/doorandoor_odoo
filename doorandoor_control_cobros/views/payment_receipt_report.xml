@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_ddc_payment_receipt_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="text-center mb-4">
+                            <h2 t-if="o.receipt_type == 'invoice'">Recibo de cobro</h2>
+                            <h2 t-else="">Estado de pagos del cliente</h2>
+                            <h4><span t-field="o.name"/></h4>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-7">
+                                <strong>Cliente:</strong> <span t-field="o.partner_id"/><br/>
+                                <strong>Dirección:</strong>
+                                <span t-esc="', '.join(filter(None, [o.partner_id.street, o.partner_id.street2, o.partner_id.city, o.partner_id.state_id.name, o.partner_id.zip])) or '-'"/><br/>
+                                <strong>Correo:</strong> <span t-esc="o.partner_id.email or '-'"/>
+                            </div>
+                            <div class="col-5 text-end">
+                                <strong>Generado:</strong> <span t-field="o.generated_at"/><br/>
+                                <strong>Preparado por:</strong> <span t-field="o.generated_by_id"/><br/>
+                                <t t-if="o.receipt_type == 'customer'">
+                                    <strong>Período:</strong>
+                                    <span t-field="o.date_from"/> — <span t-field="o.date_to"/>
+                                </t>
+                            </div>
+                        </div>
+
+                        <div t-if="o.receipt_type == 'invoice'" class="mb-3">
+                            <strong>Factura:</strong> <span t-field="o.invoice_id"/>
+                            <span class="ms-3"><strong>Fecha:</strong> <span t-field="o.invoice_id.invoice_date"/></span>
+                        </div>
+
+                        <t t-if="o.receipt_type == 'invoice'"
+                           t-set="payment_lines"
+                           t-value="o.line_ids.filtered(lambda line: line.line_type == 'payment')"/>
+                        <table t-if="o.receipt_type == 'invoice' and len(payment_lines) &gt; 1"
+                               class="table table-sm table-bordered mb-3">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Pago</th>
+                                    <th>Referencia</th>
+                                    <th class="text-end">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="payment_lines" t-as="payment_line">
+                                    <td><span t-field="payment_line.application_date"/></td>
+                                    <td><span t-field="payment_line.payment_id"/></td>
+                                    <td><span t-esc="payment_line.reference or '-'"/></td>
+                                    <td class="text-end"><span t-field="payment_line.payment_amount"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <t t-if="o.receipt_type == 'customer'">
+                            <h4 class="mt-3">Pagos y facturas asociadas</h4>
+                            <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Factura</th>
+                                        <th>Pago</th>
+                                        <th>Referencia</th>
+                                        <th class="text-end">Recibido</th>
+                                        <th class="text-end">Aplicado</th>
+                                        <th class="text-end">Sin aplicar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.line_ids" t-as="customer_line">
+                                        <td><span t-field="customer_line.application_date"/></td>
+                                        <td><span t-field="customer_line.invoice_id"/></td>
+                                        <td>
+                                            <span t-if="customer_line.payment_id" t-field="customer_line.payment_id"/>
+                                            <span t-else="" t-field="customer_line.counterpart_move_id"/>
+                                        </td>
+                                        <td><span t-esc="customer_line.reference or '-'"/></td>
+                                        <td class="text-end"><span t-field="customer_line.payment_amount"/></td>
+                                        <td class="text-end"><span t-field="customer_line.applied_amount"/></td>
+                                        <td class="text-end"><span t-field="customer_line.unapplied_amount"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <div class="row mt-2">
+                            <div class="col-6 offset-6">
+                                <table class="table table-sm border-top border-bottom">
+                                    <tr>
+                                        <td>
+                                            <strong t-if="o.receipt_type == 'invoice'">Total pagado</strong>
+                                            <strong t-else="">Total de pagos recibidos</strong>
+                                        </td>
+                                        <td class="text-end"><strong><span t-field="o.total_received"/></strong></td>
+                                    </tr>
+                                    <tr t-if="o.receipt_type == 'customer'">
+                                        <td><strong>Total aplicado a facturas</strong></td>
+                                        <td class="text-end"><strong><span t-field="o.total_applied"/></strong></td>
+                                    </tr>
+                                    <tr t-if="o.receipt_type == 'customer' and o.total_unapplied">
+                                        <td><strong>Total sin aplicar</strong></td>
+                                        <td class="text-end"><strong><span t-field="o.total_unapplied"/></strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div t-if="o.notes" class="mt-3">
+                            <strong>Observaciones</strong>
+                            <p t-field="o.notes"/>
+                        </div>
+                        <p class="mt-4 text-muted" style="font-size: 10px;">
+                            <t t-if="o.receipt_type == 'invoice'">
+                                Comprobante del pago registrado en Odoo para la factura indicada.
+                                El detalle comercial y fiscal permanece en la factura asociada.
+                            </t>
+                            <t t-else="">
+                                Estado informativo de pagos y aplicaciones registrados para el cliente en el período indicado.
+                            </t>
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_ddc_payment_receipt" model="ir.actions.report">
+        <field name="name">Recibo de cobro</field>
+        <field name="model">doorandoor.payment.receipt</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_control_cobros.report_ddc_payment_receipt_document</field>
+        <field name="report_file">doorandoor_control_cobros.report_ddc_payment_receipt_document</field>
+        <field name="binding_model_id" ref="model_doorandoor_payment_receipt"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Recibo de cobro - %s' % object.name.replace('/', '-')</field>
+    </record>
+</odoo>

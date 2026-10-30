@@ -5,6 +5,11 @@
         <field name="model">inventory.count.session</field>
         <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_inventory_count_session_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ddmh_reload_mobile"
+                        type="object" string="Actualizar"
+                        icon="fa-refresh"/>
+            </xpath>
             <xpath expr="//header/button[@name='action_start']" position="attributes">
                 <attribute name="string">Iniciar conteo y cargar existencias</attribute>
             </xpath>
@@ -35,7 +40,7 @@
                 <field name="barcode_input"
                        string="Código del producto"
                        widget="ddmh_camera_barcode"
-                       options="{'auto_action': 'action_scan'}"
+                       options="{'auto_action': 'action_scan', 'continuous': True}"
                        placeholder="Escanee el barcode del producto o ítem..."/>
             </xpath>
             <xpath expr="//group[hasclass('o_inventory_scan_box')]/field[@name='scan_qty']" position="attributes">
@@ -66,6 +71,9 @@
                               decoration-success="difference_qty == 0">
                             <field name="product_id" string="Producto"/>
                             <field name="barcode" string="Barcode"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="cost_price" string="Costo" groups="base.group_system"/>
+                            <field name="sale_price" string="Precio" groups="base.group_system"/>
                             <field name="expected_qty" string="Esperado"/>
                             <field name="counted_qty" string="Contado"/>
                             <field name="difference_qty" string="Diferencia"/>
@@ -73,7 +81,130 @@
                         </list>
                     </field>
                 </group>
+                <div class="d-grid mt-4" invisible="state != 'counting'">
+                    <button name="action_review"
+                            type="object"
+                            string="Enviar conteo a revisión"
+                            class="btn-success btn-lg"
+                            icon="fa-check-circle"/>
+                </div>
             </xpath>
+        </field>
+    </record>
+
+    <record id="view_inventory_count_session_form_ddmh_monitor" model="ir.ui.view">
+        <field name="name">inventory.count.session.form.ddmh.monitor</field>
+        <field name="model">inventory.count.session</field>
+        <field name="inherit_id" eval="False"/>
+        <field name="arch" type="xml">
+            <form string="Monitoreo Hanger - Sesión IC"
+                  js_class="ddmh_live_monitor_form"
+                  create="0" edit="0" delete="0">
+                <header>
+                    <button name="action_ddmh_reload_monitor" type="object"
+                            string="Actualizar monitoreo" icon="fa-refresh"
+                            class="btn-primary"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,counting,review,done,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="alert alert-info" role="status">
+                        Vista administrativa de solo lectura. Actualice para consultar
+                        el avance que el operador registra desde el Hanger.
+                    </div>
+                    <group>
+                        <group string="Sesión IC">
+                            <field name="date"/>
+                            <field name="user_id"/>
+                            <field name="location_id"/>
+                            <field name="count_mode"/>
+                            <field name="load_reference"/>
+                            <field name="serial_campaign_id"/>
+                            <field name="serial_batch_id"/>
+                        </group>
+                        <group string="Actividad en vivo">
+                            <field name="last_scanned_product_id"/>
+                            <field name="last_scanned_barcode"/>
+                            <field name="last_scanned_qty"/>
+                            <field name="last_scan_at"/>
+                            <field name="line_count"/>
+                            <field name="difference_count"/>
+                            <field name="serial_expected_count"/>
+                            <field name="serial_counted_count"/>
+                            <field name="serial_pending_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Seriales leídos" name="serials">
+                            <field name="serial_claim_ids" readonly="1">
+                                <list create="0" edit="0" delete="0"
+                                      decoration-success="state == 'applied'"
+                                      decoration-info="state == 'counted'">
+                                    <field name="scan_at"/>
+                                    <field name="user_id"/>
+                                    <field name="ddmh_serial_code" string="Label"/>
+                                    <field name="counted_qty"/>
+                                    <field name="scan_count"/>
+                                    <field name="last_scan_at"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Disparos Hanger" name="hanger_events">
+                            <field name="ddmh_scan_event_ids" readonly="1">
+                                <list create="0" edit="0" delete="0"
+                                      decoration-success="status == 'accepted'"
+                                      decoration-danger="status in ('rejected', 'duplicate', 'no_input')"
+                                      decoration-muted="status == 'corrected'">
+                                    <field name="event_at"/>
+                                    <field name="user_id"/>
+                                    <field name="code"/>
+                                    <field name="product_id"/>
+                                    <field name="serial_id"/>
+                                    <field name="status" widget="badge"/>
+                                    <field name="message"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Ítems contados" name="items">
+                            <field name="item_line_ids" readonly="1">
+                                <list create="0" edit="0" delete="0"
+                                      decoration-danger="is_counted and difference_qty != 0"
+                                      decoration-success="is_counted and difference_qty == 0">
+                                    <field name="product_id"/>
+                                    <field name="item_id"/>
+                                    <field name="item_code"/>
+                                    <field name="barcode"/>
+                                    <field name="expected_qty"/>
+                                    <field name="counted_qty"/>
+                                    <field name="is_counted"/>
+                                    <field name="difference_qty"/>
+                                    <field name="uom_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Variantes" name="variants">
+                            <field name="line_ids" readonly="1">
+                                <list create="0" edit="0" delete="0"
+                                      decoration-danger="is_counted and difference_qty != 0"
+                                      decoration-success="is_counted and difference_qty == 0">
+                                    <field name="product_id"/>
+                                    <field name="expected_qty"/>
+                                    <field name="counted_qty"/>
+                                    <field name="is_counted"/>
+                                    <field name="difference_qty"/>
+                                    <field name="result_qty"/>
+                                    <field name="uom_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notas" name="notes">
+                            <field name="note" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
         </field>
     </record>
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_ddsr_stripe_status" model="ir.ui.view">
+        <field name="name">account.move.form.ddsr.stripe.status</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-warning mb-3" role="status"
+                     invisible="ddsr_stripe_payment_status != 'waiting'">
+                    <strong>Pago Stripe en proceso.</strong>
+                    La operación fue iniciada y estamos esperando la confirmación segura de Stripe.
+                </div>
+                <div class="alert alert-info mb-3" role="status"
+                     invisible="ddsr_stripe_payment_status != 'confirmed'">
+                    <strong>Tarjeta aceptada por Stripe.</strong>
+                    El cobro fue confirmado y Odoo está completando su registro contable.
+                </div>
+                <div class="alert alert-danger mb-3" role="alert"
+                     invisible="ddsr_stripe_payment_status != 'error'">
+                    <strong>Pago Stripe rechazado o cancelado.</strong>
+                    No se registró el cobro; revise el mensaje de Stripe e intente nuevamente.
+                </div>
+            </xpath>
+            <xpath expr="(//widget[@name='web_ribbon'])[1]" position="before">
+                <widget name="web_ribbon" title="Esperando Stripe"
+                        bg_color="text-bg-warning"
+                        invisible="ddsr_stripe_payment_status != 'waiting'"/>
+                <widget name="web_ribbon" title="Tarjeta aceptada"
+                        bg_color="text-bg-info"
+                        invisible="ddsr_stripe_payment_status != 'confirmed'"/>
+                <widget name="web_ribbon" title="Pago rechazado"
+                        bg_color="text-bg-danger"
+                        invisible="ddsr_stripe_payment_status != 'error'"/>
+            </xpath>
+            <xpath expr="//field[@name='payment_state']" position="after">
+                <field name="ddsr_stripe_payment_status"
+                       widget="badge"
+                       invisible="not ddsr_stripe_payment_status"
+                       decoration-warning="ddsr_stripe_payment_status == 'waiting'"
+                       decoration-info="ddsr_stripe_payment_status == 'confirmed'"
+                       decoration-danger="ddsr_stripe_payment_status == 'error'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

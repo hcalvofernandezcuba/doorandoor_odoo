@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Correct the historical reverse implication. A generic Inventory User
+         must not automatically become a DoorAndDoor warehouse operator. -->
+    <function model="res.groups" name="write">
+        <value eval="[ref('stock.group_stock_user')]"/>
+        <value eval="{'implied_ids': [(3, ref('doorandoor_process_control.group_ddpc_warehouse_operator'))]}"/>
+    </function>
+    <function model="res.groups" name="write">
+        <value eval="[ref('doorandoor_process_control.group_ddpc_warehouse_operator')]"/>
+        <value eval="{'implied_ids': [(3, ref('doorandoor_inventory_variant_count.group_inventory_count_user')), (4, ref('stock.group_stock_user'))]}"/>
+    </function>
+
+    <record id="module_category_ddmh_roles" model="ir.module.category">
+        <field name="name">DoorAndDoor Hanger</field>
+        <field name="sequence">36</field>
+    </record>
+
+    <record id="group_ddmh_counter" model="res.groups">
+        <field name="name">Hanger - Contador de inventario</field>
+        <field name="category_id" ref="module_category_ddmh_roles"/>
+        <field name="implied_ids" eval="[(4, ref('doorandoor_inventory_variant_count.group_inventory_count_user'))]"/>
+    </record>
+
+    <record id="group_ddmh_delivery" model="res.groups">
+        <field name="name">Hanger - Operador de entregas</field>
+        <field name="category_id" ref="module_category_ddmh_roles"/>
+        <field name="implied_ids" eval="[(4, ref('doorandoor_process_control.group_ddpc_warehouse_operator')), (4, ref('stock.group_stock_user'))]"/>
+    </record>
+
+    <record id="group_ddmh_warehouse" model="res.groups">
+        <field name="name">Hanger - Almacenero</field>
+        <field name="category_id" ref="module_category_ddmh_roles"/>
+        <field name="implied_ids" eval="[(4, ref('group_ddmh_counter')), (4, ref('group_ddmh_delivery'))]"/>
+    </record>
+
+    <record id="group_ddmh_supervisor" model="res.groups">
+        <field name="name">Hanger - Supervisor de almacén</field>
+        <field name="category_id" ref="module_category_ddmh_roles"/>
+        <field name="implied_ids" eval="[(4, ref('group_ddmh_warehouse')), (4, ref('doorandoor_inventory_variant_count.group_inventory_count_manager'))]"/>
+    </record>
+</odoo>

@@ -16,10 +16,14 @@
                     </group>
                 </xpath>
                 <xpath expr="//notebook" position="inside">
-                    <page string="Commercial Rules">
+                    <page string="Commercial Rules" groups="base.group_system">
                         <group string="DoorAndDoor Commercial Bonus">
                             <group>
+                                <field name="ddsn_bonus_active"/>
                                 <field name="ddsn_bonus_percent"/>
+                                <field name="ddsn_bonus_date_from"/>
+                                <field name="ddsn_bonus_date_to"/>
+                                <field name="ddsn_bonus_authorized_by_id"/>
                             </group>
                             <group>
                                 <field name="ddsn_bonus_notes" placeholder="Commercial agreements, exceptions or internal notes..."/>

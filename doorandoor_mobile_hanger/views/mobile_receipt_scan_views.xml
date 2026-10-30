@@ -5,24 +5,41 @@
         <field name="model">ddsl.stock.receipt.scan.wizard</field>
         <field name="inherit_id" ref="doorandoor_stock_labels.view_ddsl_stock_receipt_scan_wizard_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='picking_id']" position="after">
+                <field name="picking_type_code" invisible="1"/>
+            </xpath>
             <xpath expr="//field[@name='scan_code']" position="replace">
                 <field name="scan_code"
                        string="Código del producto"
                        widget="ddmh_camera_barcode"
-                       options="{'auto_action': 'action_register_scan'}"
+                       options="{'auto_action': 'action_register_scan', 'continuous': True}"
                        placeholder="Escanee el barcode del producto o escríbalo..."/>
             </xpath>
             <xpath expr="//field[@name='scan_code']/ancestor::group[1]" position="before">
                 <div class="alert alert-info" role="alert">
-                    Active la cámara y enfoque el Code128 del label. Cada lectura válida suma una unidad automáticamente y actualiza el conteo inferior.
+                    Active la cámara o use el hanger. Un serial único suma una unidad. Para un label compartido repita el disparo por cada pieza. En entregas y traslados solo se admiten productos previstos.
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/ancestor::group[1]" position="after">
+                <div class="d-grid mt-3 mb-3">
+                    <button name="action_apply_and_validate_operation"
+                            type="object"
+                            string="Validar operación"
+                            class="btn-primary btn-lg"/>
                 </div>
             </xpath>
             <xpath expr="//footer/button[@name='action_register_scan']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="//footer/button[@name='action_apply_count']" position="attributes">
-                <attribute name="string">Aplicar cantidades recibidas</attribute>
-                <attribute name="class">btn-primary</attribute>
+                <attribute name="string">Guardar conteo</attribute>
+                <attribute name="class">btn-secondary</attribute>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_apply_count']" position="after">
+                <button name="action_apply_and_validate_operation"
+                        type="object"
+                        string="Validar operación"
+                        class="btn-primary"/>
             </xpath>
         </field>
     </record>

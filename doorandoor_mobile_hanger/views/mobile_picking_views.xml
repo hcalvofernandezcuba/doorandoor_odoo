@@ -6,6 +6,22 @@
         <field name="arch" type="xml">
             <form string="Operación de almacén" create="0" edit="0" delete="0">
                 <header>
+                    <button name="action_ddmh_reload_mobile"
+                            type="object" string="Actualizar"
+                            icon="fa-refresh"/>
+                    <button name="action_ddmh_print_delivery_slip"
+                            type="object" string="Imprimir albarán"
+                            icon="fa-print" class="btn-secondary"
+                            invisible="state == 'cancel'"/>
+                    <button name="action_ddmh_send_to_review"
+                            type="object" string="Enviar a validar"
+                            class="btn-primary"
+                            invisible="state in ('done', 'cancel') or not ddmh_count_complete or ddmh_validation_state == 'review'"/>
+                    <button name="action_ddmh_validate_and_close"
+                            type="object" string="Validar y cerrar"
+                            class="btn-primary"
+                            groups="doorandoor_mobile_hanger.group_ddmh_supervisor,stock.group_stock_manager,base.group_system"
+                            invisible="state in ('done', 'cancel') or ddmh_validation_state != 'review'"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -14,6 +30,17 @@
                         <i class="fa fa-barcode fa-3x text-primary"/>
                         <h1><field name="name"/></h1>
                         <field name="ddpc_operation_category" widget="badge"/>
+                        <div class="mt-2">
+                            <field name="ddmh_validation_state" widget="badge"/>
+                        </div>
+                    </div>
+                    <div class="alert alert-success" role="alert"
+                         invisible="not ddmh_count_complete or ddmh_validation_state == 'review'">
+                        Conteo completo. Envíe la operación a validar.
+                    </div>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="ddmh_validation_state != 'review'">
+                        Pendiente de validación por el responsable de inventarios.
                     </div>
                     <group>
                         <group string="Ruta">
@@ -39,14 +66,29 @@
                     </field>
                     <div class="d-grid gap-2 mt-4">
                         <button name="action_open_ddsl_receipt_scan_wizard"
-                                type="object" string="Contar productos de recepción"
+                                type="object" string="Contar productos con hanger"
                                 class="btn-primary btn-lg"
-                                invisible="picking_type_code != 'incoming' or state in ('done', 'cancel')"/>
+                                invisible="picking_type_code not in ('incoming', 'outgoing', 'internal') or state in ('done', 'cancel')"/>
                         <button name="action_ddmh_open_full_operation"
                                 type="object" string="Abrir operación completa"
                                 class="btn-secondary btn-lg"/>
                     </div>
+                    <div class="alert alert-info mt-3" role="status"
+                         invisible="state in ('done', 'cancel') or ddmh_validation_state == 'review' or ddmh_count_complete">
+                        Conteo pendiente. Entre en <strong>Contar productos con hanger</strong>
+                        y escanee todos los labels antes de enviar la operación a validar.
+                    </div>
+                    <div class="d-grid mt-3"
+                         invisible="state in ('done', 'cancel') or ddmh_validation_state == 'review' or not ddmh_count_complete">
+                        <button name="action_ddmh_send_to_review"
+                                type="object"
+                                string="Enviar operación a validar"
+                                class="btn-success btn-lg"/>
+                    </div>
                     <field name="picking_type_code" invisible="1"/>
+                    <field name="ddmh_is_pickup_delivery" invisible="1"/>
+                    <field name="ddmh_count_complete" invisible="1"/>
+                    <field name="ddmh_validation_state" invisible="1"/>
                 </sheet>
             </form>
         </field>
@@ -58,5 +100,174 @@
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_ddmh_mobile_picking_form"/>
         <field name="target">current</field>
+    </record>
+
+    <record id="view_picking_form_ddmh_pickup_count" model="ir.ui.view">
+        <field name="name">stock.picking.form.ddmh.operation.count</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="doorandoor_stock_labels.view_picking_form_inherit_ddsl"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_open_ddsl_receipt_scan_wizard']" position="attributes">
+                <attribute name="string">Contar operación con hanger</attribute>
+                <attribute name="invisible">picking_type_code not in ('incoming', 'outgoing', 'internal') or state in ('done', 'cancel')</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_open_ddsl_receipt_scan_wizard']" position="after">
+                <button name="action_ddmh_print_delivery_slip"
+                        type="object" string="Imprimir albarán"
+                        icon="fa-print" class="btn-secondary"
+                        invisible="picking_type_code not in ('incoming', 'outgoing', 'internal') or state == 'cancel'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_list_ddmh_monitor" model="ir.ui.view">
+        <field name="name">stock.picking.list.ddmh.monitor</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <list string="Monitoreo Hanger" create="0" edit="0" delete="0"
+                  decoration-success="ddmh_count_complete"
+                  decoration-warning="ddmh_validation_state == 'counting'">
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="ddpc_source_warehouse_id"/>
+                <field name="ddmh_monitor_progress"/>
+                <field name="ddmh_last_scan_user_id"/>
+                <field name="ddmh_last_scan_at"/>
+                <field name="ddmh_last_scan_status"/>
+                <field name="ddmh_validation_state" widget="badge"/>
+                <field name="state" widget="badge"/>
+                <field name="ddmh_count_complete" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_picking_form_ddmh_monitor" model="ir.ui.view">
+        <field name="name">stock.picking.form.ddmh.monitor</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" eval="False"/>
+        <field name="arch" type="xml">
+            <form string="Monitoreo Hanger" create="0" edit="0" delete="0"
+                  js_class="ddmh_live_monitor_form">
+                <header>
+                    <button name="action_ddmh_reload_monitor" type="object"
+                            string="Actualizar monitoreo" icon="fa-refresh"
+                            class="btn-primary"/>
+                    <field name="ddmh_validation_state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="alert alert-info" role="status">
+                        Vista administrativa independiente. Actualice para consultar
+                        las lecturas que el operador realiza desde el Hanger.
+                    </div>
+                    <group>
+                        <group string="Operación">
+                            <field name="origin"/>
+                            <field name="partner_id"/>
+                            <field name="ddpc_source_warehouse_id"/>
+                            <field name="state"/>
+                        </group>
+                        <group string="Actividad en vivo">
+                            <field name="ddmh_monitor_progress"/>
+                            <field name="ddmh_last_scan_user_id"/>
+                            <field name="ddmh_last_scan_at"/>
+                            <field name="ddmh_last_scan_status"/>
+                        </group>
+                    </group>
+                    <separator string="Historial de lecturas"/>
+                    <field name="ddmh_scan_event_ids" readonly="1">
+                        <list create="0" edit="0" delete="0"
+                              decoration-success="status == 'accepted'"
+                              decoration-danger="status in ('rejected', 'duplicate', 'no_input')"
+                              decoration-info="status == 'opened'"
+                              decoration-muted="status == 'corrected'">
+                            <field name="event_at"/>
+                            <field name="user_id"/>
+                            <field name="code" string="Código leído"/>
+                            <field name="serial_id" string="Label contado"/>
+                            <field name="product_id" string="Producto contado"/>
+                            <field name="counted_batch_id" string="Lote contado" optional="show"/>
+                            <field name="expected_serial_id" string="Label esperado a liberar" optional="show"/>
+                            <field name="expected_product_id" string="Producto esperado" optional="show"/>
+                            <field name="expected_batch_id" string="Lote esperado" optional="show"/>
+                            <field name="status" widget="badge"/>
+                            <field name="message"/>
+                            <field name="corrected_by_id" optional="hide"/>
+                            <field name="corrected_at" optional="hide"/>
+                            <button name="action_ddmh_accept_failed_label"
+                                    type="object" string="Aceptar label"
+                                    icon="fa-check"
+                                    class="btn-primary"
+                                    groups="stock.group_stock_manager,base.group_system"
+                                    invisible="status not in ('rejected', 'duplicate') or not serial_id or not expected_serial_id"
+                                    confirm="El servidor volverá a validar producto, almacén, reserva, duplicidad y cantidad antes de sumar una unidad. ¿Desea aceptar este label?"/>
+                            <button name="action_ddmh_void_failed_event"
+                                    type="object" string="Anular evento"
+                                    icon="fa-undo"
+                                    groups="stock.group_stock_manager,base.group_system"
+                                    invisible="status not in ('rejected', 'duplicate', 'no_input')"
+                                    confirm="Se anulará únicamente este evento fallido. El conteo físico y la lectura aceptada no cambiarán. ¿Desea continuar?"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_picking_search_ddmh_monitor" model="ir.ui.view">
+        <field name="name">stock.picking.search.ddmh.monitor</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <search string="Buscar operación Hanger">
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="partner_id"/>
+                <filter name="counting" string="En conteo" domain="[('ddmh_validation_state','=','counting')]"/>
+                <filter name="review" string="Pendiente de validación" domain="[('ddmh_validation_state','=','review')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="warehouse" string="Almacén" context="{'group_by':'ddpc_source_warehouse_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddmh_picking_monitor_form" model="ir.actions.act_window">
+        <field name="name">Monitoreo Hanger</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_picking_form_ddmh_monitor"/>
+        <field name="target">current</field>
+    </record>
+
+    <record id="action_ddmh_hanger_monitor" model="ir.actions.act_window">
+        <field name="name">Monitoreo Hanger</field>
+        <field name="res_model">ddmh.daily.task</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_ddmh_unified_monitor_list"/>
+        <field name="search_view_id" ref="view_ddmh_unified_monitor_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_active_work': 1}</field>
+    </record>
+
+    <record id="action_ddmh_hanger_monitor_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_picking_list_ddmh_monitor"/>
+        <field name="act_window_id" ref="action_ddmh_hanger_monitor"/>
+    </record>
+
+    <record id="action_ddmh_hanger_monitor_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_picking_form_ddmh_monitor"/>
+        <field name="act_window_id" ref="action_ddmh_hanger_monitor"/>
+    </record>
+
+    <!-- The historical action used by bookmarks must expose only the unified
+         list. Clear its legacy stock.picking list/form composition after the
+         compatibility records above have been processed. -->
+    <record id="action_ddmh_hanger_monitor" model="ir.actions.act_window">
+        <field name="view_ids" eval="[(5, 0, 0)]"/>
+        <field name="view_id" ref="view_ddmh_unified_monitor_list"/>
     </record>
 </odoo>

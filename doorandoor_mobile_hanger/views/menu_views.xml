@@ -6,4 +6,22 @@
               action="action_ddmh_document_scan"
               sequence="1"
               groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+    <menuitem id="menu_ddmh_my_deliveries"
+              name="Mis entregas"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              action="action_ddmh_delivery_queue"
+              sequence="3"
+              groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+    <menuitem id="menu_ddmh_daily_work"
+              name="Trabajo diario"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              action="action_ddmh_daily_work"
+              sequence="2"
+              groups="doorandoor_process_control.group_ddpc_warehouse_operator,base.group_system"/>
+    <menuitem id="menu_ddmh_hanger_monitor"
+              name="Monitoreo Hanger"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              action="action_ddmh_unified_hanger_monitor"
+              sequence="90"
+              groups="stock.group_stock_manager,base.group_system"/>
 </odoo>

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_doorandoor_clover_operation_user,doorandoor.clover.operation user,model_doorandoor_clover_operation,base.group_user,1,1,1,0
+access_doorandoor_clover_operation_manager,doorandoor.clover.operation manager,model_doorandoor_clover_operation,account.group_account_manager,1,1,1,0
+access_doorandoor_clover_checkout_wizard_user,doorandoor.clover.checkout.wizard user,model_doorandoor_clover_checkout_wizard,base.group_user,1,1,1,1

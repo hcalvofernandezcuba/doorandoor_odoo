@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="sale_report_policy_reference" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <div class="mt-3 pt-2" style="border-top:1px solid #d8dee5;font-size:10px;">
+                <strong>Sales Policies:</strong>
+                <a href="https://www.doorandoor.com/terminos-y-condiciones">https://www.doorandoor.com/terminos-y-condiciones</a>
+                <t t-if="doc.ddpa_policy_acceptance_id and doc.ddpa_policy_acceptance_id.state == 'accepted'">
+                    <br/>Accepted by <span t-field="doc.ddpa_policy_acceptance_id.signer_name"/> on <span t-field="doc.ddpa_policy_acceptance_id.accepted_at"/>. Version <span t-field="doc.ddpa_policy_acceptance_id.policy_version"/>.
+                </t>
+                <t t-else=""><br/><strong>Pending customer acceptance.</strong></t>
+            </div>
+        </xpath>
+    </template>
+    <template id="invoice_report_policy_reference" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <div class="mt-2 pt-1" style="border-top:1px solid #d8dee5;font-size:9px;">
+                <strong>Sales Policies:</strong>
+                <a href="https://www.doorandoor.com/terminos-y-condiciones">https://www.doorandoor.com/terminos-y-condiciones</a>
+                <t t-if="o.ddpa_policy_acceptance_id and o.ddpa_policy_acceptance_id.state == 'accepted'">
+                    <br/>Accepted by <span t-field="o.ddpa_policy_acceptance_id.signer_name"/> on <span t-field="o.ddpa_policy_acceptance_id.accepted_at"/>. Version <span t-field="o.ddpa_policy_acceptance_id.policy_version"/>.
+                </t>
+            </div>
+        </xpath>
+    </template>
+</odoo>

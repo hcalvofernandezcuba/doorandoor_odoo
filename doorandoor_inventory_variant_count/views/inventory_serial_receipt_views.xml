@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_inventory_serial_receipt_list" model="ir.ui.view">
+        <field name="name">inventory.serial.receipt.list</field>
+        <field name="model">inventory.serial.receipt</field>
+        <field name="arch" type="xml">
+            <list string="Ingreso de mercancía etiquetada" decoration-success="state == 'done'" decoration-warning="state in ('scanning','ready')">
+                <field name="name"/>
+                <field name="operation_type" widget="badge"/>
+                <field name="picking_id"/>
+                <field name="warehouse_id"/>
+                <field name="destination_purpose" widget="badge"/>
+                <field name="product_id"/>
+                <field name="batch_id"/>
+                <field name="label_mode" widget="badge"/>
+                <field name="quantity"/>
+                <field name="scanned_count"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_inventory_serial_receipt_search" model="ir.ui.view">
+        <field name="name">inventory.serial.receipt.search</field>
+        <field name="model">inventory.serial.receipt</field>
+        <field name="arch" type="xml">
+            <search string="Buscar ingresos de mercancía">
+                <field name="name"/>
+                <field name="picking_id"/>
+                <field name="product_id"/>
+                <field name="batch_id"/>
+                <field name="warehouse_id"/>
+                <filter name="pending" string="Pendientes" domain="[('state','in',('draft','scanning','ready'))]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_warehouse" string="Almacén" context="{'group_by':'warehouse_id'}"/>
+                    <filter name="group_product" string="Producto" context="{'group_by':'product_id'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_inventory_serial_receipt_form" model="ir.ui.view">
+        <field name="name">inventory.serial.receipt.form</field>
+        <field name="model">inventory.serial.receipt</field>
+        <field name="arch" type="xml">
+            <form string="Ingreso de mercancía a lote">
+                <header>
+                    <button name="action_start" type="object" string="Preparar labels" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_print_labels" type="object" string="Imprimir labels nuevos" class="btn-primary" invisible="label_mode != 'generate' or state not in ('ready','done')"/>
+                    <button name="action_confirm" type="object" string="Confirmar ingreso" class="btn-success" groups="doorandoor_inventory_variant_count.group_inventory_count_manager,base.group_system" invisible="state != 'ready'"/>
+                    <button name="action_close_incomplete" type="object" string="Cerrar con faltantes" class="btn-warning" groups="doorandoor_inventory_variant_count.group_inventory_count_manager,base.group_system" invisible="state not in ('scanning','ready') or operation_type != 'internal' or missing_count == 0" confirm="Se cerrará la recepción únicamente con los labels contados. Los faltantes serán notificados a Gerencia. ¿Continuar?"/>
+                    <button name="action_create_damage_return" type="object" string="Crear devolución por daño" class="btn-danger" groups="doorandoor_inventory_variant_count.group_inventory_count_manager,base.group_system" invisible="state not in ('done','incomplete') or return_picking_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,scanning,ready,done,incomplete"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><label for="name"/><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Documento logístico">
+                            <field name="allowed_warehouse_ids" invisible="1"/>
+                            <field name="can_select_warehouse" invisible="1"/>
+                            <field name="warehouse_id" readonly="state != 'draft' or not can_select_warehouse"/>
+                            <field name="candidate_picking_ids" invisible="1"/>
+                            <field name="picking_id" readonly="state != 'draft'"/>
+                            <field name="operation_type" readonly="1"/>
+                            <field name="source_warehouse_id" readonly="1"/>
+                            <field name="transport_plan_names" readonly="1" invisible="not transport_plan_names"/>
+                            <field name="transport_driver_name" readonly="1"/>
+                            <field name="transport_vehicle_name" readonly="1"/>
+                            <field name="transport_license_plate" readonly="1"/>
+                            <field name="destination_purpose" readonly="state != 'draft'"/>
+                            <field name="destination_reference" readonly="1" invisible="not destination_reference"/>
+                            <field name="destination_picking_id" readonly="1" invisible="not destination_picking_id"/>
+                            <field name="predispatch_location_id" readonly="1" invisible="destination_purpose != 'delivery'"/>
+                        </group>
+                        <group string="Producto y etiquetado">
+                            <field name="product_id" readonly="state != 'draft'"/>
+                            <field name="candidate_batch_ids" invisible="1"/>
+                            <field name="recommended_batch_id" readonly="1" invisible="destination_purpose != 'storage'"/>
+                            <field name="batch_id" readonly="state != 'draft'" invisible="destination_purpose != 'storage'"/>
+                            <field name="label_mode" readonly="state != 'draft' or operation_type == 'internal'"/>
+                            <field name="quantity" readonly="state != 'draft'"/>
+                            <field name="document_quantity" readonly="1"/>
+                            <field name="scanned_count" readonly="1"/>
+                            <field name="missing_count" readonly="1" invisible="operation_type != 'internal'"/>
+                            <field name="return_picking_id" readonly="1" invisible="not return_picking_id"/>
+                        </group>
+                    </group>
+                    <group string="Lectura de labels" invisible="state != 'scanning'">
+                        <field name="scan_code" placeholder="Escanee el label y pulse Agregar"/>
+                        <button name="action_scan" type="object" string="Agregar label" class="btn-primary"/>
+                    </group>
+                    <notebook>
+                        <page string="Labels de esta operación">
+                            <field name="serial_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="code"/>
+                                    <field name="product_id"/>
+                                    <field name="current_warehouse_id"/>
+                                    <field name="current_batch_id"/>
+                                    <field name="current_location_id"/>
+                                    <field name="inventory_loaded"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Faltantes" invisible="operation_type != 'internal'">
+                            <group>
+                                <field name="closure_note" placeholder="Explique la diferencia encontrada durante la recepción..." readonly="state in ('done','incomplete','cancel')"/>
+                                <field name="evidence_attachment_ids" widget="many2many_binary" readonly="state in ('done','incomplete','cancel')"/>
+                            </group>
+                            <group string="Labels esperados desde el despacho">
+                                <field name="expected_serial_ids" readonly="1">
+                                    <list create="0" edit="0" delete="0">
+                                        <field name="code"/>
+                                        <field name="product_id"/>
+                                        <field name="current_warehouse_id"/>
+                                    </list>
+                                </field>
+                            </group>
+                            <group string="Labels pendientes de recibir" invisible="missing_count == 0">
+                                <field name="missing_serial_ids" readonly="1">
+                                    <list create="0" edit="0" delete="0">
+                                        <field name="code"/>
+                                        <field name="product_id"/>
+                                        <field name="current_warehouse_id"/>
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Devolución por daño" invisible="state not in ('done','incomplete')">
+                            <div class="alert alert-warning">Use esta sección solamente cuando la mercancía llegó físicamente, pero presenta daños por accidente o mala manipulación durante el traslado. Un faltante no genera devolución.</div>
+                            <group>
+                                <field name="damaged_serial_ids" widget="many2many_tags" readonly="return_picking_id"/>
+                                <field name="damage_note" placeholder="Describa el defecto, accidente o mala manipulación observada..." readonly="return_picking_id"/>
+                                <field name="damage_attachment_ids" widget="many2many_binary" readonly="return_picking_id"/>
+                                <field name="return_picking_id" readonly="1" invisible="not return_picking_id"/>
+                            </group>
+                        </page>
+                        <page string="Contenido actual del lote" invisible="destination_purpose != 'storage'">
+                            <div class="alert alert-info">Esta lista es informativa. Los seriales históricos no pueden seleccionarse ni modificarse.</div>
+                            <field name="batch_serial_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="code"/>
+                                    <field name="current_warehouse_id"/>
+                                    <field name="inventory_loaded"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_inventory_serial_receipt" model="ir.actions.act_window">
+        <field name="name">Ingreso de mercancía a lote</field>
+        <field name="res_model">inventory.serial.receipt</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_inventory_serial_receipt_search"/>
+    </record>
+
+    <record id="view_picking_form_serial_receipt" model="ir.ui.view">
+        <field name="name">stock.picking.form.serial.receipt</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_print_associated_labels" type="object"
+                        string="Imprimir labels asociados" icon="fa-barcode"
+                        invisible="not serial_receipt_ids"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_serial_receipts" type="object" class="oe_stat_button" icon="fa-barcode" invisible="picking_type_code not in ('incoming','internal')">
+                    <field name="serial_receipt_count" widget="statinfo" string="Control de labels"/>
+                </button>
+                <button name="action_open_predispatch_location" type="object" class="oe_stat_button" icon="fa-map-marker" invisible="not ddic_predispatch_location_id">
+                    <field name="ddic_predispatch_location_id" widget="statinfo" string="Predespacho"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Recepción por ITEM" invisible="picking_type_code not in ('incoming','internal')">
+                    <div class="alert alert-info" role="alert">
+                        Reposición propone lote. Una compra vinculada a factura u orden de entrega
+                        propone predespacho. Revise cada línea antes de preparar los labels.
+                    </div>
+                    <group>
+                        <button name="action_prepare_serial_receipt_lines" type="object"
+                                string="1. Preparar líneas" class="btn-primary"
+                                invisible="state in ('done','cancel')"/>
+                        <button name="action_prepare_all_serial_receipt_labels" type="object"
+                                string="2. Preparar e imprimir labels" class="btn-primary"
+                                invisible="state in ('done','cancel')"/>
+                        <button name="action_print_serial_receipt_labels" type="object"
+                                string="Reimprimir labels" invisible="not serial_receipt_ids"/>
+                        <button name="action_validate_serial_receipt" type="object"
+                                string="3. Validar recepción" class="btn-success"
+                                groups="doorandoor_inventory_variant_count.group_inventory_count_manager,base.group_system"
+                                invisible="state in ('done','cancel')"
+                                confirm="Se validará el inventario físico y lógico según el destino de cada línea. ¿Continuar?"/>
+                    </group>
+                    <field name="serial_receipt_ids" readonly="state in ('done','cancel')">
+                        <list create="0" delete="0" editable="bottom"
+                              decoration-success="state == 'done'"
+                              decoration-warning="state in ('scanning','ready')">
+                            <field name="source_group_key" column_invisible="True"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="quantity" readonly="1"/>
+                            <field name="destination_purpose"/>
+                            <field name="destination_reference" readonly="1" optional="show"/>
+                            <field name="recommended_batch_id" readonly="1" optional="show"/>
+                            <field name="batch_id" invisible="destination_purpose != 'storage'"/>
+                            <field name="label_mode" readonly="1"/>
+                            <field name="scanned_count" readonly="1"/>
+                            <field name="state" widget="badge" readonly="1"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_location_form_predispatch" model="ir.ui.view">
+        <field name="name">stock.location.form.predispatch</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_form"/>
+        <field name="arch" type="xml">
+            <field name="usage" position="after">
+                <field name="ddic_is_predispatch" invisible="usage != 'internal'"/>
+                <field name="ddic_is_predispatch_root" invisible="1"/>
+                <field name="ddic_predispatch_picking_id" readonly="1" invisible="not ddic_is_predispatch"/>
+            </field>
+        </field>
+    </record>
+</odoo>

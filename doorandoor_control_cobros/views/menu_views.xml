@@ -47,11 +47,43 @@
             <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
         </record>
 
+        <record id="menu_ddc_daily_income_report" model="ir.ui.menu">
+            <field name="name">Ingresos diarios</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_reports"/>
+            <field name="action" ref="doorandoor_control_cobros.action_ddc_daily_income_report"/>
+            <field name="sequence">12</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
+
         <record id="menu_ddc_report_wizard" model="ir.ui.menu">
             <field name="name">Asistente PDF</field>
             <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_reports"/>
             <field name="action" ref="doorandoor_control_cobros.action_ddc_cobro_report_wizard"/>
             <field name="sequence">20</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
+
+        <record id="menu_ddc_payment_receipts" model="ir.ui.menu">
+            <field name="name">Recibos de cobro</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_reports"/>
+            <field name="action" ref="doorandoor_control_cobros.action_ddc_payment_receipts"/>
+            <field name="sequence">25</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
+
+        <record id="menu_ddc_generate_payment_receipt" model="ir.ui.menu">
+            <field name="name">Generar recibo</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_reports"/>
+            <field name="action" ref="doorandoor_control_cobros.action_ddc_payment_receipt_wizard"/>
+            <field name="sequence">26</field>
+            <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
+        </record>
+
+        <record id="menu_ddc_customer_payment_statement" model="ir.ui.menu">
+            <field name="name">Estado de pagos por cliente</field>
+            <field name="parent_id" ref="doorandoor_control_cobros.menu_ddc_reports"/>
+            <field name="action" ref="doorandoor_control_cobros.action_ddc_customer_payment_statement_wizard"/>
+            <field name="sequence">27</field>
             <field name="groups_id" eval="[(6, 0, [ref('doorandoor_control_cobros.group_ddc_user')])]"/>
         </record>
     </data>

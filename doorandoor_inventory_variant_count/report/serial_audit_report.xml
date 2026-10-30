@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_serial_session_audit" model="ir.actions.report">
+        <field name="name">Control de seriales del conteo</field>
+        <field name="model">inventory.count.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_inventory_variant_count.serial_audit_report</field>
+        <field name="report_file">doorandoor_inventory_variant_count.serial_audit_report</field>
+        <field name="print_report_name">'Control de seriales - %s' % (object.name or 'Conteo')</field>
+    </record>
+
+    <record id="action_report_serial_campaign_audit" model="ir.actions.report">
+        <field name="name">Control de seriales de la campaña</field>
+        <field name="model">inventory.serial.campaign</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_inventory_variant_count.serial_campaign_audit_report</field>
+        <field name="report_file">doorandoor_inventory_variant_count.serial_campaign_audit_report</field>
+        <field name="print_report_name">'Control de seriales - %s' % (object.name or 'Campaña')</field>
+    </record>
+
+    <template id="serial_audit_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="audit" t-value="o._serial_audit_report_data()"/>
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Control de seriales</h2>
+                        <table class="table table-sm table-borderless">
+                            <tr><th>Campaña</th><td><t t-esc="audit['campaign']"/></td></tr>
+                            <tr t-if="audit['session']"><th>Sesión</th><td><t t-esc="audit['session']"/></td></tr>
+                            <tr><th>Almacén</th><td><t t-esc="audit['warehouse']"/></td></tr>
+                        </table>
+                        <div class="row my-3">
+                            <div class="col-4"><strong>Emitidos:</strong> <t t-esc="audit['expected']"/></div>
+                            <div class="col-4"><strong>Contados:</strong> <t t-esc="audit['counted']"/></div>
+                            <div class="col-4"><strong>Pendientes:</strong> <t t-esc="audit['pending']"/></div>
+                        </div>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Lote</th><th>Almacén</th><th>Producto</th>
+                                    <th class="text-end">Emitidos</th>
+                                    <th class="text-end">Contados</th>
+                                    <th class="text-end">Otra sesión</th>
+                                    <th class="text-end">Pendientes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="audit['rows']" t-as="row">
+                                    <tr>
+                                        <td><t t-esc="row['batch']"/></td>
+                                        <td><t t-esc="row['warehouse']"/></td>
+                                        <td><t t-esc="row['product']"/></td>
+                                        <td class="text-end"><t t-esc="row['expected']"/></td>
+                                        <td class="text-end"><t t-esc="row['counted']"/></td>
+                                        <td class="text-end"><t t-esc="row['counted_other']"/></td>
+                                        <td class="text-end"><strong><t t-esc="row['pending']"/></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7">
+                                            <table class="table table-sm mb-0">
+                                                <thead><tr><th>Serial</th><th>Estado</th><th>Sesión</th></tr></thead>
+                                                <tbody>
+                                                    <tr t-foreach="row['details']" t-as="detail">
+                                                        <td><t t-esc="detail['code']"/></td>
+                                                        <td><t t-esc="detail['status']"/></td>
+                                                        <td><t t-esc="detail['session']"/></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <p t-if="audit['pending']" class="text-danger">
+                            <strong>Atención:</strong> existen seriales emitidos que no fueron contados
+                            en esta sesión. Investigue la diferencia y documente la observación antes
+                            de enviar el conteo a revisión.
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="serial_campaign_audit_report">
+        <t t-call="doorandoor_inventory_variant_count.serial_audit_report"/>
+    </template>
+</odoo>

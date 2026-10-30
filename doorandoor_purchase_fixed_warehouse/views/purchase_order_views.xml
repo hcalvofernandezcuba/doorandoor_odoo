@@ -25,12 +25,51 @@
                 <xpath expr="//button[@name='button_confirm']" position="attributes">
                     <attribute name="class" add="btn-success" separator=" "/>
                 </xpath>
+                <xpath expr="//button[@name='button_confirm']" position="before">
+                    <button
+                        name="action_ddpfw_auto_allocate_supply"
+                        type="object"
+                        string="Calcular logística"
+                        class="btn-secondary"
+                        invisible="state not in ('draft', 'sent')"/>
+                </xpath>
                 <xpath expr="//field[@name='picking_type_id']" position="after">
                     <field name="ddpfw_enforced_warehouse_id" invisible="1"/>
                     <field name="ddpfw_receipt_picking_id" invisible="1"/>
+                    <field name="ddpfw_supply_summary" readonly="1"/>
+                    <field name="ddpfw_source_invoice_ids" widget="many2many_tags" readonly="1"/>
+                    <field name="ddpfw_demand_warehouse_id"/>
                 </xpath>
                 <xpath expr="//field[@name='picking_type_id']" position="attributes">
                     <attribute name="readonly">ddpfw_enforced_warehouse_id</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/list/field[@name='product_qty']" position="after">
+                    <field name="ddpfw_supply_origin" optional="show"/>
+                    <field name="ddpfw_allocated_qty" optional="hide"/>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Origen logístico" name="ddpfw_supply_origin">
+                        <p class="text-muted">
+                            Esta distribución se calcula automáticamente. Logística puede
+                            corregirla manualmente solamente cuando exista una excepción.
+                        </p>
+                        <field name="ddpfw_supply_allocation_ids" context="{'default_purchase_order_id': id}">
+                            <list editable="bottom">
+                                <field name="purchase_line_id" domain="[('order_id', '=', parent.id), ('display_type', '=', False)]"/>
+                                <field name="product_id" readonly="1"/>
+                                <field name="quantity"/>
+                                <field name="product_uom_id" readonly="1"/>
+                                <field name="origin_type"/>
+                                <field name="invoice_id" invisible="origin_type != 'sale'"/>
+                                <field name="invoice_line_id" invisible="origin_type != 'sale'"/>
+                                <field name="sale_order_id" invisible="origin_type != 'sale'"/>
+                                <field name="customer_id" readonly="1" invisible="origin_type != 'sale'"/>
+                                <field name="warehouse_id"/>
+                                <field name="automatic" readonly="1"/>
+                                <field name="origin_document" readonly="1"/>
+                            </list>
+                        </field>
+                    </page>
                 </xpath>
             </field>
         </record>

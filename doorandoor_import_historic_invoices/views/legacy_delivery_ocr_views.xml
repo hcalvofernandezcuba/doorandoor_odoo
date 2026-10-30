@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_legacy_delivery_import_batch_list" model="ir.ui.view">
+        <field name="name">doorandoor.legacy.delivery.import.batch.list</field>
+        <field name="model">doorandoor.legacy.delivery.import.batch</field>
+        <field name="arch" type="xml">
+            <list string="Lotes de PDF históricos">
+                <field name="name"/>
+                <field name="warehouse_id"/>
+                <field name="supply_warehouse_id"/>
+                <field name="state" widget="badge"/>
+                <field name="create_date"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_legacy_delivery_import_batch_form" model="ir.ui.view">
+        <field name="name">doorandoor.legacy.delivery.import.batch.form</field>
+        <field name="model">doorandoor.legacy.delivery.import.batch</field>
+        <field name="arch" type="xml">
+            <form string="Importar facturas históricas">
+                <header>
+                    <button name="action_enqueue" type="object" string="Crear documentos y procesar" class="btn-primary" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="supply_warehouse_id" options="{'no_create': True}"/>
+                            <field name="warehouse_id" options="{'no_create': True}"/>
+                            <field name="inventory_treatment"/>
+                            <field name="inventory_treatment_reason"
+                                   required="inventory_treatment in ('excluded_legacy', 'exceptional_regularization')"/>
+                        </group>
+                        <group>
+                            <field name="payment_note"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Seleccione uno o varios PDF">
+                        <field name="attachment_ids" widget="many2many_binary" readonly="state != 'draft'"/>
+                    </group>
+                    <notebook>
+                        <page string="Documentos">
+                            <field name="document_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="file_name"/>
+                                    <field name="source_system" widget="badge"/>
+                                    <field name="external_reference"/>
+                                    <field name="partner_id"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="needs_review"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_legacy_delivery_ocr_list" model="ir.ui.view">
+        <field name="name">doorandoor.legacy.delivery.ocr.list</field>
+        <field name="model">doorandoor.legacy.delivery.ocr</field>
+        <field name="arch" type="xml">
+            <list string="Facturas históricas importadas"
+                  decoration-danger="state == 'error'" decoration-warning="state == 'review'"
+                  decoration-success="state == 'approved'">
+                <field name="name"/>
+                <field name="file_name"/>
+                <field name="source_system" widget="badge"/>
+                <field name="external_reference"/>
+                <field name="sale_date"/>
+                <field name="partner_id"/>
+                <field name="warehouse_id"/>
+                <field name="state" widget="badge"/>
+                <field name="needs_review"/>
+                <field name="historical_delivery_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_legacy_delivery_ocr_form" model="ir.ui.view">
+        <field name="name">doorandoor.legacy.delivery.ocr.form</field>
+        <field name="model">doorandoor.legacy.delivery.ocr</field>
+        <field name="arch" type="xml">
+            <form string="Factura histórica importada">
+                <header>
+                    <button name="action_extract_now" type="object" string="Extraer ahora" class="btn-primary" invisible="state not in ('draft', 'queued', 'error')"/>
+                    <button name="action_mark_ready" type="object" string="Enviar a aprobación" class="btn-primary" invisible="state != 'review'"/>
+                    <button name="action_approve_and_create_delivery" type="object" string="Aprobar tratamiento logístico" class="btn-primary" groups="doorandoor_import_historic_invoices.group_legacy_delivery_ocr_supervisor" invisible="state != 'ready'"/>
+                    <button name="action_open_historical_delivery" type="object" string="Abrir entrega histórica" invisible="not historical_delivery_id"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="file_name"/>
+                            <field name="file_data" filename="file_name"/>
+                            <field name="extraction_method"/>
+                            <field name="source_system"/>
+                            <field name="file_sha256" optional="hide"/>
+                        </group>
+                        <group>
+                            <field name="external_reference" readonly="state not in ('review', 'ready')"/>
+                            <field name="sale_date" readonly="state not in ('review', 'ready')"/>
+                            <field name="customer_text"/>
+                            <field name="partner_id" readonly="state not in ('review', 'ready')"/>
+                            <field name="salesperson_text"/>
+                            <field name="legacy_status"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="supply_warehouse_id" readonly="state not in ('review', 'ready')"/>
+                            <field name="warehouse_id" readonly="state not in ('review', 'ready')"/>
+                            <field name="inventory_treatment" readonly="state not in ('review', 'ready')"/>
+                            <field name="inventory_treatment_reason"
+                                   readonly="state not in ('review', 'ready')"
+                                   required="inventory_treatment in ('excluded_legacy', 'exceptional_regularization')"/>
+                            <field name="payment_note" readonly="state not in ('review', 'ready')"/>
+                            <field name="payment_method_text"/>
+                            <field name="amount_total" widget="monetary"/>
+                            <field name="amount_paid" widget="monetary"/>
+                            <field name="amount_due" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="needs_review"/>
+                            <field name="reviewed_by_id"/>
+                            <field name="approved_by_id"/>
+                            <field name="historical_delivery_id"/>
+                            <field name="picking_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Productos y cantidades pendientes">
+                            <field name="line_ids" readonly="state not in ('review', 'ready')">
+                                <list editable="bottom" decoration-danger="match_state != 'matched'">
+                                    <field name="source_text" optional="hide"/>
+                                    <field name="description"/>
+                                    <field name="billed_quantity"/>
+                                    <field name="delivered_quantity"/>
+                                    <field name="quantity" string="Pendiente a entregar"/>
+                                    <field name="logistic_notes"/>
+                                    <field name="legacy_size" optional="hide"/>
+                                    <field name="legacy_swing" optional="hide"/>
+                                    <field name="legacy_color" optional="hide"/>
+                                    <field name="legacy_glass" optional="hide"/>
+                                    <field name="legacy_model" optional="hide"/>
+                                    <field name="product_id"/>
+                                    <field name="mapping_proposed" optional="show"/>
+                                    <field name="mapping_confirmed" optional="show"/>
+                                    <field name="confidence"/>
+                                    <field name="match_state" widget="badge"/>
+                                    <button name="action_open_historical_special_wizard" type="object" string="Crear especial histórico" class="btn-link" invisible="product_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Texto extraído"><field name="raw_text" widget="text"/></page>
+                        <page string="Errores" invisible="not error_message"><field name="error_message"/></page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_legacy_delivery_import_batches" model="ir.actions.act_window">
+        <field name="name">Importar facturas anteriores</field>
+        <field name="res_model">doorandoor.legacy.delivery.import.batch</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_legacy_delivery_ocr_documents" model="ir.actions.act_window">
+        <field name="name">Revisión de facturas importadas</field>
+        <field name="res_model">doorandoor.legacy.delivery.ocr</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="view_legacy_product_mapping_list" model="ir.ui.view">
+        <field name="name">doorandoor.legacy.product.mapping.list</field>
+        <field name="model">doorandoor.legacy.product.mapping</field>
+        <field name="arch" type="xml">
+            <list string="Equivalencias de productos anteriores">
+                <field name="source_system" widget="badge"/>
+                <field name="legacy_name"/>
+                <field name="legacy_size"/>
+                <field name="legacy_swing"/>
+                <field name="legacy_color"/>
+                <field name="legacy_glass"/>
+                <field name="legacy_model"/>
+                <field name="product_id"/>
+                <field name="use_count"/>
+                <field name="last_used_at"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_legacy_product_mapping_form" model="ir.ui.view">
+        <field name="name">doorandoor.legacy.product.mapping.form</field>
+        <field name="model">doorandoor.legacy.product.mapping</field>
+        <field name="arch" type="xml">
+            <form string="Equivalencia de producto anterior">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="source_system"/>
+                            <field name="legacy_name"/>
+                            <field name="legacy_size"/>
+                            <field name="legacy_swing"/>
+                            <field name="legacy_color"/>
+                            <field name="legacy_glass"/>
+                            <field name="legacy_model"/>
+                        </group>
+                        <group>
+                            <field name="product_id" options="{'no_create': True}"/>
+                            <field name="use_count"/>
+                            <field name="last_used_at"/>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_legacy_product_mappings" model="ir.actions.act_window">
+        <field name="name">Equivalencias de productos históricos</field>
+        <field name="res_model">doorandoor.legacy.product.mapping</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="menu_legacy_delivery_import_batches" name="Importar PDF históricos"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              action="action_legacy_delivery_import_batches" sequence="24"
+              groups="doorandoor_import_historic_invoices.group_legacy_delivery_ocr_operator"/>
+    <menuitem id="menu_legacy_delivery_ocr_documents" name="Revisar importaciones históricas"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              action="action_legacy_delivery_ocr_documents" sequence="25"
+              groups="doorandoor_import_historic_invoices.group_legacy_delivery_ocr_operator"/>
+    <menuitem id="menu_legacy_product_mappings" name="Equivalencias de productos históricos"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              action="action_legacy_product_mappings" sequence="26"
+              groups="doorandoor_import_historic_invoices.group_legacy_delivery_ocr_supervisor"/>
+</odoo>

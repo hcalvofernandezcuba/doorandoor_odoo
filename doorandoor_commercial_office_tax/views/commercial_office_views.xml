@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddco_commercial_office_list" model="ir.ui.view">
+        <field name="name">doorandoor.commercial.office.list</field>
+        <field name="model">doorandoor.commercial.office</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="company_id"/>
+                <field name="city"/>
+                <field name="state_id"/>
+                <field name="phone"/>
+                <field name="sale_tax_id"/>
+                <field name="operational_warehouse_id"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddco_commercial_office_form" model="ir.ui.view">
+        <field name="name">doorandoor.commercial.office.form</field>
+        <field name="model">doorandoor.commercial.office</field>
+        <field name="arch" type="xml">
+            <form string="Commercial Office">
+                <sheet>
+                    <div class="oe_title"><label for="name"/><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Office">
+                            <field name="company_id"/>
+                            <field name="phone"/>
+                            <field name="active"/>
+                            <field name="sale_tax_id"/>
+                            <field name="operational_warehouse_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                        <group string="Address">
+                            <field name="street"/>
+                            <field name="street2"/>
+                            <field name="city"/>
+                            <field name="state_id"/>
+                            <field name="zip"/>
+                            <field name="country_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Salespeople">
+                            <field name="user_ids" context="{'default_ddco_office_id': id}">
+                                <list editable="bottom"><field name="name"/><field name="login"/><field name="active"/></list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddco_commercial_office" model="ir.actions.act_window">
+        <field name="name">Commercial Offices</field>
+        <field name="res_model">doorandoor.commercial.office</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_ddco_commercial_office" name="Commercial Offices"
+              parent="account.menu_finance_configuration" action="action_ddco_commercial_office"
+              sequence="93" groups="account.group_account_manager"/>
+</odoo>

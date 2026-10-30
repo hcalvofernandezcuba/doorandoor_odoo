@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="catalog_index" name="Catálogo DoorAndDoor">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Catálogo</t>
+            <main id="wrap" class="ddwc_catalog">
+                <section class="ddwc_hero">
+                    <div class="container py-5 py-lg-6">
+                        <div class="row align-items-center g-4">
+                            <div class="col-lg-8">
+                                <span class="ddwc_eyebrow">FABRICACIÓN · DISTRIBUCIÓN · INSTALACIÓN</span>
+                                <h1>Soluciones que transforman cada espacio</h1>
+                                <p>Explore puertas, ventanas y sistemas de impacto fabricados de acuerdo con las necesidades de cada proyecto.</p>
+                            </div>
+                            <div class="col-lg-4 text-lg-end">
+                                <a href="/contactus?subject=Solicitud%20de%20proyecto" class="btn btn-lg ddwc_btn_gold">Hablemos de su proyecto</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="container py-5">
+                    <nav class="ddwc_filters" aria-label="Categorías del catálogo">
+                        <a href="/catalogo" t-attf-class="ddwc_filter #{'active' if not selected_category else ''}">Todos</a>
+                        <t t-foreach="categories" t-as="category">
+                            <a t-att-href="'/catalogo/%s' % category.slug"
+                               t-attf-class="ddwc_filter #{'active' if selected_category and selected_category.id == category.id else ''}">
+                                <t t-esc="category.name"/>
+                            </a>
+                        </t>
+                    </nav>
+
+                    <div t-if="products" class="row g-4 mt-2">
+                        <t t-foreach="products" t-as="product">
+                            <div class="col-sm-6 col-lg-4">
+                                <article class="ddwc_card h-100">
+                                    <a t-att-href="'/catalogo/producto/%s' % product.id" class="ddwc_card_media">
+                                        <img t-if="product.image_1920"
+                                             t-att-src="'/web/image/product.template/%s/image_1920' % product.id"
+                                             t-att-alt="product.name" loading="lazy"/>
+                                        <div t-else="" class="ddwc_placeholder" aria-hidden="true">
+                                            <span>D<span>&amp;</span>D</span>
+                                        </div>
+                                        <span t-if="product.ddwc_catalog_featured" class="ddwc_badge">Destacado</span>
+                                    </a>
+                                    <div class="ddwc_card_body">
+                                        <div class="ddwc_category"><t t-esc="product.ddwc_catalog_category_id.name"/></div>
+                                        <h2><a t-att-href="'/catalogo/producto/%s' % product.id"><t t-esc="product.name"/></a></h2>
+                                        <p t-if="product.description_sale"><t t-esc="product.description_sale"/></p>
+                                        <div class="ddwc_card_footer">
+                                            <span>Consulte configuraciones disponibles</span>
+                                            <a t-att-href="'/catalogo/producto/%s' % product.id" aria-label="Ver detalles">Ver detalles →</a>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </t>
+                    </div>
+
+                    <div t-else="" class="ddwc_empty text-center py-5 my-4">
+                        <img src="/doorandoor_website_brand/static/src/img/doorandoor_icon.svg" alt=""/>
+                        <h2>Estamos preparando nuestro catálogo</h2>
+                        <p>Muy pronto encontrará aquí nuestras soluciones fabricadas bajo pedido.</p>
+                        <a href="/contactus" class="btn btn-primary">Solicitar información</a>
+                    </div>
+                </section>
+            </main>
+        </t>
+    </template>
+
+    <template id="catalog_product" name="Producto del catálogo DoorAndDoor">
+        <t t-call="website.layout">
+            <t t-set="additional_title"><t t-esc="product.name"/></t>
+            <main id="wrap" class="ddwc_detail">
+                <section class="container py-4 py-lg-6">
+                    <a href="/catalogo" class="ddwc_back">← Volver al catálogo</a>
+                    <div class="row g-5 align-items-start mt-1">
+                        <div class="col-lg-7">
+                            <div class="ddwc_detail_media">
+                                <img t-if="product.image_1920" class="ddwc_product_image"
+                                     t-att-src="'/web/image/product.template/%s/image_1920' % product.id"
+                                     t-att-alt="product.name"/>
+                                <div t-else="" class="ddwc_placeholder"><span>D<span>&amp;</span>D</span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="ddwc_category"><t t-esc="product.ddwc_catalog_category_id.name"/></div>
+                            <h1><t t-esc="product.name"/></h1>
+                            <p t-if="product.description_sale" class="ddwc_lead"><t t-esc="product.description_sale"/></p>
+                            <div class="ddwc_made_to_order">Configuración según las opciones disponibles</div>
+                            <div t-if="product.description" class="ddwc_richtext" t-field="product.description"/>
+                            <div t-if="catalog_attributes" class="ddwc_configurator"
+                                 t-att-data-variants="catalog_variants_json"
+                                 t-att-data-product-name="product.name">
+                                <h2>Configure su producto</h2>
+                                <p class="ddwc_configurator_intro">Seleccione cada opción. Solo se muestran combinaciones disponibles.</p>
+                                <t t-foreach="catalog_attributes" t-as="attribute">
+                                    <fieldset class="ddwc_option_group" t-att-data-attribute-id="attribute['id']">
+                                        <legend>
+                                            <t t-esc="attribute['name']"/>
+                                            <span class="ddwc_selected_value">Seleccione una opción</span>
+                                        </legend>
+                                        <div class="ddwc_option_values">
+                                            <t t-foreach="attribute['values']" t-as="value">
+                                                <button type="button" class="ddwc_option"
+                                                        t-att-data-value-id="value['id']">
+                                                    <t t-esc="value['name']"/>
+                                                </button>
+                                            </t>
+                                        </div>
+                                    </fieldset>
+                                </t>
+                                <div class="ddwc_variant_result" aria-live="polite">
+                                    Seleccione las opciones para identificar el producto.
+                                </div>
+                            </div>
+                            <a t-attf-href="/contactus?subject=Solicitud+de+cotizacion:+#{product.name}"
+                               t-attf-class="btn btn-lg ddwc_btn_gold w-100 mt-4 ddwc_quote_button #{'disabled' if catalog_attributes else ''}"
+                               t-att-aria-disabled="'true' if catalog_attributes else 'false'">Solicitar cotización</a>
+                            <p class="ddwc_note">Confirmaremos medidas, configuración, disponibilidad y condiciones del proyecto.</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_ddsn_po_letter" model="report.paperformat">
+        <field name="name">DoorAndDoor PO - Letter compacto</field>
+        <field name="default" eval="False"/>
+        <field name="format">Letter</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">15</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_ddsn_po" model="ir.actions.report">
+        <field name="name">PO</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_sales_new.report_ddsn_po</field>
+        <field name="report_file">doorandoor_sales_new.report_ddsn_po</field>
+        <field name="paperformat_id" ref="paperformat_ddsn_po_letter"/>
+        <field name="print_report_name">'PO - %s' % object.name</field>
+    </record>
+
+    <template id="report_ddsn_po_document">
+        <t t-call="web.basic_layout">
+            <div class="page" style="font-size: 11px; line-height: 1.15;">
+                <div class="row mb-3 align-items-start" style="border-bottom: 2px solid #28c878; padding-bottom: 8px;">
+                    <div class="col-5">
+                        <img t-if="doc.company_id.logo"
+                             t-att-src="image_data_uri(doc.company_id.logo)"
+                             style="max-height: 58px; max-width: 230px;" alt="Logo"/>
+                    </div>
+                    <div class="col-7 text-end" style="font-size: 10px; line-height: 1.2;">
+                        <strong style="font-size: 14px;" t-field="doc.company_id.name"/><br/>
+                        <span t-if="doc.company_id.street" t-field="doc.company_id.street"/>
+                        <span t-if="doc.company_id.street2">, <span t-field="doc.company_id.street2"/></span><br t-if="doc.company_id.street or doc.company_id.street2"/>
+                        <span t-if="doc.company_id.city" t-field="doc.company_id.city"/>
+                        <span t-if="doc.company_id.state_id">, <span t-field="doc.company_id.state_id"/></span>
+                        <span t-if="doc.company_id.zip"> <span t-field="doc.company_id.zip"/></span><br/>
+                        <span t-if="doc.company_id.country_id" t-field="doc.company_id.country_id"/>
+                        <t t-if="doc.company_id.vat"><br/><strong>Tax ID:</strong> <span t-field="doc.company_id.vat"/></t>
+                    </div>
+                </div>
+                <div class="row mb-2 align-items-start">
+                    <div class="col-7">
+                        <strong>Customer</strong>
+                        <div t-field="doc.partner_id" t-options='{"widget":"contact","fields":["name","address","phone"],"no_marker":true}'/>
+                    </div>
+                    <div class="col-5 text-end">
+                        <h2 style="margin: 0;">PO <span t-field="doc.name"/></h2>
+                        <div><strong>Date:</strong> <span t-field="doc.date_order" t-options='{"widget":"date"}'/></div>
+                        <div><strong>Salesperson:</strong> <span t-field="doc.user_id"/></div>
+                    </div>
+                </div>
+                <t t-if="doc.partner_shipping_id and doc.partner_shipping_id != doc.partner_id">
+                    <div class="mb-2"><strong>Delivery address:</strong>
+                        <span t-field="doc.partner_shipping_id" t-options='{"widget":"contact","fields":["name","address","phone"],"no_marker":true}'/>
+                    </div>
+                </t>
+                <table class="table table-sm o_main_table" style="font-size: 11px;">
+                    <thead><tr>
+                        <th class="text-start">Description</th>
+                        <th class="text-end">Quantity</th>
+                        <th class="text-end">Unit Price</th>
+                        <th class="text-end">Taxes</th>
+                        <th class="text-end">Amount</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="doc.order_line.filtered(lambda line: not line.display_type)" t-as="line">
+                            <td><span t-field="line.name"/></td>
+                            <td class="text-end"><span t-field="line.product_uom_qty"/> <span t-field="line.product_uom"/></td>
+                            <td class="text-end"><span t-field="line.price_unit"/></td>
+                            <td class="text-end"><span t-esc="', '.join((tax.invoice_label or tax.name) for tax in line.tax_id)"/></td>
+                            <td class="text-end"><span t-field="line.price_total" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="row"><div class="col-5 ms-auto">
+                    <table class="table table-sm table-borderless">
+                        <tr><td>Subtotal</td><td class="text-end"><span t-field="doc.amount_untaxed" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/></td></tr>
+                        <tr><td>Taxes</td><td class="text-end"><span t-field="doc.amount_tax" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/></td></tr>
+                        <tr class="fw-bold"><td>Total</td><td class="text-end"><span t-field="doc.amount_total" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/></td></tr>
+                    </table>
+                </div></div>
+                <div t-if="doc.note" class="mb-2"><strong>Terms and Conditions:</strong> <span t-field="doc.note"/></div>
+                <div class="row mt-2 align-items-start">
+                    <div class="col-8"><strong>Document Code</strong><br/>
+                        <img t-att-src="doc._ddsn_get_barcode_img_src()" style="max-width:250px;max-height:55px;"/>
+                    </div>
+                    <div class="col-4 text-end"><strong>Scan to Open</strong><br/>
+                        <img t-att-src="doc._ddsn_get_document_qr_img_src()" style="width:72px;height:72px;"/>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-6"><strong>Salesperson</strong><div style="border-top:1px solid #000;margin-top:28px;padding-top:3px;"><span t-field="doc.user_id"/></div></div>
+                    <div class="col-6"><strong>Approved by</strong><div style="border-top:1px solid #000;margin-top:28px;padding-top:3px;">&#160;</div></div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_ddsn_po">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc"><t t-call="doorandoor_sales_new.report_ddsn_po_document" t-lang="'en_US'"/></t>
+        </t>
+    </template>
+</odoo>

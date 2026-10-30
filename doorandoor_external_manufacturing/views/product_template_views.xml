@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_template_form_ddem" model="ir.ui.view">
+        <field name="name">product.template.form.ddem</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Abastecimiento DoorAndDoor" name="ddem_supply">
+                    <group>
+                        <group string="Ruta predeterminada">
+                            <field name="ddem_supply_route"/>
+                            <field name="ddem_primary_vendor_id" invisible="ddem_supply_route not in ('external', 'subcontract')" required="ddem_supply_route in ('external', 'subcontract')"/>
+                            <field name="ddem_alternative_vendor_ids" widget="many2many_tags" invisible="ddem_supply_route not in ('external', 'subcontract')"/>
+                            <field name="ddem_logistic_route" invisible="ddem_supply_route not in ('external', 'subcontract')"/>
+                            <field name="ddem_receipt_warehouse_id" invisible="ddem_supply_route not in ('external', 'subcontract') or ddem_logistic_route == 'direct'"/>
+                        </group>
+                        <group string="Plazos y controles" invisible="ddem_supply_route not in ('external', 'subcontract')">
+                            <field name="ddem_manufacturing_days"/>
+                            <field name="ddem_transport_days"/>
+                            <field name="ddem_min_payment_percent"/>
+                            <field name="ddem_min_margin_percent"/>
+                            <field name="ddem_requires_manager_approval"/>
+                            <field name="ddem_auto_prepare_purchase"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="ddem_supply_route not in ('external', 'subcontract')">
+                        Esta configuración se hereda al producto especial. La cotización puede confirmar una modalidad distinta para un pedido concreto sin modificar la plantilla.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

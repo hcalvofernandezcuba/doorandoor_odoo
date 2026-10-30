@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Process Control",
-    "version": "18.0.2.4.3",
+    "version": "18.0.2.7.0",
     "category": "Operations",
-    "summary": "18.0.2.4.3 - Avisos por almacén, administradores globales y refresco en Odoo 18",
+    "summary": "18.0.2.7.0 - Nuevo traslado logístico manual desde cada almacén autorizado",
     "description": """
 DoorAndDoor Process Control
 ===========================
@@ -36,10 +36,21 @@ Alcance inicial
 Historial resumido
 ------------------
 
+- 18.0.2.7.0
+  Habilita Nuevo en la bandeja de Traslados para decisiones logísticas sin
+  documento previo. Preselecciona el tipo interno y DD/Stock del almacén
+  predeterminado o único autorizado, dejando editable el destino. Conserva el
+  flujo nativo hacia carga de camión, conteo Hanger, tránsito y recepción.
+
 - 18.0.2.4.3
   Envía los avisos a los operadores configurados en el almacén destino y a
   todos los usuarios de Administración/Ajustes. Sustituye el listener legado
   por un servicio compatible con Odoo 18 y registra los destinatarios enviados.
+
+- 18.0.2.4.4
+  Cierra el acceso implícito a toda la compañía cuando un operador de almacén
+  no tiene almacenes autorizados. La administración general conserva su acceso
+  global y los perfiles Hanger deben declarar al menos un almacén.
 
 - 18.0.2.4.2
   Implementa actualización automática de vistas usando mensajes record_update
@@ -198,6 +209,20 @@ Historial resumido
 - 18.0.1.0.17
   Se retira la sobreescritura de `stock_picking_batch.action_prepare_wave_for_picking_type` porque ese modulo no esta instalado en esta base.
   Esto restablece la actualizacion de `doorandoor_process_control` sin depender de un XML ID externo inexistente localmente.
+
+- 18.0.2.4.5
+  Renombra el segundo acceso `Operaciones` del módulo Inventario como `Tareas de almacén`.
+  El cambio evita confusiones en la navegación y la documentación sin modificar acciones, rutas ni permisos.
+
+- 18.0.2.5.0
+  Incorpora el registro auditado de entregas provenientes del sistema anterior,
+  con factura histórica única, respaldo obligatorio y una salida nativa del almacén.
+  Las operaciones generadas se integran a la misma cola móvil usada por Hanger.
+
+- 18.0.2.5.1
+  Concede explícitamente a Responsable de Inventario acceso para crear y
+  administrar entregas históricas, seleccionar almacenes y ver su entrada de
+  menú, sin depender de Administración/Ajustes ni de permisos heredados.
     """,
     "author": "Hanoi Calvo",
     "maintainer": "doorandoor",
@@ -214,7 +239,9 @@ Historial resumido
     ],
     "data": [
         "security/process_control_security.xml",
+        "security/warehouse_scope_enforcement.xml",
         "security/ir.model.access.csv",
+        "data/historical_delivery_sequence.xml",
         "data/warehouse_alert_data.xml",
         "views/process_control_views.xml",
         "report/process_control_reports.xml",
@@ -229,6 +256,7 @@ Historial resumido
         "views/pending_delivery_views.xml",
         "views/sales_reservation_analysis_views.xml",
         "views/warehouse_operation_views.xml",
+        "views/historical_delivery_views.xml",
         "views/menu_views.xml",
         "views/realtime_dashboard_views.xml",
     ],

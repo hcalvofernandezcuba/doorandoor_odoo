@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_list_ddsr_operational_state" model="ir.ui.view">
+        <field name="name">account.payment.list.ddsr.operational.state</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="replace">
+                <field name="ddsr_operational_state"
+                       widget="badge"
+                       decoration-info="ddsr_operational_state == 'draft'"
+                       decoration-warning="ddsr_operational_state == 'in_process'"
+                       decoration-success="ddsr_operational_state in ('paid', 'credit_available')"
+                       decoration-primary="ddsr_operational_state == 'credit_partial'"
+                       decoration-muted="ddsr_operational_state in ('canceled', 'credit_consumed')"
+                       decoration-danger="ddsr_operational_state == 'rejected'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

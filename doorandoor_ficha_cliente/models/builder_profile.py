@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class DdfcBuilderProfile(models.Model):
@@ -33,6 +34,12 @@ class DdfcBuilderProfile(models.Model):
     )
     discount_active = fields.Boolean(string="Descuento activo", default=True, tracking=True)
     discount_percent = fields.Float(string="Descuento especial (%)", default=0.0, tracking=True)
+    discount_date_from = fields.Date(string="Descuento válido desde", tracking=True)
+    discount_date_to = fields.Date(string="Descuento válido hasta", tracking=True)
+    discount_authorized_by_id = fields.Many2one(
+        "res.users", string="Descuento autorizado por", tracking=True, copy=False
+    )
+    discount_reason = fields.Text(string="Motivo del descuento", tracking=True)
     customer_ids = fields.One2many(
         "res.partner",
         "ddfc_builder_id",
@@ -58,6 +65,30 @@ class DdfcBuilderProfile(models.Model):
         ("ddfc_builder_profile_name_uniq", "unique(name)", "Ya existe un constructor con este nombre."),
         ("ddfc_builder_profile_code_uniq", "unique(code)", "Ya existe un constructor con este codigo."),
     ]
+
+    @api.constrains("discount_percent", "discount_date_from", "discount_date_to")
+    def _check_discount_percent(self):
+        for record in self:
+            if not 0.0 <= record.discount_percent <= 100.0:
+                raise ValidationError("El descuento del constructor debe estar entre 0 y 100 %.")
+            if (
+                record.discount_date_from
+                and record.discount_date_to
+                and record.discount_date_from > record.discount_date_to
+            ):
+                raise ValidationError("La fecha final del descuento no puede ser anterior a la inicial.")
+
+    def _ddfc_discount_is_current(self):
+        self.ensure_one()
+        today = fields.Date.context_today(self)
+        return bool(
+            self.active
+            and self.discount_active
+            and self.ddfc_discount_for_new_process
+            and self.discount_percent > 0.0
+            and (not self.discount_date_from or self.discount_date_from <= today)
+            and (not self.discount_date_to or self.discount_date_to >= today)
+        )
 
     @api.depends("customer_ids")
     def _compute_customer_count(self):

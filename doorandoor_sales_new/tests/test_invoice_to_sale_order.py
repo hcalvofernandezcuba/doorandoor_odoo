@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from odoo import fields
+from odoo import Command, fields
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
@@ -19,6 +19,7 @@ class TestInvoiceToSaleOrder(TransactionCase):
             {
                 "name": "Producto Prueba DDSN",
                 "type": "consu",
+                "is_storable": True,
                 "list_price": 120.0,
             }
         )
@@ -34,6 +35,7 @@ class TestInvoiceToSaleOrder(TransactionCase):
             {
                 "name": "Componente DDSN",
                 "type": "consu",
+                "is_storable": True,
                 "list_price": 10.0,
             }
         )
@@ -84,7 +86,23 @@ class TestInvoiceToSaleOrder(TransactionCase):
                 ],
             }
         )
+        self._accept_current_policy(move)
         return move
+
+    def test_reposting_invoice_preserves_original_fiscal_number(self):
+        move = self._create_customer_invoice()
+        move.action_post()
+        original_name = move.name
+        original_prefix = move.sequence_prefix
+        original_number = move.sequence_number
+
+        move.button_draft()
+        self.assertEqual(move.name, original_name)
+        move.action_post()
+
+        self.assertEqual(move.name, original_name)
+        self.assertEqual(move.sequence_prefix, original_prefix)
+        self.assertEqual(move.sequence_number, original_number)
 
     def _create_manufacturing_invoice(self):
         move = self.env["account.move"].create(
@@ -106,6 +124,7 @@ class TestInvoiceToSaleOrder(TransactionCase):
                 ],
             }
         )
+        self._accept_current_policy(move)
         return move
 
     def _create_stock_invoice(self):
@@ -128,7 +147,64 @@ class TestInvoiceToSaleOrder(TransactionCase):
                 ],
             }
         )
+        self._accept_current_policy(move)
         return move
+
+    def _accept_current_policy(self, move):
+        """Keep fulfillment tests aligned with the mandatory policy gate."""
+        if not hasattr(move, "_ddpa_get_or_create_request"):
+            return
+        if move.partner_id._ddpa_get_valid_acceptance():
+            return
+        move._ddpa_get_or_create_request("present")._accept(
+            "Cliente Pruebas DoorAndDoor",
+            ip_address="127.0.0.1",
+            user_agent="Odoo test suite",
+            document_language="en",
+        )
+
+    def _approve_current_production_need(self, move):
+        """Follow the active daily-planning flow when Factory Control is installed."""
+        fulfillment = move.fulfillment_line_ids
+        if "ddfc.production.need" not in self.env.registry:
+            return fulfillment.mrp_production_id
+        need = fulfillment.production_need_ids
+        self.assertEqual(len(need), 1)
+        self.assertEqual(need.requested_qty, fulfillment.qty_released)
+        production_warehouse = self.env["stock.warehouse"].search(
+            [
+                ("company_id", "=", move.company_id.id),
+                ("name", "ilike", "Tampa Produccion"),
+            ],
+            limit=1,
+        ) or move.sale_order_id.warehouse_id
+        destination = (
+            production_warehouse.manu_type_id.default_location_src_id
+            or production_warehouse.lot_stock_id
+        )
+        plan = self.env["ddfc.daily.plan"].create({
+            "plan_date": fields.Date.today() + timedelta(days=1000),
+            "production_warehouse_id": production_warehouse.id,
+            "material_destination_location_id": destination.id,
+        })
+        self.env["ddfc.daily.plan.line"].with_context(
+            ddfc_snapshot_loading=True
+        ).create({
+            "plan_id": plan.id,
+            "warehouse_id": need.warehouse_id.id,
+            "product_id": need.product_id.id,
+            "bom_id": self.bom.id,
+            "requested_qty": need.requested_qty,
+            "approved_qty": need.requested_qty,
+            "need_ids": [Command.set(need.ids)],
+        })
+        plan.write({
+            "snapshot_at": fields.Datetime.now(),
+            "snapshot_user_id": self.env.user.id,
+            "snapshot_locked": True,
+        })
+        plan.action_approve()
+        return fulfillment.mrp_production_id
 
     def test_invoice_post_creates_sale_order_and_fulfillment(self):
         move = self._create_customer_invoice()
@@ -292,6 +368,18 @@ class TestInvoiceToSaleOrder(TransactionCase):
         self.assertEqual(fulfillment_line.qty_sent_stock, fulfillment_line.qty_released)
         self.assertEqual(fulfillment_line.state, "in_process")
         self.assertEqual(move.picking_count, 1)
+        self.assertEqual(len(move.pickup_order_ids), 1)
+        self.assertEqual(move.pickup_order_ids.picking_id, fulfillment_line.picking_id)
+        self.assertEqual(len(move.pickup_order_ids.pickup_line_ids), 1)
+        self.assertEqual(
+            move.pickup_order_ids.pickup_line_ids.product_uom_qty,
+            fulfillment_line.qty_released,
+        )
+
+        move._ddsn_apply_release_for_amount(move.amount_total)
+
+        self.assertEqual(len(move.pickup_order_ids), 1)
+        self.assertEqual(len(move.pickup_order_ids.pickup_line_ids), 1)
 
     def test_release_reuses_existing_sale_picking_without_duplicate_moves(self):
         move = self._create_customer_invoice()
@@ -432,14 +520,16 @@ class TestInvoiceToSaleOrder(TransactionCase):
 
         self.assertEqual(quant.quantity, 1.0)
 
-    def test_release_creates_mrp_production(self):
+    def test_release_creates_production_need_and_plan_creates_mrp(self):
         move = self._create_manufacturing_invoice()
         move.fulfillment_route_policy = "force_mrp"
+        move.mrp_creation_policy = "per_line"
         move.action_post()
 
         move._ddsn_apply_release_for_amount(move.amount_total)
 
         fulfillment_line = move.fulfillment_line_ids
+        self._approve_current_production_need(move)
         self.assertTrue(fulfillment_line.mrp_production_id, "La liberacion debe crear una orden de fabricacion.")
         self.assertEqual(fulfillment_line.qty_sent_mrp, fulfillment_line.qty_released)
         self.assertEqual(fulfillment_line.state, "in_process")
@@ -448,12 +538,14 @@ class TestInvoiceToSaleOrder(TransactionCase):
     def test_partial_payment_can_create_mrp_production(self):
         move = self._create_manufacturing_invoice()
         move.fulfillment_route_policy = "force_mrp"
+        move.mrp_creation_policy = "per_line"
         move.payment_release_policy = "prorated"
         move.action_post()
 
         move._ddsn_apply_release_for_amount(move.amount_total / 2)
 
         fulfillment_line = move.fulfillment_line_ids
+        self._approve_current_production_need(move)
         self.assertTrue(
             fulfillment_line.mrp_production_id,
             "La fabricacion debe poder generarse con pago parcial.",
@@ -464,10 +556,12 @@ class TestInvoiceToSaleOrder(TransactionCase):
     def test_completed_mrp_creates_outgoing_picking(self):
         move = self._create_manufacturing_invoice()
         move.fulfillment_route_policy = "force_mrp"
+        move.mrp_creation_policy = "per_line"
         move.action_post()
         move._ddsn_apply_release_for_amount(move.amount_total)
 
         fulfillment_line = move.fulfillment_line_ids
+        self._approve_current_production_need(move)
         picking = move._ddsn_sync_finished_mrp_to_outgoing_picking(fulfillment_line)
 
         self.assertTrue(picking, "La produccion terminada debe preparar un picking de salida.")
@@ -477,6 +571,7 @@ class TestInvoiceToSaleOrder(TransactionCase):
     def test_completed_mrp_does_not_create_outgoing_picking_with_partial_payment(self):
         move = self._create_manufacturing_invoice()
         move.fulfillment_route_policy = "force_mrp"
+        move.mrp_creation_policy = "per_line"
         move.payment_release_policy = "prorated"
         move.action_post()
         move._ddsn_apply_release_for_amount(move.amount_total / 2)

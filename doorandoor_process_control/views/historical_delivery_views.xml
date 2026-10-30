@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddpc_historical_delivery_list" model="ir.ui.view">
+        <field name="name">doorandoor.historical.delivery.list</field>
+        <field name="model">doorandoor.historical.delivery</field>
+        <field name="arch" type="xml">
+            <list string="Entregas históricas">
+                <field name="name"/>
+                <field name="external_reference"/>
+                <field name="sale_date"/>
+                <field name="partner_id"/>
+                <field name="supply_warehouse_id"/>
+                <field name="warehouse_id"/>
+                <field name="picking_id"/>
+                <field name="state" widget="badge"/>
+                <field name="created_by_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddpc_historical_delivery_form" model="ir.ui.view">
+        <field name="name">doorandoor.historical.delivery.form</field>
+        <field name="model">doorandoor.historical.delivery</field>
+        <field name="arch" type="xml">
+            <form string="Entrega histórica">
+                <header>
+                    <button name="action_create_operation" type="object"
+                            string="Liberar al almacén" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_open_operation" type="object"
+                            string="Abrir en Hanger" class="btn-secondary"
+                            invisible="not picking_id"/>
+                    <button name="action_open_transfer_dispatch" type="object"
+                            string="Abrir despacho" class="btn-secondary"
+                            invisible="not transfer_dispatch_id"/>
+                    <button name="action_open_transfer_receipt" type="object"
+                            string="Abrir recepción" class="btn-secondary"
+                            invisible="not transfer_receipt_id"/>
+                    <button name="action_sync_state" type="object"
+                            string="Actualizar estado" invisible="not picking_id"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="external_reference" readonly="state != 'draft'"/>
+                            <field name="sale_date" readonly="state != 'draft'"/>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="supply_warehouse_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="warehouse_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="payment_note" readonly="state != 'draft'"/>
+                            <field name="picking_id"/>
+                            <field name="transfer_dispatch_id"/>
+                            <field name="transfer_receipt_id"/>
+                            <field name="created_by_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Productos">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="product_uom_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Respaldo y notas">
+                            <field name="evidence_attachment_ids" widget="many2many_binary" readonly="state != 'draft'"/>
+                            <field name="note" placeholder="Explique el origen y cualquier validación realizada..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ddpc_historical_delivery_search" model="ir.ui.view">
+        <field name="name">doorandoor.historical.delivery.search</field>
+        <field name="model">doorandoor.historical.delivery</field>
+        <field name="arch" type="xml">
+            <search string="Entregas históricas">
+                <field name="external_reference"/>
+                <field name="partner_id"/>
+                <field name="warehouse_id"/>
+                <field name="supply_warehouse_id"/>
+                <field name="picking_id"/>
+                <filter name="draft" string="Borradores" domain="[('state','=','draft')]"/>
+                <filter name="transfer_pending" string="Traslados pendientes" domain="[('state','=','transfer_pending')]"/>
+                <filter name="ready" string="En almacén" domain="[('state','=','ready')]"/>
+                <filter name="done" string="Entregadas" domain="[('state','=','done')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_warehouse" string="Almacén" context="{'group_by':'warehouse_id'}"/>
+                    <filter name="group_supply_warehouse" string="Almacén proveedor" context="{'group_by':'supply_warehouse_id'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddpc_historical_deliveries" model="ir.actions.act_window">
+        <field name="name">Entregas del sistema anterior</field>
+        <field name="res_model">doorandoor.historical.delivery</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_ddpc_historical_delivery_search"/>
+    </record>
+
+    <menuitem id="menu_ddpc_historical_deliveries"
+              name="Crear entrega histórica"
+              parent="doorandoor_process_control.menu_ddpc_warehouse_root"
+              action="action_ddpc_historical_deliveries"
+              sequence="25"
+              groups="doorandoor_process_control.group_ddpc_manager,stock.group_stock_manager,base.group_system"/>
+</odoo>

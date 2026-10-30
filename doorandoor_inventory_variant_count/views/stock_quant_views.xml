@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_quant_tree_editable_prices" model="ir.ui.view">
+        <field name="name">stock.quant.list.editable.prices</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_editable"/>
+        <field name="arch" type="xml">
+            <field name="inventory_quantity_auto_apply" position="before">
+                <field name="ddivc_currency_id" column_invisible="1"/>
+                <field name="ddivc_unit_cost" string="Costo" optional="show" groups="base.group_system"/>
+                <field name="ddivc_sale_price" string="Precio" optional="show" groups="base.group_system"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_stock_quant_tree_inventory_editable_prices" model="ir.ui.view">
+        <field name="name">stock.quant.inventory.list.editable.prices</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_inventory_editable"/>
+        <field name="arch" type="xml">
+            <field name="quantity" position="before">
+                <field name="ddivc_currency_id" column_invisible="1"/>
+                <field name="ddivc_unit_cost" string="Costo" optional="show" groups="base.group_system"/>
+                <field name="ddivc_sale_price" string="Precio" optional="show" groups="base.group_system"/>
+            </field>
+        </field>
+    </record>
+</odoo>

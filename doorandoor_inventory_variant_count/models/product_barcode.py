@@ -70,6 +70,14 @@ class ProductProduct(models.Model):
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    ddic_shared_lot_serial = fields.Boolean(
+        string="Serial compartido por lote",
+        help=(
+            "Genera un solo codigo para todo el lote. Cada lectura repetida suma "
+            "la cantidad indicada, en lugar de rechazar el codigo como duplicado."
+        ),
+    )
+
     def action_generate_doorandoor_barcode(self):
         self.ensure_one()
         return self.product_variant_ids.action_generate_doorandoor_barcode()

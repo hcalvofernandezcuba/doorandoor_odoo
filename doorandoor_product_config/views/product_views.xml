@@ -1,14 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <record id="view_product_product_search_ddpc_item" model="ir.ui.view">
+            <field name="name">product.product.search.ddpc.item.attributes</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_search_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="ddpc_item_search" string="ITEM / Variante"/>
+                </xpath>
+                <xpath expr="//filter[@name='group_by_product_tmpl_id']" position="after">
+                    <filter string="ITEM / Variante"
+                            name="group_by_ddpc_item_variant"
+                            context="{'group_by': 'ddpc_item_group'}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_product_product_ddpc_variant_pricing_list" model="ir.ui.view">
+            <field name="name">product.product.ddpc.variant.pricing.list</field>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <list string="Precios por ítem" editable="bottom" create="0" delete="0">
+                    <field name="default_code" string="Referencia" readonly="1" optional="show"/>
+                    <field name="product_template_attribute_value_ids"
+                           string="Ítem / Variante"
+                           widget="many2many_tags"
+                           readonly="1"/>
+                    <field name="list_price" string="Precio base" readonly="1"/>
+                    <field name="ddpc_variant_extra_price"
+                           string="Adicional"
+                           readonly="1"
+                           optional="hide"/>
+                    <field name="ddpc_variant_final_price"
+                           string="Precio final"
+                           groups="base.group_system,doorandoor_product_config.group_ddpc_variant_price_editor"/>
+                    <field name="active" readonly="1" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_product_product_list_ddpc_final_price" model="ir.ui.view">
+            <field name="name">product.product.list.ddpc.final.price</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='lst_price']" position="replace">
+                    <field name="ddpc_variant_final_price"
+                           string="Precio final del ítem"
+                           optional="show"
+                           readonly="1"
+                           groups="!base.group_system,!doorandoor_product_config.group_ddpc_variant_price_editor"/>
+                    <field name="ddpc_variant_final_price"
+                           string="Precio final del ítem"
+                           optional="show"
+                           groups="base.group_system,doorandoor_product_config.group_ddpc_variant_price_editor"/>
+                </xpath>
+            </field>
+        </record>
+
         <record id="view_product_product_form_inherit_ddpc" model="ir.ui.view">
             <field name="name">product.product.form.ddpc.variant.extra.price</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='list_price']" position="after">
-                    <field name="ddpc_variant_extra_price" groups="base.group_system"/>
-                    <field name="ddpc_is_custom_variant" readonly="1"/>
+                <xpath expr="//field[@name='list_price']" position="replace">
+                    <field name="ddpc_variant_final_price"
+                           string="Precio del ítem"
+                           groups="base.group_system,doorandoor_product_config.group_ddpc_variant_price_editor"/>
+                </xpath>
+                <xpath expr="//notebook" position="before">
+                    <field name="ddpc_variant_extra_price" invisible="1"/>
+                    <field name="ddpc_is_custom_variant" invisible="1"/>
                 </xpath>
                 <xpath expr="//notebook" position="inside">
                     <page string="Variante personalizada" invisible="not ddpc_is_custom_variant">
@@ -19,6 +82,30 @@
                             <field name="ddpc_archive_after_date" readonly="1"/>
                         </group>
                     </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_product_product_easy_form_inherit_ddpc_price" model="ir.ui.view">
+            <field name="name">product.product.easy.form.ddpc.final.price</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//label[@for='lst_price']" position="replace">
+                    <label for="ddpc_variant_final_price"
+                           string="Precio del ítem"
+                           groups="base.group_system,doorandoor_product_config.group_ddpc_variant_price_editor"/>
+                </xpath>
+                <xpath expr="//group[@name='pricing']/div[field[@name='lst_price']]" position="replace">
+                    <div class="o_row" groups="base.group_system,doorandoor_product_config.group_ddpc_variant_price_editor">
+                        <field name="ddpc_variant_final_price"
+                               class="oe_inline"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id', 'field_digits': True}"/>
+                    </div>
+                </xpath>
+                <xpath expr="//group[@name='pricing']" position="inside">
+                    <field name="ddpc_variant_extra_price" invisible="1"/>
                 </xpath>
             </field>
         </record>
@@ -34,11 +121,11 @@
                         type="object"
                         class="oe_stat_button"
                         icon="fa-sliders"
-                        groups="base.group_system"
+                        groups="base.group_system,doorandoor_product_config.group_ddpc_variant_price_editor"
                         invisible="product_variant_count &lt;= 0">
                         <div class="o_stat_info">
-                            <span class="o_stat_text">Variant</span>
-                            <span class="o_stat_text">Pricing</span>
+                            <span class="o_stat_text">Precios por</span>
+                            <span class="o_stat_text">ítem</span>
                         </div>
                     </button>
                 </xpath>

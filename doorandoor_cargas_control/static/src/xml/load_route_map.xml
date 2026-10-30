@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="doorandoor_cargas_control.RouteMap">
+        <div class="o_ddcc_route_map">
+            <header class="ddcc_map_header">
+                <div><h1>Mapa de rutas</h1><p>Florida · Punto principal: Oficina Central Doral</p></div>
+                <div class="ddcc_header_actions">
+                    <button type="button" class="btn btn-light" t-on-click="showFlorida">Ver Florida</button>
+                    <div class="ddcc_active_counter"><strong t-esc="state.activeCount"/><span>rutas activas</span></div>
+                </div>
+            </header>
+            <div class="ddcc_legend">
+                <span><i class="ready"/>Preparada</span><span><i class="loading"/>En carga</span>
+                <span><i class="transit"/>En tránsito</span><span><i class="incident"/>Incidencia</span>
+                <span><i class="completed"/>Última completada</span><span><b class="provisional"/>Coordenada provisional</span>
+            </div>
+            <div class="ddcc_map_layout">
+                <section class="ddcc_map_canvas"><div t-ref="map" class="ddcc_leaflet_map"/></section>
+                <aside class="ddcc_route_panel">
+                    <div t-if="state.loading" class="ddcc_empty">Cargando rutas…</div>
+                    <div t-elif="!state.routes.length" class="ddcc_empty">No existen rutas activas ni completadas.</div>
+                    <button t-foreach="state.routes" t-as="route" t-key="route.id" type="button"
+                            t-att-class="'ddcc_route_card ' + route.color_key + (state.selectedId === route.id ? ' selected' : '')"
+                            t-on-click="() => this.selectRoute(route)">
+                        <span><strong t-esc="route.name"/><small t-esc="route.state_label"/></span>
+                        <span class="ddcc_route_endpoints" t-esc="route.origin + ' → ' + route.next_stop"/>
+                        <em t-if="route.uses_provisional_points">Usa coordenadas provisionales</em>
+                    </button>
+                    <div t-if="selectedRoute" class="ddcc_route_detail">
+                        <h2 t-esc="selectedRoute.name"/>
+                        <dl>
+                            <dt>Vehículo</dt><dd t-esc="selectedRoute.vehicle"/>
+                            <dt>Chofer</dt><dd t-esc="selectedRoute.driver"/>
+                            <dt>Último punto</dt><dd t-esc="selectedRoute.last_checkpoint"/>
+                            <dt>Próxima parada</dt><dd t-esc="selectedRoute.next_stop"/>
+                            <dt>Documentos</dt><dd t-esc="selectedRoute.documents"/>
+                            <dt>Unidades</dt><dd t-esc="selectedRoute.units"/>
+                        </dl>
+                        <button type="button" class="btn btn-primary" t-on-click="() => this.openPlan(selectedRoute)">Abrir plan de carga</button>
+                    </div>
+                </aside>
+            </div>
+            <p class="ddcc_map_note">La posición operativa procede del último almacén confirmado; todavía no representa GPS en tiempo real.</p>
+        </div>
+    </t>
+</templates>

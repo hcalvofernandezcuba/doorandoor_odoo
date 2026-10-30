@@ -53,6 +53,19 @@
                                 <field name="email"/>
                             </group>
                         </group>
+                        <group string="Control gerencial del descuento" groups="base.group_system">
+                            <group>
+                                <field name="ddfc_discount_for_new_process"/>
+                                <field name="discount_active"/>
+                                <field name="discount_percent"/>
+                                <field name="discount_date_from"/>
+                                <field name="discount_date_to"/>
+                                <field name="discount_authorized_by_id"/>
+                            </group>
+                            <group>
+                                <field name="discount_reason" placeholder="Causa, acuerdo, alcance y excepciones..."/>
+                            </group>
+                        </group>
                         <group>
                             <group>
                                 <field name="city"/>

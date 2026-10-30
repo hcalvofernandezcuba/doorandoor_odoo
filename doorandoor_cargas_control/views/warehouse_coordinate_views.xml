@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddcc_warehouse_coordinate_list" model="ir.ui.view">
+        <field name="name">stock.warehouse.ddcc.coordinate.list</field>
+        <field name="model">stock.warehouse</field>
+        <field name="arch" type="xml">
+            <list string="Almacenes y coordenadas" create="0" delete="0" editable="bottom" multi_edit="1">
+                <field name="name" readonly="1"/>
+                <field name="code" readonly="1"/>
+                <field name="ddcc_delivery_address"/>
+                <field name="ddcc_latitude"/>
+                <field name="ddcc_longitude"/>
+                <field name="ddcc_coordinate_status" widget="badge"
+                       decoration-muted="ddcc_coordinate_status == 'pending'"
+                       decoration-warning="ddcc_coordinate_status == 'provisional'"
+                       decoration-success="ddcc_coordinate_status == 'verified'"/>
+                <field name="ddcc_has_coordinates" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddcc_warehouse_coordinate_form" model="ir.ui.view">
+        <field name="name">stock.warehouse.ddcc.coordinate.form</field>
+        <field name="model">stock.warehouse</field>
+        <field name="arch" type="xml">
+            <form string="Coordenadas logísticas del almacén" create="0" delete="0">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Almacén">
+                            <field name="code" readonly="1"/>
+                            <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+                            <field name="ddcc_coordinate_status" widget="radio"/>
+                        </group>
+                        <group string="Punto de entrega y recepción">
+                            <field name="ddcc_delivery_address" placeholder="Dirección exacta para el chofer"/>
+                            <field name="ddcc_latitude" placeholder="Ej. 25.8195000"/>
+                            <field name="ddcc_longitude" placeholder="Ej. -80.3313000"/>
+                            <field name="ddcc_has_coordinates" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Indicaciones operativas">
+                        <field name="ddcc_coordinate_notes" nolabel="1"
+                               placeholder="Muelle, puerta, horario, restricciones del camión o persona de contacto…"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ddcc_warehouse_coordinate_search" model="ir.ui.view">
+        <field name="name">stock.warehouse.ddcc.coordinate.search</field>
+        <field name="model">stock.warehouse</field>
+        <field name="arch" type="xml">
+            <search string="Almacenes y coordenadas">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="ddcc_delivery_address"/>
+                <filter string="Pendientes" name="pending_coordinates" domain="[('ddcc_coordinate_status','=','pending')]"/>
+                <filter string="Provisionales" name="provisional_coordinates" domain="[('ddcc_coordinate_status','=','provisional')]"/>
+                <filter string="Verificadas" name="verified_coordinates" domain="[('ddcc_coordinate_status','=','verified')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddcc_warehouse_coordinates" model="ir.actions.act_window">
+        <field name="name">Almacenes y coordenadas</field>
+        <field name="res_model">stock.warehouse</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_ddcc_warehouse_coordinate_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_ddcc_warehouse_coordinate_form')})]"/>
+        <field name="search_view_id" ref="view_ddcc_warehouse_coordinate_search"/>
+        <field name="context">{'search_default_pending_coordinates': 1}</field>
+    </record>
+</odoo>

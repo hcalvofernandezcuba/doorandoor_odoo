@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="website_layout_doorandoor_brand"
+              inherit_id="website.layout"
+              name="DoorAndDoor Website Identity">
+        <xpath expr="//meta[@name='generator']" position="replace">
+            <meta name="generator" content="DoorAndDoor"/>
+        </xpath>
+        <xpath expr="//t[@t-set='x_icon']" position="replace">
+            <t t-set="x_icon" t-value="'/doorandoor_website_brand/static/src/img/doorandoor_icon.svg'"/>
+        </xpath>
+    </template>
+
+    <template id="header_brand_logo_doorandoor"
+              inherit_id="website.option_header_brand_logo"
+              name="DoorAndDoor Header Logo">
+        <xpath expr="//span[@t-field='website.logo']" position="replace">
+            <span t-field="website.logo"
+                  t-options="{'widget': 'image', 'width': 230, 'height': 68}"
+                  class="ddwb_header_logo"
+                  role="img"
+                  t-att-aria-label="'Logo of %s' % website.name"
+                  t-att-title="website.name"/>
+        </xpath>
+    </template>
+
+    <template id="brand_promotion_doorandoor"
+              inherit_id="web.brand_promotion"
+              name="DoorAndDoor Footer Brand">
+        <xpath expr="//div[hasclass('o_brand_promotion')]" position="replace">
+            <div class="o_brand_promotion ddwb_brand_promotion">
+                <a href="https://doorandoor.com" title="DoorAndDoor">
+                    <strong>DOOR <span>&amp;</span> DOOR</strong> · Puertas · Ventanas · Impacto
+                </a>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="portal_record_sidebar_doorandoor"
+              inherit_id="portal.portal_record_sidebar"
+              name="DoorAndDoor Portal Sidebar Brand">
+        <xpath expr="//div[hasclass('d-none', 'd-lg-block', 'mt-5', 'small', 'text-center', 'text-muted')]" position="replace">
+            <div class="text-center small mt-4 ddwb_portal_brand">
+                DoorAndDoor
+            </div>
+        </xpath>
+    </template>
+
+    <template id="livechat_support_doorandoor"
+              inherit_id="im_livechat.support_page"
+              name="DoorAndDoor Live Chat Support Brand">
+        <xpath expr="//div[contains(., 'Powered by')]" position="replace">
+            <div>Website Live Chat — <strong>DoorAndDoor</strong></div>
+        </xpath>
+    </template>
+</odoo>

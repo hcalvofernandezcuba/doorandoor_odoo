@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_operational_manuals" model="ir.module.category">
+        <field name="name">Guias operativas</field>
+        <field name="description">Consulta y administracion de manuales internos DoorAndDoor.</field>
+        <field name="sequence">45</field>
+    </record>
+
+    <record id="group_operational_manual_manager" model="res.groups">
+        <field name="name">Administrador de guias</field>
+        <field name="category_id" ref="module_category_operational_manuals"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+    <record id="rule_operational_manual_reader" model="ir.rule">
+        <field name="name">Guias publicadas para todos los usuarios internos</field>
+        <field name="model_id" ref="model_doorandoor_operational_manual"/>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="domain_force">[('state', '=', 'published'), ('active', '=', True)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_operational_manual_manager" model="ir.rule">
+        <field name="name">Administradores ven todas las guias</field>
+        <field name="model_id" ref="model_doorandoor_operational_manual"/>
+        <field name="groups" eval="[(4, ref('group_operational_manual_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+</odoo>

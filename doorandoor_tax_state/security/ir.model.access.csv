@@ -3,3 +3,4 @@ access_doorandoor_tax_state_rule_manager,doorandoor.tax.state.rule manager,model
 access_doorandoor_tax_state_rate_manager,doorandoor.tax.state.rate manager,model_doorandoor_tax_state_rate,account.group_account_manager,1,1,1,1
 access_doorandoor_tax_state_rule_sales_read,doorandoor.tax.state.rule sales read,model_doorandoor_tax_state_rule,sales_team.group_sale_salesman,1,0,0,0
 access_doorandoor_tax_state_rate_sales_read,doorandoor.tax.state.rate sales read,model_doorandoor_tax_state_rate,sales_team.group_sale_salesman,1,0,0,0
+access_res_partner_accounting_edit_tax_exemption,res.partner accounting edit tax exemption,base.model_res_partner,account.group_account_user,1,1,1,0

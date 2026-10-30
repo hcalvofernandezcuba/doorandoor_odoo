@@ -1,9 +1,48 @@
 {
     "name": "DoorAndDoor Transformed and Special Products",
-    "version": "18.0.4.6.1",
+    "version": "18.0.4.8.1",
     "category": "Sales/Manufacturing",
-    "summary": "18.0.4.6.1 - Calcula Especiales y Transformados desde el precio administrativo de variante",
+    "summary": "18.0.4.8.1 - Programa el archivo de cada LdM especial a los 30 días",
     "description": """
+18.0.4.8.1
+------------
+Todo producto especial nuevo queda programado desde su creación para archivarse
+junto con su LdM a los 30 días. La actividad comercial posterior renueva el
+plazo y el proceso conserva los bloqueos por stock, movimientos, fabricación,
+ventas o facturas abiertas para no romper la trazabilidad.
+
+18.0.4.8.0
+------------
+Incorpora el rol Ventas / Creador de plantillas maestras especiales. Sus
+usuarios pueden declarar desde una cotizacion o factura abierta que la
+plantilla no existe y crearla junto con el primer Especial, conservando
+familia, atributos, componentes, operaciones, precio y autor. No concede
+edicion general del catalogo ni permisos de Administrador/Ajustes.
+
+18.0.4.7.2
+------------
+La confirmación de una factura por un vendedor limitado actualiza con elevación
+técnica únicamente las fechas de venta, actividad y archivo del producto
+Especial. El vendedor conserva bloqueada toda edición general del catálogo.
+
+18.0.4.7.1
+------------
+Los asistentes continúan heredando internamente el costo del producto base sin
+exponerlo al vendedor, aun cuando el campo de costo queda restringido a
+Administrador/Ajustes.
+
+18.0.4.7.0
+------------
+Las plantillas Especiales autorizadas, inicialmente EMC WINDOWS, permiten al
+comercial introducir el precio vigente del proveedor. El valor se conserva en
+la cotizacion o factura sin abrir la edicion de precios de otros productos.
+
+18.0.4.6.2
+------------
+Los comerciales pueden agregar un producto Especial desde cotizaciones y
+facturas sin recibir permiso general para modificar el catalogo. La fecha de
+actividad y archivo del Especial se actualiza de forma tecnica y controlada.
+
 18.0.4.6.1
 ------------
 Especiales y Transformados muestran un precio de solo lectura calculado como
@@ -72,6 +111,7 @@ separado de su referencia interna ESP y compatible con lectores y etiquetas.
         "stock",
     ],
     "data": [
+        "security/special_product_security.xml",
         "security/ir.model.access.csv",
         "data/special_product_sequence.xml",
         "data/special_product_cron.xml",

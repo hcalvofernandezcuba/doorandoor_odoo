@@ -1,0 +1,28 @@
+<odoo>
+    <template id="report_invoice_document_card_fee_totals"
+              inherit_id="doorandoor_tax_state.report_invoice_document_total_tax_label">
+        <xpath expr="//tr[hasclass('o_total')]" position="before">
+            <tr t-if="o.ddtp_payment_plan == 'partial'">
+                <td>Pago parcial</td><td class="text-end"><span t-field="o.ddtp_payment_due_amount" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+            </tr>
+            <tr t-if="o.ddtp_card_payment_enabled and o.ddtp_card_fee_preview" class="ddtp_card_fee_total">
+                <td>Cargo por pago con tarjeta (<t t-esc="o._ddtp_format_percent(o.ddtp_card_fee_rate)"/>%)</td>
+                <td class="text-end">
+                    <span t-field="o.ddtp_card_fee_preview"
+                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                </td>
+            </tr>
+        </xpath>
+        <xpath expr="//tr[hasclass('o_total')]" position="after">
+            <tr t-if="o.ddtp_payment_plan == 'partial'"><td><strong>Saldo pendiente</strong></td><td class="text-end"><strong t-field="o.ddtp_payment_pending_amount" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+        </xpath>
+        <xpath expr="//tr[hasclass('o_total')]/td[2]" position="replace">
+            <td class="text-end">
+                <strong t-if="o.ddtp_card_payment_enabled" t-field="o.ddtp_card_total_preview"
+                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                <strong t-else="" t-out="tax_totals['total_amount_currency']"
+                        t-options='{"widget": "monetary", "display_currency": currency}'/>
+            </td>
+        </xpath>
+    </template>
+</odoo>

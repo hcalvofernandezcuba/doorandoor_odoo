@@ -4,5 +4,7 @@ from . import account_payment
 from . import account_payment_register
 from . import cobro_control
 from . import customer_credit
+from . import daily_income_report
 from . import credit_authorization
+from . import payment_receipt
 from . import res_partner

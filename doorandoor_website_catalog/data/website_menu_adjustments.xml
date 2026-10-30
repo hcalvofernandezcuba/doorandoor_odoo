@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- El catálogo es el segundo acceso, inmediatamente después de Inicio. -->
+    <!-- Solo se retira la entrada pública; website_event y sus datos permanecen instalados. -->
+    <function model="website.menu" name="_ddwc_apply_catalog_navigation"/>
+</odoo>

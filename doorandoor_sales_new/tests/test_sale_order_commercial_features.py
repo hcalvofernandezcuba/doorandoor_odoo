@@ -1,3 +1,4 @@
+from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -66,6 +67,71 @@ class TestSaleOrderCommercialFeatures(TransactionCase):
         self.assertIn("8.00", line.ddsn_warehouse_stock_display)
         self.assertIn(self.warehouse.code or self.warehouse.name, line.ddsn_warehouse_stock_display)
         self.assertIn(self.warehouse.code or self.warehouse.name, line.ddsn_warehouse_stock_html)
+
+    def test_sale_line_selects_an_alternate_warehouse_with_stock(self):
+        alternate = self.env["stock.warehouse"].create(
+            {
+                "name": "Almacén alterno DDSN",
+                "code": "ADSN",
+                "company_id": self.env.company.id,
+            }
+        )
+        self.env["stock.quant"]._update_available_quantity(
+            self.product,
+            alternate.lot_stock_id,
+            6.0,
+        )
+        sale_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "warehouse_id": self.warehouse.id,
+            }
+        )
+        line = self.env["sale.order.line"].new(
+            {
+                "order_id": sale_order.id,
+                "product_id": self.product.id,
+                "name": self.product.display_name,
+                "product_uom_qty": 4.0,
+                "price_unit": 50.0,
+            }
+        )
+
+        line._onchange_ddsn_warn_insufficient_stock()
+
+        self.assertEqual(line.ddsn_supply_warehouse_id, alternate)
+
+    def test_preinvoice_shortage_is_documented_but_not_blocked(self):
+        sale_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+                "warehouse_id": self.warehouse.id,
+                "order_line": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": self.product.id,
+                            "name": self.product.display_name,
+                            "product_uom_qty": 3.0,
+                            "price_unit": 50.0,
+                            "ddsn_supply_warehouse_id": self.warehouse.id,
+                        },
+                    )
+                ],
+            }
+        )
+        sale_order.action_ddsn_register_quote()
+        preinvoice = sale_order.ddsn_preinvoice_move_id
+
+        preinvoice.action_ddsn_confirm_preinvoice()
+
+        self.assertEqual(preinvoice.ddsn_preinvoice_state, "confirmed")
+        self.assertTrue(
+            preinvoice.message_ids.filtered(
+                lambda message: "faltantes de inventario" in (message.body or "")
+            )
+        )
 
     def test_sale_order_starts_unregistered_without_sequence(self):
         sale_order = self.env["sale.order"].create(
@@ -302,6 +368,42 @@ class TestSaleOrderCommercialFeatures(TransactionCase):
         self.assertEqual(line.discount, 7.5)
         self.assertEqual(line.ddsn_bonus_percent, 7.5)
         self.assertEqual(line.ddsn_bonus_source, "partner")
+
+    def test_limited_user_cannot_change_customer_bonus_but_can_read_it(self):
+        limited_user = self.env["res.users"].create({
+            "name": "Vendedor limitado bonificaciones DDSN",
+            "login": "limited-bonus-ddsn",
+            "groups_id": [(6, 0, [self.env.ref("base.group_user").id])],
+        })
+
+        self.assertEqual(
+            self.partner.with_user(limited_user).ddsn_bonus_percent,
+            7.5,
+        )
+        with self.assertRaises(AccessError):
+            self.partner.with_user(limited_user).write({
+                "ddsn_bonus_percent": 25.0,
+            })
+
+    def test_administrator_can_change_customer_bonus(self):
+        self.partner.write({
+            "ddsn_bonus_percent": 8.0,
+            "ddsn_bonus_authorized_by_id": self.env.user.id,
+            "ddsn_bonus_notes": "Prueba de autorización administrativa.",
+        })
+        self.assertEqual(self.partner.ddsn_bonus_percent, 8.0)
+
+    def test_product_commercial_policy_is_searchable_and_groupable(self):
+        self.assertEqual(self.product.ddsn_commercial_policy, "standard")
+        self.product.write({"ddsn_fixed_price": True})
+        self.assertEqual(self.product.ddsn_commercial_policy, "fixed_price")
+        self.assertEqual(
+            self.env["product.product"].search_count([
+                ("id", "=", self.product.id),
+                ("ddsn_commercial_policy", "=", "fixed_price"),
+            ]),
+            1,
+        )
 
     def test_partner_bonus_does_not_override_existing_discount(self):
         sale_order = self.env["sale.order"].create(

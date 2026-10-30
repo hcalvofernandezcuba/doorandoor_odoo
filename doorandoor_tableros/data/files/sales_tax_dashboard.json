@@ -1,0 +1,53 @@
+{
+  "version": 21,
+  "sheets": [{
+    "id": "dd-sales-tax-dashboard", "name": "Dashboard", "colNumber": 8, "rowNumber": 80,
+    "rows": {"1":{"size":34},"2":{"size":34},"3":{"size":34}},
+    "cols": {"0":{"size":160},"1":{"size":160},"2":{"size":160},"3":{"size":160},"4":{"size":160},"5":{"size":160},"6":{"size":160},"7":{"size":160}},
+    "cells": {
+      "A1":{"content":"[Ventas e Impuestos]"},
+      "A2":{"content":"Facturas de cliente contabilizadas y pagadas, incluyendo ventas históricas y el nuevo flujo PO."},
+      "A3":{"content":"Use los filtros de periodo, cliente y vendedor para la revisión fiscal."}
+    },
+    "styles":{}, "formats":{}, "borders":{}, "conditionalFormats":[], "tables":[],
+    "areGridLinesVisible":false, "isVisible":true, "headerGroups":{}, "dataValidationRules":[], "comments":{},
+    "figures":[
+      {"id":"fig-paid-sales","x":0,"y":95,"width":620,"height":320,"tag":"chart","data":{
+        "title":{"text":"Ventas pagadas por mes"},"background":"#FFFFFF","legendPosition":"none",
+        "metaData":{"groupBy":["invoice_date:month"],"measure":"amount_total","order":null,"resModel":"account.move","mode":"line"},
+        "searchParams":{"comparison":null,"context":{"group_by":["invoice_date"]},"domain":[["move_type","=","out_invoice"],["state","=","posted"],["payment_state","=","paid"]],"groupBy":["invoice_date"],"orderBy":[]},
+        "type":"odoo_line","verticalAxisPosition":"left","stacked":false,"fillArea":true,
+        "fieldMatching":{"dd-date":{"chain":"invoice_date","type":"date","offset":0},"dd-partner":{"chain":"partner_id","type":"many2one"},"dd-user":{"chain":"invoice_user_id","type":"many2one"}}
+      }},
+      {"id":"fig-paid-tax","x":640,"y":95,"width":610,"height":320,"tag":"chart","data":{
+        "title":{"text":"Impuestos cobrados por mes"},"background":"#FFFFFF","legendPosition":"none",
+        "metaData":{"groupBy":["invoice_date:month"],"measure":"amount_tax","order":null,"resModel":"account.move","mode":"bar"},
+        "searchParams":{"comparison":null,"context":{"group_by":["invoice_date"]},"domain":[["move_type","=","out_invoice"],["state","=","posted"],["payment_state","=","paid"]],"groupBy":["invoice_date"],"orderBy":[]},
+        "type":"odoo_bar","verticalAxisPosition":"left","stacked":false,
+        "fieldMatching":{"dd-date":{"chain":"invoice_date","type":"date","offset":0},"dd-partner":{"chain":"partner_id","type":"many2one"},"dd-user":{"chain":"invoice_user_id","type":"many2one"}}
+      }},
+      {"id":"fig-paid-customers","x":0,"y":435,"width":620,"height":320,"tag":"chart","data":{
+        "title":{"text":"Ventas pagadas por cliente"},"background":"#FFFFFF","legendPosition":"none",
+        "metaData":{"groupBy":["partner_id"],"measure":"amount_total","order":"desc","resModel":"account.move","mode":"bar"},
+        "searchParams":{"comparison":null,"context":{"group_by":["partner_id"]},"domain":[["move_type","=","out_invoice"],["state","=","posted"],["payment_state","=","paid"]],"groupBy":["partner_id"],"orderBy":[]},
+        "type":"odoo_bar","verticalAxisPosition":"left","stacked":false,
+        "fieldMatching":{"dd-date":{"chain":"invoice_date","type":"date","offset":0},"dd-partner":{"chain":"partner_id","type":"many2one"},"dd-user":{"chain":"invoice_user_id","type":"many2one"}}
+      }},
+      {"id":"fig-tax-exempt","x":640,"y":435,"width":610,"height":320,"tag":"chart","data":{
+        "title":{"text":"Ventas pagadas sin impuesto por mes"},"background":"#FFFFFF","legendPosition":"none",
+        "metaData":{"groupBy":["invoice_date:month"],"measure":"amount_untaxed","order":null,"resModel":"account.move","mode":"bar"},
+        "searchParams":{"comparison":null,"context":{"group_by":["invoice_date"]},"domain":[["move_type","=","out_invoice"],["state","=","posted"],["payment_state","=","paid"],["amount_tax","=",0]],"groupBy":["invoice_date"],"orderBy":[]},
+        "type":"odoo_bar","verticalAxisPosition":"left","stacked":false,
+        "fieldMatching":{"dd-date":{"chain":"invoice_date","type":"date","offset":0},"dd-partner":{"chain":"partner_id","type":"many2one"},"dd-user":{"chain":"invoice_user_id","type":"many2one"}}
+      }}
+    ]
+  }],
+  "styles":{},"formats":{},"borders":{},"revisionId":"1","uniqueFigureIds":[],
+  "settings":{"locale":"es_419"},"pivots":{},"pivotNextId":1,"customTableStyles":{},"odooVersion":18,
+  "globalFilters":[
+    {"id":"dd-date","type":"date","label":"Periodo","rangeType":"from_to","defaultValue":[]},
+    {"id":"dd-partner","type":"relation","label":"Cliente","modelName":"res.partner","includeChildren":false,"defaultValue":[]},
+    {"id":"dd-user","type":"relation","label":"Vendedor","modelName":"res.users","includeChildren":false,"defaultValue":[]}
+  ],
+  "lists":{},"listNextId":1,"chartOdooMenusReferences":{}
+}

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_historical_delivery_list_ddhl" model="ir.ui.view">
+        <field name="name">doorandoor.historical.delivery.list.ddhl</field>
+        <field name="model">doorandoor.historical.delivery</field>
+        <field name="inherit_id" ref="doorandoor_process_control.view_ddpc_historical_delivery_list"/>
+        <field name="arch" type="xml">
+            <field name="picking_id" position="after">
+                <field name="ddhl_requested_qty" optional="show"/>
+                <field name="ddhl_regularized_qty" optional="show"/>
+                <field name="ddhl_reserved_qty" optional="show"/>
+                <field name="ddhl_pending_qty" optional="show"/>
+                <field name="ddhl_readiness_state" widget="badge"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_historical_delivery_form_ddhl" model="ir.ui.view">
+        <field name="name">doorandoor.historical.delivery.form.ddhl</field>
+        <field name="model">doorandoor.historical.delivery</field>
+        <field name="inherit_id" ref="doorandoor_process_control.view_ddpc_historical_delivery_form"/>
+        <field name="arch" type="xml">
+            <button name="action_create_operation" position="attributes">
+                <attribute name="invisible">state != 'draft' or ddhl_inventory_treatment != 'exceptional_regularization'</attribute>
+            </button>
+            <button name="action_create_operation" position="before">
+                <button name="action_ddhl_prepare_existing_stock" type="object"
+                        string="1. Proponer labels existentes" class="btn-primary"
+                        groups="doorandoor_historic_logistics.group_historic_logistics_operator"
+                        invisible="state != 'draft' or ddhl_inventory_treatment != 'existing_stock' or ddhl_stock_allocation_count != 0"/>
+                <button name="action_ddhl_clear_stock_proposal" type="object"
+                        string="Liberar propuesta" class="btn-secondary"
+                        groups="doorandoor_historic_logistics.group_historic_logistics_supervisor"
+                        invisible="state != 'draft' or ddhl_inventory_treatment != 'existing_stock' or ddhl_stock_allocation_count == 0"
+                        confirm="Se eliminará la propuesta actual para calcularla nuevamente. ¿Continuar?"/>
+                <button name="action_ddhl_approve_existing_stock" type="object"
+                        string="2. Aprobar y crear operaciones" class="btn-primary"
+                        groups="doorandoor_historic_logistics.group_historic_logistics_supervisor"
+                        invisible="state != 'draft' or ddhl_inventory_treatment != 'existing_stock' or not ddhl_stock_allocation_ready" 
+                        confirm="Se reservarán exactamente estos labels y se crearán las operaciones según sus almacenes reales. ¿Continuar?"/>
+                <button name="action_ddhl_mark_excluded" type="object"
+                        string="Confirmar exclusión" class="btn-secondary"
+                        groups="doorandoor_historic_logistics.group_historic_logistics_supervisor"
+                        invisible="state != 'draft' or ddhl_inventory_treatment != 'excluded_legacy'"
+                        confirm="Se conservará la evidencia, pero no se creará ni moverá inventario. ¿Continuar?"/>
+                <button name="action_ddhl_start_predispatch_cycle" type="object"
+                        string="Crear ciclo logístico completo" class="btn-primary"
+                        groups="doorandoor_historic_logistics.group_historic_logistics_operator"
+                        invisible="state != 'draft' or ddhl_inventory_treatment != 'exceptional_regularization' or ddhl_regularization_count != 0"
+                        confirm="Se crearán y enlazarán la recepción de origen, el traslado con su recepción destino y la entrega final. Los labels se generarán una sola vez en origen. ¿Desea continuar?"/>
+                <button name="action_ddhl_create_regularization" type="object"
+                        string="Registrar existencia ya localizada" class="btn-secondary"
+                        groups="doorandoor_historic_logistics.group_historic_logistics_operator"
+                        invisible="state in ('done', 'cancel')"/>
+                <button name="action_ddhl_select_next_operation" type="object"
+                        string="2. Elegir siguiente operación" class="btn-primary"
+                        groups="doorandoor_historic_logistics.group_historic_logistics_operator"
+                        invisible="not ddhl_can_create_next_operation"/>
+            </button>
+            <div class="oe_title" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_ddhl_open_regularizations" type="object"
+                            class="oe_stat_button" icon="fa-tags"
+                            invisible="ddhl_regularization_count == 0">
+                        <field name="ddhl_regularization_count" widget="statinfo" string="Recepciones históricas"/>
+                    </button>
+                    <button name="action_ddhl_open_cycle_operations" type="object"
+                            class="oe_stat_button" icon="fa-sitemap"
+                            invisible="ddhl_cycle_operation_count == 0">
+                        <field name="ddhl_cycle_operation_count" widget="statinfo"
+                               string="Operaciones del ciclo"/>
+                    </button>
+                </div>
+                <div class="alert alert-info" role="alert">
+                    Preparación física: <field name="ddhl_readiness_state" widget="badge"/> —
+                    solicitado <field name="ddhl_requested_qty"/>, localizado <field name="ddhl_regularized_qty"/>,
+                    reservado <field name="ddhl_reserved_qty"/> y pendiente <field name="ddhl_pending_qty"/>.
+                </div>
+            </div>
+            <field name="supply_warehouse_id" position="before">
+                <field name="ddhl_inventory_treatment" readonly="state != 'draft'"/>
+                <field name="ddhl_exclusion_reason"
+                       invisible="ddhl_inventory_treatment != 'excluded_legacy'"
+                       required="ddhl_inventory_treatment == 'excluded_legacy'"
+                       readonly="state != 'draft'"/>
+            </field>
+            <field name="quantity" position="after">
+                <field name="ddhl_regularized_qty" optional="show"/>
+            </field>
+            <notebook position="inside">
+                <page string="Stock existente"
+                      invisible="ddhl_inventory_treatment != 'existing_stock'">
+                    <div class="alert alert-info" role="alert">
+                        Esta propuesta usa únicamente labels activos ya aplicados al inventario.
+                        No crea recepciones, existencias ni códigos nuevos.
+                    </div>
+                    <group>
+                        <field name="ddhl_stock_allocation_count"/>
+                        <field name="ddhl_stock_allocation_ready"/>
+                    </group>
+                    <field name="ddhl_stock_allocation_ids" readonly="1">
+                        <list create="0" delete="0">
+                            <field name="product_id"/>
+                            <field name="source_warehouse_id"/>
+                            <field name="quantity"/>
+                            <field name="serial_codes"/>
+                            <field name="picking_id"/>
+                            <field name="receipt_picking_id" optional="hide"/>
+                            <field name="delivery_picking_id" optional="hide"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Ciclo operativo">
+                    <div class="alert alert-info" role="alert">
+                        Este es el panel único del proceso. Los productos salen de la factura histórica y no deben cargarse nuevamente.
+                    </div>
+                    <group>
+                        <group string="Preparación">
+                            <field name="ddhl_readiness_state" widget="badge"/>
+                            <field name="ddhl_requested_qty"/>
+                            <field name="ddhl_regularized_qty"/>
+                            <field name="ddhl_pending_qty"/>
+                        </group>
+                        <group string="Documentos enlazados">
+                            <field name="transfer_dispatch_id"/>
+                            <field name="transfer_receipt_id"/>
+                            <field name="picking_id" string="Entrega final"/>
+                            <field name="ddhl_can_create_next_operation" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="ddhl_cycle_operation_ids" readonly="1">
+                        <list create="0" delete="0">
+                            <field name="name"/>
+                            <field name="ddpc_operation_category" widget="badge"/>
+                            <field name="location_id"/>
+                            <field name="location_dest_id"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="view_historical_delivery_search_ddhl" model="ir.ui.view">
+        <field name="name">doorandoor.historical.delivery.search.ddhl</field>
+        <field name="model">doorandoor.historical.delivery</field>
+        <field name="inherit_id" ref="doorandoor_process_control.view_ddpc_historical_delivery_search"/>
+        <field name="arch" type="xml">
+            <filter name="draft" position="before">
+                <filter name="ddhl_missing" string="Falta mercancía" domain="[('ddhl_readiness_state','in',('missing','partial'))]"/>
+                <filter name="ddhl_ready" string="Lista físicamente" domain="[('ddhl_readiness_state','in',('ready_dispatch','ready_delivery'))]"/>
+            </filter>
+            <filter name="group_state" position="after">
+                <filter name="group_readiness" string="Preparación física" context="{'group_by':'ddhl_readiness_state'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="view_stock_picking_form_related_historic_operations" model="ir.ui.view">
+        <field name="name">stock.picking.form.related.historic.operations</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_ddhl_open_related_operations" type="object"
+                        class="oe_stat_button" icon="fa-link"
+                        groups="stock.group_stock_user"
+                        >
+                    <field name="ddhl_related_operation_count" widget="statinfo"
+                           string="Operaciones enlazadas"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

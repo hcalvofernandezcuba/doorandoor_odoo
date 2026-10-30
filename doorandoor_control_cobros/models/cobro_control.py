@@ -1,3 +1,5 @@
+import base64
+
 from markupsafe import Markup
 
 from odoo import _, api, fields, models
@@ -126,6 +128,7 @@ class DoorAndDoorCobroControl(models.Model):
         tracking=True,
         copy=False,
     )
+
     payment_reference = fields.Char(
         string="Referencia",
         tracking=True,
@@ -497,6 +500,35 @@ class DoorAndDoorCobroControl(models.Model):
         self.ensure_one()
         return self.env.ref("doorandoor_control_cobros.action_report_ddc_cobro_control").report_action(self)
 
+    def action_send_control_report_email(self):
+        self.ensure_one()
+        pdf, __format = self.env["ir.actions.report"]._render_qweb_pdf(
+            "doorandoor_control_cobros.action_report_ddc_cobro_control", self.ids
+        )
+        attachment = self.env["ir.attachment"].create({
+            "name": _("Control de Cobro - %s.pdf") % self.name.replace("/", "-"),
+            "type": "binary",
+            "datas": base64.b64encode(pdf),
+            "res_model": self._name,
+            "res_id": self.id,
+            "mimetype": "application/pdf",
+        })
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Enviar control de cobro"),
+            "res_model": "mail.compose.message",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_model": self._name,
+                "default_res_ids": self.ids,
+                "default_composition_mode": "comment",
+                "default_partner_ids": [self.partner_id.commercial_partner_id.id],
+                "default_attachment_ids": [attachment.id],
+                "default_subject": _("Control de Cobro %s") % self.name,
+            },
+        }
+
     def action_mark_pending(self):
         if self.filtered("payment_id"):
             self._ddc_check_official_payment_permission()
@@ -616,6 +648,14 @@ class DoorAndDoorCobroControl(models.Model):
                     "review_date": fields.Datetime.now(),
                 }
             )
+            # Reconciliation changes residuals in SQL while the payment move
+            # lines can still carry their pre-reconciliation values in the
+            # current ORM cache.  Re-read them before deciding whether a real
+            # open credit remains; otherwise a fully applied company-currency
+            # payment can be transferred incorrectly to customer advances.
+            payment.move_id.line_ids.invalidate_recordset([
+                "amount_residual", "amount_residual_currency", "reconciled",
+            ])
             payment._ddc_transfer_open_credit_to_advance(record)
             # ``write(state=validated)`` emits an operational event, but that
             # event can be queued while Odoo is still finishing the payment
@@ -790,6 +830,11 @@ class DoorAndDoorCobroControl(models.Model):
         if not payment.move_id:
             raise ValidationError(_("El pago seleccionado no tiene un asiento contable para conciliar."))
         invoice = self.move_id
+        # Stripe can reconcile its payment before the linked Control de
+        # Cobros is validated.  That is already correct: do not attempt to
+        # apply the same outstanding line a second time.
+        if invoice in payment.reconciled_invoice_ids:
+            return
         residual_before = invoice.amount_residual
         payment_lines = payment.move_id.line_ids.filtered(
             lambda line: (
@@ -797,7 +842,14 @@ class DoorAndDoorCobroControl(models.Model):
                 and not line.reconciled
                 and line.partner_id.commercial_partner_id == invoice.partner_id.commercial_partner_id
                 and line.account_id.account_type in ("asset_receivable", "liability_payable")
-                and not line.currency_id.is_zero(line.amount_residual_currency)
+                # In company currency Odoo may leave ``currency_id`` empty and
+                # ``amount_residual_currency`` at zero even though the
+                # receivable/payable balance is still open.  Filtering by the
+                # foreign-currency residual discarded valid cash payments and
+                # moved the whole collection to customer advances instead of
+                # reducing the invoice.  The company-currency residual is the
+                # authoritative value for this accounting reconciliation.
+                and not line.company_currency_id.is_zero(line.amount_residual)
             )
         )
         invoice_lines = invoice.line_ids.filtered(

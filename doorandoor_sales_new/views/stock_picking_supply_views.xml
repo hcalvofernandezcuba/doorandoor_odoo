@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='origin']" position="after">
                     <field name="ddsn_supply_invoice_id" readonly="1" invisible="not ddsn_supply_invoice_id"/>
+                    <field name="ddsn_supply_sale_order_id" readonly="1" invisible="not ddsn_supply_sale_order_id"/>
                     <field name="ddsn_supply_preinvoice_id" readonly="1" invisible="not ddsn_supply_preinvoice_id"/>
                     <field name="ddsn_supply_source_warehouse_id" readonly="1" invisible="not ddsn_supply_invoice_id"/>
                     <field name="ddsn_supply_destination_warehouse_id" readonly="1" invisible="not ddsn_supply_invoice_id"/>

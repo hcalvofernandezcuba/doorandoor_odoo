@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Ficha de Cliente",
-    "version": "18.0.1.1.9",
+    "version": "18.0.1.2.0",
     "category": "Contacts",
-    "summary": "18.0.1.1.9 - Mantiene el descuento automático bajo el control administrativo de precios",
+    "summary": "18.0.1.2.0 - Respeta precio fijo y bonificación prioritaria del ITEM",
     "description": """
 DoorAndDoor Ficha de Cliente
 ============================
@@ -25,6 +25,15 @@ Alcance inicial
 
 Historial resumido
 ------------------
+
+- 18.0.1.2.0
+  Conserva la prioridad de precio fijo y bonificación propia del ITEM antes de
+  evaluar el descuento del constructor. Las reglas no se acumulan.
+
+- 18.0.1.1.10
+  Integra el descuento de constructor en la prioridad comercial común, sin
+  sobrescribir descuentos manuales ni reglas vigentes del cliente. Agrega
+  vigencia, autorizador, motivo y control gerencial en la ficha del constructor.
 
 - 18.0.1.0.0
   Se crea el modulo `doorandoor_ficha_cliente` con un catalogo propio

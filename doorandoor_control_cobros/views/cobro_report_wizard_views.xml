@@ -31,8 +31,12 @@
                 </sheet>
                 <footer>
                     <button name="action_print_pdf" type="object" string="Imprimir PDF base" class="btn-primary"/>
+                    <button name="action_send_pdf" type="object"
+                            string="Enviar reporte por correo" class="btn-secondary"/>
                     <button name="action_print_credit_pdf" type="object"
                             string="PDF de creditos autorizados" class="btn-primary"/>
+                    <button name="action_send_credit_pdf" type="object"
+                            string="Enviar creditos por correo" class="btn-secondary"/>
                     <button string="Cerrar" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>

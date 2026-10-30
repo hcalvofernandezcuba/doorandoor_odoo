@@ -6,3 +6,4 @@ access_ddsl_stock_serial_wizard_user,access.ddsl.stock.serial.wizard.user,model_
 access_ddsl_stock_serial_wizard_line_user,access.ddsl.stock.serial.wizard.line.user,model_ddsl_stock_serial_wizard_line,stock.group_stock_user,1,1,1,1
 access_ddsl_stock_receipt_scan_wizard_user,access.ddsl.stock.receipt.scan.wizard.user,model_ddsl_stock_receipt_scan_wizard,stock.group_stock_user,1,1,1,1
 access_ddsl_stock_receipt_scan_wizard_line_user,access.ddsl.stock.receipt.scan.wizard.line.user,model_ddsl_stock_receipt_scan_wizard_line,stock.group_stock_user,1,1,1,1
+access_ddsl_stock_receipt_count_user,access.ddsl.stock.receipt.count.user,model_ddsl_stock_receipt_count,stock.group_stock_user,1,1,1,1

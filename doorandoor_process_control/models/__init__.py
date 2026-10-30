@@ -11,3 +11,4 @@ from . import backfill_wizard
 from . import preinventory_reservation
 from . import sales_reservation_analysis
 from . import pending_delivery
+from . import historical_delivery

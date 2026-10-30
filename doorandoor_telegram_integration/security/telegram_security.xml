@@ -53,5 +53,11 @@
             <field name="domain_force">[('company_id', 'in', company_ids)]</field>
             <field name="groups" eval="[(4, ref('doorandoor_telegram_integration.group_ddtg_manager'))]"/>
         </record>
+        <record id="rule_ddtg_poll_company" model="ir.rule">
+            <field name="name">Encuestas Telegram por compañía</field>
+            <field name="model_id" ref="model_doorandoor_telegram_poll"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('doorandoor_telegram_integration.group_ddtg_manager'))]"/>
+        </record>
     </data>
 </odoo>

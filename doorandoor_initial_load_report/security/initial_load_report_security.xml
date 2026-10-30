@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rule_inventory_initial_load_report_company" model="ir.rule">
+        <field name="name">Initial load report by company and warehouse</field>
+        <field name="model_id" ref="model_inventory_initial_load_report"/>
+        <field name="domain_force">([('company_id', 'in', company_ids)] if user.has_group('base.group_system') or (not user.ddpc_warehouse_ids and (user.has_group('doorandoor_process_control.group_ddpc_manager') or user.has_group('doorandoor_inventory_variant_count.group_inventory_count_manager'))) else [('company_id', 'in', company_ids), ('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)])</field>
+        <field name="groups" eval="[(4, ref('doorandoor_inventory_variant_count.group_inventory_count_user'))]"/>
+    </record>
+</odoo>

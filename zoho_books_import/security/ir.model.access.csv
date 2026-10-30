@@ -1,8 +1,8 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_zoho_connector_user,Zoho Connector User,model_zoho_connector,base.group_user,1,0,0,0
-access_zoho_connector_manager,Zoho Connector Manager,model_zoho_connector,base.group_system,1,1,1,1
-access_zoho_import_log_user,Zoho Import Log User,model_zoho_import_log,base.group_user,1,0,0,0
-access_zoho_import_log_manager,Zoho Import Log Manager,model_zoho_import_log,base.group_system,1,1,1,1
-access_zoho_product_import,Zoho Product Import Wizard,model_zoho_product_import,base.group_user,1,1,1,0
-access_zoho_partner_import,Zoho Partner Import Wizard,model_zoho_partner_import,base.group_user,1,1,1,0
-access_zoho_import_wizard,Zoho Import Wizard,model_zoho_import_wizard,base.group_user,1,1,1,0
+access_zoho_connector_user,Zoho Connector User,model_zoho_connector,zoho_books_import.group_zoho_manager,1,0,0,0
+access_zoho_connector_manager,Zoho Connector Manager,model_zoho_connector,zoho_books_import.group_zoho_manager,1,1,1,1
+access_zoho_import_log_user,Zoho Import Log User,model_zoho_import_log,zoho_books_import.group_zoho_manager,1,0,0,0
+access_zoho_import_log_manager,Zoho Import Log Manager,model_zoho_import_log,zoho_books_import.group_zoho_manager,1,1,1,1
+access_zoho_product_import,Zoho Product Import Manager,model_zoho_product_import,zoho_books_import.group_zoho_manager,1,1,1,0
+access_zoho_partner_import,Zoho Partner Import Manager,model_zoho_partner_import,zoho_books_import.group_zoho_manager,1,1,1,0
+access_zoho_import_wizard,Zoho Import Wizard Manager,model_zoho_import_wizard,zoho_books_import.group_zoho_manager,1,1,1,0

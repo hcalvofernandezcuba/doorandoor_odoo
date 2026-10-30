@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="customer_display_policy_alert" inherit_id="doorandoor_pantalla_cliente.customer_display">
+        <xpath expr="//aside[hasclass('ddpc-summary')]/*[1]" position="before">
+            <section id="ddpa-policy-alert" class="ddpa-policy-alert d-none" aria-live="polite">
+                <strong>Políticas comerciales pendientes</strong>
+                <span id="ddpa-policy-message">Revise y acepte las políticas para autorizar la venta.</span>
+                <a id="ddpa-policy-link" href="#" target="_blank" rel="noopener">Revisar y aceptar ahora</a>
+            </section>
+        </xpath>
+        <xpath expr="//head" position="inside">
+            <link rel="stylesheet" href="/doorandoor_policy_acceptance/static/src/css/customer_display_policy.css?v=18.0.1.1.0"/>
+        </xpath>
+        <xpath expr="//body/script[last()]" position="after">
+            <script src="/doorandoor_policy_acceptance/static/src/js/customer_display_policy.js?v=18.0.1.1.0"></script>
+        </xpath>
+    </template>
+</odoo>

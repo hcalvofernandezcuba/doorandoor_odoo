@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- No depende de XML IDs de extensiones previas: compatible con bases locales atrasadas. -->
+    <template id="external_layout_bubble_invoice_office" inherit_id="web.external_layout_bubble">
+        <xpath expr="//div[@name='company_address']" position="replace">
+            <div name="company_address" class="w-50 text-end">
+                <t t-if="o and (o._name == 'sale.order' or (o._name == 'account.move' and o.move_type == 'out_invoice'))">
+                    <t t-set="office" t-value="o.ddco_office_id"/>
+                    <div style="text-align: right; font-size: 10pt; line-height: 1.2;">
+                        <img t-if="company.logo" class="o_company_logo" t-att-src="image_data_uri(company.logo)" alt="Door &amp; Door" style="display: block; max-height: 106px; max-width: 300px; position: relative; top: -2pt; margin: 0 0 3px auto;"/>
+                        <t t-if="office">
+                            <div t-esc="office.name"/><div t-if="office.street" t-esc="office.street"/><div t-if="office.street2" t-esc="office.street2"/>
+                            <div><span t-if="office.city" t-esc="office.city"/><span t-if="office.state_id">, <span t-esc="office.state_id.name"/></span><span t-if="office.zip"> <span t-esc="office.zip"/></span></div>
+                            <div t-if="office.country_id" t-esc="office.country_id.name"/><div t-if="office.phone" t-esc="office.phone"/>
+                        </t>
+                        <t t-else=""><address t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}' style="margin: 0;"/><div t-if="company.phone or company.mobile"><span t-esc="company.phone or company.mobile"/></div></t>
+                    </div>
+                </t>
+                <t t-else=""><ul class="list-unstyled" name="company_address_list"><li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/></li><li t-else=""><span t-field="company.company_details"/></li><li t-if="not forced_vat and company.vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="company.vat"/></li><li t-elif="forced_vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="forced_vat"/></li></ul></t>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="external_layout_wave_invoice_office" inherit_id="web.external_layout_wave">
+        <xpath expr="//div[@name='company_address']" position="replace">
+            <div name="company_address" class="w-50 text-end">
+                <t t-if="o and (o._name == 'sale.order' or (o._name == 'account.move' and o.move_type == 'out_invoice'))">
+                    <t t-set="office" t-value="o.ddco_office_id"/>
+                    <div style="text-align: right; font-size: 10pt; line-height: 1.2;">
+                        <img t-if="company.logo" class="o_company_logo" t-att-src="image_data_uri(company.logo)" alt="Door &amp; Door" style="display: block; max-height: 106px; max-width: 300px; position: relative; top: -2pt; margin: 0 0 3px auto;"/>
+                        <t t-if="office">
+                            <div t-esc="office.name"/><div t-if="office.street" t-esc="office.street"/><div t-if="office.street2" t-esc="office.street2"/>
+                            <div><span t-if="office.city" t-esc="office.city"/><span t-if="office.state_id">, <span t-esc="office.state_id.name"/></span><span t-if="office.zip"> <span t-esc="office.zip"/></span></div>
+                            <div t-if="office.country_id" t-esc="office.country_id.name"/><div t-if="office.phone" t-esc="office.phone"/>
+                        </t>
+                        <t t-else=""><address t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}' style="margin: 0;"/><div t-if="company.phone or company.mobile"><span t-esc="company.phone or company.mobile"/></div></t>
+                    </div>
+                </t>
+                <t t-else=""><ul class="list-unstyled" name="company_address_list"><li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/></li><li t-else=""><span t-field="company.company_details"/></li><li t-if="not forced_vat and company.vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="company.vat"/></li><li t-elif="forced_vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="forced_vat"/></li></ul></t>
+            </div>
+        </xpath>
+    </template>
+</odoo>

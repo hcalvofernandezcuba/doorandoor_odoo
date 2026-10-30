@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddii_inventory_import_manager,ddii.inventory.import manager,model_ddii_inventory_import,stock.group_stock_manager,1,1,1,1
+access_ddii_inventory_import_line_manager,ddii.inventory.import.line manager,model_ddii_inventory_import_line,stock.group_stock_manager,1,1,1,1
+access_ddii_inventory_import_wizard_manager,ddii.inventory.import.wizard manager,model_ddii_inventory_import_wizard,stock.group_stock_manager,1,1,1,1

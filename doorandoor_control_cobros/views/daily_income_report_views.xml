@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddc_daily_income_list" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.daily.income.list</field>
+        <field name="model">doorandoor.daily.income.report</field>
+        <field name="arch" type="xml">
+            <list string="Ingresos diarios" create="0" edit="0" delete="0"
+                  default_order="payment_date desc, id desc">
+                <field name="payment_date"/>
+                <field name="journal_id" string="Método de pago"/>
+                <field name="office_id"/>
+                <field name="partner_id"/>
+                <field name="commercial_user_id"/>
+                <field name="move_id"/>
+                <field name="payment_id"/>
+                <field name="income_amount_company" sum="Total empresa"/>
+                <field name="company_currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddc_daily_income_search" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.daily.income.search</field>
+        <field name="model">doorandoor.daily.income.report</field>
+        <field name="arch" type="xml">
+            <search string="Analizar ingresos diarios">
+                <field name="payment_date"/>
+                <field name="journal_id" string="Método de pago"/>
+                <field name="office_id"/>
+                <field name="partner_id"/>
+                <field name="commercial_user_id"/>
+                <field name="move_id"/>
+                <filter name="today" string="Hoy"
+                        domain="[('payment_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="this_month" string="Este mes"
+                        domain="[('payment_date', '&gt;=', context_today().replace(day=1).strftime('%Y-%m-%d')),
+                                 ('payment_date', '&lt;', (context_today() + relativedelta(months=1)).replace(day=1).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_day" string="Día" context="{'group_by': 'payment_date:day'}"/>
+                    <filter name="group_method" string="Método de pago" context="{'group_by': 'journal_id'}"/>
+                    <filter name="group_office" string="Unidad" context="{'group_by': 'office_id'}"/>
+                    <filter name="group_partner" string="Cliente" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_commercial" string="Comercial" context="{'group_by': 'commercial_user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ddc_daily_income_pivot" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.daily.income.pivot</field>
+        <field name="model">doorandoor.daily.income.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Ingresos diarios">
+                <field name="payment_date" type="row" interval="day"/>
+                <field name="office_id" type="row"/>
+                <field name="journal_id" type="col" string="Método de pago"/>
+                <field name="income_amount_company" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_ddc_daily_income_graph" model="ir.ui.view">
+        <field name="name">doorandoor.cobro.control.daily.income.graph</field>
+        <field name="model">doorandoor.daily.income.report</field>
+        <field name="arch" type="xml">
+            <graph string="Ingresos por método de pago" type="bar" stacked="1">
+                <field name="payment_date" interval="day"/>
+                <field name="journal_id"/>
+                <field name="income_amount_company" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_ddc_daily_income_report" model="ir.actions.act_window">
+        <field name="name">Ingresos diarios</field>
+        <field name="res_model">doorandoor.daily.income.report</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_ddc_daily_income_list')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_ddc_daily_income_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_ddc_daily_income_graph')})
+        ]"/>
+        <field name="search_view_id" ref="view_ddc_daily_income_search"/>
+        <field name="context">{'search_default_group_day': 1, 'search_default_group_method': 1, 'search_default_group_office': 1}</field>
+        <field name="help" type="html">
+            <p>No existen ingresos validados con los filtros seleccionados.</p>
+        </field>
+    </record>
+</odoo>

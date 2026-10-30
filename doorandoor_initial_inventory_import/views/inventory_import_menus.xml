@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_ddii_initial_inventory_root" name="Initial Inventory" parent="stock.menu_stock_config_settings" sequence="65" groups="stock.group_stock_manager"/>
+    <menuitem id="menu_ddii_import_start" name="Import inventory file" parent="menu_ddii_initial_inventory_root" action="action_ddii_inventory_import_wizard" sequence="10" groups="stock.group_stock_manager"/>
+    <menuitem id="menu_ddii_import_history" name="Import history" parent="menu_ddii_initial_inventory_root" action="action_ddii_inventory_import" sequence="20" groups="stock.group_stock_manager"/>
+</odoo>

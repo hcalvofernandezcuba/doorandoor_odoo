@@ -207,7 +207,7 @@ class SpecialProductWizard(models.TransientModel):
             "uom_id": base_template.uom_id.id,
             "uom_po_id": base_template.uom_po_id.id,
             "list_price": configured_price,
-            "standard_price": base_template.standard_price,
+            "standard_price": base_template.sudo().standard_price,
             "sale_ok": True,
             "purchase_ok": False,
             "route_ids": [(6, 0, base_template.route_ids.ids)],

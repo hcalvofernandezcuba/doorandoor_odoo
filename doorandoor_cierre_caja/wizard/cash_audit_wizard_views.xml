@@ -1,0 +1,22 @@
+<odoo>
+    <record id="view_ddcc_cash_audit_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.cash.audit.wizard.form</field>
+        <field name="model">doorandoor.cash.audit.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Iniciar arqueo de caja">
+                <sheet>
+                    <div class="alert alert-info" role="status">Se congelará el efectivo esperado y el detalle de cobros/vueltos al emitir la hoja. Imprima el PDF, realice el conteo físico en la caja y capture el resultado al regresar.</div>
+                    <group><field name="register_id"/><field name="session_id" readonly="1"/></group>
+                    <group><field name="expected_amount" readonly="1"/><field name="counted_amount" readonly="1"/><field name="difference_amount" readonly="1"/></group>
+                    <group><field name="note" invisible="1"/></group>
+                </sheet>
+                <footer><button name="action_record_audit" type="object" string="Generar hoja de arqueo" class="btn-primary"/><button string="Cancelar" special="cancel"/></footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_ddcc_cash_audit_wizard" model="ir.actions.act_window">
+        <field name="name">Iniciar arqueo de caja</field><field name="res_model">doorandoor.cash.audit.wizard</field><field name="view_mode">form</field><field name="target">new</field>
+    </record>
+    <menuitem id="menu_ddcc_audit_wizard" name="Arqueo de caja" parent="menu_ddcc_root" action="action_ddcc_cash_audit_wizard" sequence="15" groups="doorandoor_cierre_caja.group_cash_manager,base.group_system"/>
+    <menuitem id="menu_ddcc_audits" name="Arqueos registrados" parent="menu_ddcc_root" action="action_ddcc_cash_audit" sequence="25" groups="doorandoor_cierre_caja.group_cash_manager,base.group_system"/>
+</odoo>

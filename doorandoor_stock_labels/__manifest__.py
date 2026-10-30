@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Stock Labels",
-    "version": "18.0.1.0.50",
+    "version": "18.0.1.4.1",
     "category": "Inventory",
-    "summary": "18.0.1.0.50 - Label Zebra vertical de 4x6 pulgadas, uno por hoja completa",
+    "summary": "18.0.1.4.1 - Acceso comercial prepara despacho y labels serializados",
     "description": """
 DoorAndDoor Stock Labels
 ========================
@@ -41,6 +41,93 @@ Alcance inicial
 
 Historial resumido
 ------------------
+
+- 18.0.1.4.1
+  Renombra la acción comercial para expresar que prepara el despacho antes de
+  imprimir y añade la referencia de la operación al label 4x6. La reserva y
+  auditoría de seriales se implementan en Mobile Hanger sin alterar las reglas
+  existentes de pago ni fulfillment.
+
+- 18.0.1.4.0
+  Generaliza el conteo con hanger para operaciones autorizadas por módulos
+  operativos. Las recepciones conservan productos adicionales; entregas y
+  traslados solo pueden contar productos ya previstos en el documento.
+
+- 18.0.1.3.2
+  Incorpora un punto de extensión para autorizar conteos con hanger en otras
+  operaciones controladas, conservando por defecto la restricción a recepciones.
+
+- 18.0.1.3.1
+  Devuelve al lector móvil el producto y la cantidad acumulada después de cada
+  disparo, permitiendo continuar el conteo sin recargar el formulario.
+
+- 18.0.1.3.0
+  Separa las cantidades esperadas de las cantidades fisicamente contadas,
+  conserva las lecturas por recepcion y permite agregar productos no previstos
+  mediante barcode, referencia interna o codigo propio del label. Las lecturas
+  no modifican existencias; las cantidades se preparan al aplicarlas y solo la
+  validacion normal de la recepcion actualiza el inventario.
+
+- 18.0.1.2.2
+  Separa la resolución física de la Zebra (203 DPI) de la resolución CSS del
+  PDF (96 DPI). Evita que wkhtmltopdf reduzca texto y barcode a menos de la
+  mitad del área disponible en la hoja 3x1.
+
+- 18.0.1.2.1
+  Amplía tipografías, área informativa y código de barras en los reportes
+  pequeños para aprovechar visualmente toda la hoja física 3x1 sin recortes.
+
+- 18.0.1.2.0
+  Ajusta el label pequeño al rollo Zebra real de 3 pulgadas de ancho por
+  1 pulgada de alto, una etiqueta por página. Lo mantiene predeterminado para
+  producto, recepción y fabricación; las facturas destinadas a entregas usan
+  4x6 vertical de forma predeterminada.
+
+- 18.0.1.1.4
+  Recupera para los labels grandes la geometría estable de papel 102x152 mm
+  gestionada por Odoo. Evita el desborde introducido al forzar dimensiones
+  decimales simultáneamente en wkhtmltopdf y CSS, sin modificar el formato
+  pequeño ni el selector de tamaño.
+
+- 18.0.1.1.3
+  Eleva cuatro puntos en total el bloque textual de la etiqueta pequeña,
+  conservando sin cambios la posición y el tamaño del código de barras.
+
+- 18.0.1.1.2
+  Eleva dos puntos el bloque textual de la etiqueta pequeña y conserva intactos
+  la posición y el tamaño del código de barras. Muestra la variante del producto
+  inmediatamente debajo del almacén y lo selecciona por defecto desde Producto.
+
+- 18.0.1.1.1
+  Añade tolerancia interna de 0,6 mm al formato grande sin modificar el papel
+  físico 4x6, evitando que el contenido salga del área visible por redondeo.
+
+- 18.0.1.1.0
+  Agrega el selector Tamaño de etiqueta a los asistentes de productos,
+  recepciones, facturas y fabricación. Permite escoger el formato grande Zebra
+  4x6 o el formato pequeño correspondiente a cada flujo antes de imprimir.
+
+- 18.0.1.0.55
+  Conserva el salto físico estable entre etiquetas y evita generar una hoja
+  vacía después de la última etiqueta del lote.
+
+- 18.0.1.0.54
+  Elimina el ancho adaptable del contenedor HTML y fuerza un salto físico por
+  etiqueta para que la posición no se desplace en impresiones multipágina.
+
+- 18.0.1.0.53
+  Usa las medidas físicas exactas 101,6 x 152,4 mm del papel Zebra 4x6 tanto
+  en el formato PDF como en cada página, evitando desplazamiento acumulado a
+  partir de la tercera o cuarta etiqueta.
+
+- 18.0.1.0.52
+  Los labels de factura muestran todos los atributos reales de la variante y
+  las opciones informativas guardadas en la línea, incluyendo Marca, Alto y
+  Ancho/Medidas, sin duplicarlos.
+
+- 18.0.1.0.51
+  Declara la dependencia de Manufactura usada por los labels de OF para que el
+  modulo pueda instalarse correctamente en una base limpia.
 
 - 18.0.1.0.50
   Ajusta el reporte al rollo Zebra real de 4 pulgadas de ancho por 6 de alto.
@@ -142,6 +229,7 @@ Historial resumido
     "website": "https://doorandoor.com",
     "depends": [
         "stock",
+        "mrp",
         "product",
         "doorandoor_product_config",
     ],

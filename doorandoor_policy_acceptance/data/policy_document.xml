@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="policy_document_2026_10" model="doorandoor.policy.document">
+        <field name="name">Door &amp; Door Sales and Customer Support Policies</field>
+        <field name="version">2026-10-12</field>
+        <field name="effective_date">2026-10-11</field>
+        <field name="pdf_url">/doorandoor_policy_acceptance/static/src/pdf/Door_and_Door_Sales_Customer_Support_Policies_ENGLISH.pdf</field>
+        <field name="sha256">230dc3ea2cc86b792d2861257149fa31d65b6b43e69f86538bc47eea3d566fa6</field>
+        <field name="pdf_url_es">/doorandoor_policy_acceptance/static/src/pdf/Politicas_Door_and_Door_FINAL_PARA_IMPRIMIR.pdf</field>
+        <field name="sha256_es">c35af26425681bff3e88cedd44149d6fe933a128ed6c53d1ad9a4fe37bc55051</field>
+        <field name="active">1</field>
+    </record>
+</odoo>

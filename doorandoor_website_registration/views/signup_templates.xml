@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="signup_doorandoor" inherit_id="auth_signup.signup" name="Registro DoorAndDoor">
+        <xpath expr="//form[hasclass('oe_signup_form')]" position="attributes">
+            <attribute name="class" add="ddwr_signup_form" separator=" "/>
+        </xpath>
+        <xpath expr="//t[@t-call='auth_signup.fields']" position="before">
+            <div t-if="not (token and not invalid_token)" class="ddwr_signup_heading">
+                <img src="/doorandoor_website_brand/static/src/img/doorandoor_wordmark.svg"
+                     alt="DoorAndDoor — Puertas, Ventanas, Impacto"/>
+                <h1>Cree su cuenta</h1>
+                <p>Administre sus datos y consulte sus compras, cotizaciones y documentos.</p>
+            </div>
+        </xpath>
+        <xpath expr="//t[@t-call='auth_signup.fields']" position="after">
+            <div t-if="not only_passwords" class="ddwr_extended_fields">
+                <div t-if="ddwr_verification_pending" class="alert alert-info">
+                    Se envió un código de seis dígitos al bot de pruebas de DoorAndDoor. Tiene una vigencia de 10 minutos.
+                </div>
+                <div t-if="ddwr_verification_pending" class="mb-3">
+                    <label for="verification_code">Código de verificación *</label>
+                    <input type="text" name="verification_code" id="verification_code" class="form-control"
+                           inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"
+                           required="required" t-att-value="verification_code"/>
+                </div>
+                <div class="ddwr_section_title">Tipo de cliente</div>
+                <div class="mb-3">
+                    <label for="customer_type">Seleccione la opción que le corresponde *</label>
+                    <select name="customer_type" id="customer_type" class="form-select" required="required">
+                        <option value="">Seleccione…</option>
+                        <option value="individual" t-att-selected="customer_type == 'individual'">Cliente particular</option>
+                        <option value="builder" t-att-selected="customer_type == 'builder'">Constructor / empresa constructora</option>
+                        <option value="builder_client" t-att-selected="customer_type == 'builder_client'">Cliente asociado a una constructora</option>
+                    </select>
+                </div>
+
+                <div class="row g-3 ddwr_builder_company_fields" t-attf-style="#{'' if customer_type == 'builder' else 'display:none;'}">
+                    <div class="col-md-7">
+                        <label for="company_name">Nombre de la empresa constructora *</label>
+                        <input type="text" name="company_name" id="company_name" class="form-control" t-att-value="company_name"/>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="builder_license">Licencia del constructor</label>
+                        <input type="text" name="builder_license" id="builder_license" class="form-control" t-att-value="builder_license"/>
+                    </div>
+                </div>
+
+                <div class="mb-3 ddwr_builder_association_fields" t-attf-style="#{'' if customer_type == 'builder_client' else 'display:none;'}">
+                    <label for="builder_name_claim">Nombre de la constructora asociada *</label>
+                    <input type="text" name="builder_name_claim" id="builder_name_claim" class="form-control"
+                           t-att-value="builder_name_claim" autocomplete="organization"/>
+                    <div class="form-text">Escriba el nombre. Por privacidad, no mostramos la lista de constructoras registradas.</div>
+                </div>
+
+                <div class="ddwr_section_title">Datos de contacto</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="phone">Teléfono *</label>
+                        <input type="tel" name="phone" id="phone" class="form-control" required="required" t-att-value="phone" autocomplete="tel"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mobile">Teléfono móvil</label>
+                        <input type="tel" name="mobile" id="mobile" class="form-control" t-att-value="mobile" autocomplete="tel-national"/>
+                    </div>
+                </div>
+
+                <div class="ddwr_section_title">Dirección principal</div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="street">Dirección *</label>
+                        <input type="text" name="street" id="street" class="form-control" required="required" t-att-value="street" autocomplete="street-address"/>
+                    </div>
+                    <div class="col-12">
+                        <label for="street2">Apartamento, unidad o referencia</label>
+                        <input type="text" name="street2" id="street2" class="form-control" t-att-value="street2"/>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="city">Ciudad *</label>
+                        <input type="text" name="city" id="city" class="form-control" required="required" t-att-value="city" autocomplete="address-level2"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="state_name">Estado / provincia *</label>
+                        <input type="text" name="state_name" id="state_name" class="form-control" required="required" t-att-value="state_name" autocomplete="address-level1"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="zip">Código postal *</label>
+                        <input type="text" name="zip" id="zip" class="form-control" required="required" t-att-value="zip" autocomplete="postal-code"/>
+                    </div>
+                    <div class="col-12">
+                        <label for="country_id">País *</label>
+                        <select name="country_id" id="country_id" class="form-select" required="required" autocomplete="country">
+                            <option value="">Seleccione…</option>
+                            <t t-foreach="ddwr_countries" t-as="country">
+                                <option t-att-value="country.id" t-att-selected="str(country.id) == str(country_id)"><t t-esc="country.name"/></option>
+                            </t>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="ddwr_section_title">Su proyecto</div>
+                <div class="mb-3">
+                    <label for="project_interest">¿Qué producto o proyecto le interesa?</label>
+                    <textarea name="project_interest" id="project_interest" class="form-control" rows="3"><t t-esc="project_interest"/></textarea>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" name="privacy_consent" id="privacy_consent" class="form-check-input" required="required"
+                           t-att-checked="privacy_consent == 'on'"/>
+                    <label for="privacy_consent" class="form-check-label">
+                        Acepto los <a href="/terminos-y-condiciones" target="_blank">Términos y condiciones</a>
+                        y la <a href="/politica-de-privacidad" target="_blank">Política de privacidad</a>
+                        de DoorAndDoor para administrar mi cuenta y atender mis solicitudes. *
+                    </label>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="login_layout_doorandoor" inherit_id="web.login_layout" name="Marca DoorAndDoor en acceso y registro">
+        <xpath expr="//div[contains(@class, 'text-center')][a[contains(@href, 'odoo.com')]]" position="replace">
+            <div class="text-center small mt-4 pt-3 border-top ddwr_login_footer">DoorAndDoor · Puertas · Ventanas · Impacto</div>
+        </xpath>
+    </template>
+</odoo>

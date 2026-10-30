@@ -1,0 +1,44 @@
+<odoo>
+    <record id="account_payment_register_form_ddcl_clover" model="ir.ui.view">
+        <field name="name">account.payment.register.form.ddcl.clover</field>
+        <field name="model">account.payment.register</field>
+            <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+            <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount']" position="attributes">
+                <attribute name="readonly">ddcl_clover_ecommerce_mode</attribute>
+            </xpath>
+            <xpath expr="//field[@name='journal_id']" position="attributes">
+                <attribute name="readonly">ddcl_clover_required</attribute>
+            </xpath>
+            <xpath expr="//field[@name='payment_method_line_id']" position="attributes">
+                <attribute name="readonly">ddcl_clover_required</attribute>
+            </xpath>
+            <xpath expr="//field[@name='journal_id']" position="after">
+                <field name="ddcl_clover_ecommerce_mode" invisible="1"/>
+                <field name="ddcl_clover_provider_id" invisible="1"/>
+                <field name="ddcl_clover_required" invisible="1"/>
+                <field name="ddcl_collection_base_amount" invisible="1"/>
+                <field name="ddcl_collection_fee_amount" invisible="1"/>
+                <field name="ddcl_collection_total_amount" invisible="1"/>
+                <field name="ddcl_collection_fee_rate_display" invisible="1"/>
+                <div class="alert alert-info mt-2" invisible="not ddcl_clover_ecommerce_mode">
+                    Al pulsar <strong>Crear pago</strong> se abrirá el formulario seguro de <strong>Clover</strong>.
+                    El importe es el saldo calculado de la factura y no se puede modificar.
+                    La factura no se marcará como pagada hasta la confirmación del cobro.
+                </div>
+                <div class="alert alert-warning mt-2" invisible="not ddcl_clover_ecommerce_mode or not ddcl_collection_fee_amount">
+                    <strong>Liquidación con Clover</strong><br/>
+                    Saldo pendiente: <field name="ddcl_collection_base_amount" class="oe_inline" readonly="1"/> ·
+                    Cargo (<field name="ddcl_collection_fee_rate_display" class="oe_inline" readonly="1"/>%):
+                    <field name="ddcl_collection_fee_amount" class="oe_inline" readonly="1"/><br/>
+                    Total a cobrar por Clover: <field name="ddcl_collection_total_amount" class="oe_inline" readonly="1"/>.
+                </div>
+                <div class="alert alert-warning mt-2" invisible="not ddcl_clover_required">
+                    Esta factura ya fue preparada para <strong>Clover</strong>. No puede registrarse como
+                    efectivo, transferencia u otro método hasta que Clover confirme o rechace el cobro.
+                    Tras completar un pago parcial, el saldo restante podrá elegir su propio método.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

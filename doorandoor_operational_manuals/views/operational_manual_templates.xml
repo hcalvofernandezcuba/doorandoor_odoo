@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="operational_manual_center" name="Centro de guias operativas">
+        <t t-call="website.layout">
+            <div id="wrap" class="ddom_manual_center">
+                <section class="ddom_manual_hero">
+                    <div class="container py-5">
+                        <p class="ddom_kicker">DOORANDOOR · USO INTERNO</p>
+                        <h1>Centro de guias operativas</h1>
+                        <p class="lead">Consulte, descargue o imprima el procedimiento vigente para su trabajo.</p>
+                    </div>
+                </section>
+                <section class="container py-4">
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <a href="/guias-operativas" t-attf-class="btn #{'btn-primary' if not selected_area else 'btn-outline-primary'}">Todas</a>
+                        <t t-foreach="areas" t-as="area_item">
+                            <a t-att-href="'/guias-operativas?area=%s' % area_item[0]"
+                               t-attf-class="btn #{'btn-primary' if selected_area == area_item[0] else 'btn-outline-primary'}">
+                                <t t-esc="area_item[1]"/>
+                            </a>
+                        </t>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        Este repositorio es visible para todos los usuarios internos. Solo aparecen las versiones publicadas y vigentes.
+                    </div>
+                    <div class="row g-4" t-if="manuals">
+                        <t t-foreach="manuals" t-as="manual">
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <article class="ddom_manual_card h-100">
+                                    <div class="ddom_manual_area"><t t-esc="area_labels.get(manual.area)"/></div>
+                                    <h2><t t-esc="manual.name"/></h2>
+                                    <p class="ddom_manual_meta"><b>Operacion:</b> <t t-esc="manual.operation_name"/></p>
+                                    <p><t t-esc="manual.summary"/></p>
+                                    <p class="ddom_manual_meta">Version <t t-esc="manual.version"/> · vigente desde <span t-field="manual.effective_date"/></p>
+                                    <div class="d-flex flex-wrap gap-2 mt-auto">
+                                        <a class="btn btn-primary" target="_blank" t-att-href="'/guias-operativas/%s/pdf' % manual.id">Abrir PDF</a>
+                                        <a class="btn btn-outline-primary" t-att-href="'/guias-operativas/%s/pdf?download=1' % manual.id">Descargar</a>
+                                    </div>
+                                </article>
+                            </div>
+                        </t>
+                    </div>
+                    <div class="alert alert-warning" t-else="">
+                        Todavia no hay guias publicadas para consulta.
+                    </div>
+                    <div class="mt-4"><a class="btn btn-secondary" href="/odoo">Regresar a Odoo</a></div>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

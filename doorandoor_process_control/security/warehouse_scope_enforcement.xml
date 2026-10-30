@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Esta escritura se mantiene fuera del bloque noupdate histórico para que
+      las actualizaciones corrijan también la regla ya instalada. Un usuario
+      con perfiles operativos y gerenciales conserva únicamente sus almacenes;
+      Administración/Ajustes mantiene la supervisión global.
+    -->
+    <function model="ir.rule" name="write">
+        <value eval="[ref('doorandoor_process_control.rule_ddpc_stock_picking_operator_warehouses')]"/>
+        <value eval="{
+            'domain_force': &quot;(['|', ('ddpc_source_warehouse_id', 'in', user.ddpc_warehouse_ids.ids), ('ddpc_dest_warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [('id', '=', 0)])&quot;
+        }"/>
+    </function>
+    <function model="ir.rule" name="write">
+        <value eval="[ref('doorandoor_process_control.rule_ddpc_stock_picking_manager_all')]"/>
+        <value eval="{
+            'name': 'Gerencia operativa limitada por almacenes asignados',
+            'groups': [(4, ref('stock.group_stock_manager'))],
+            'domain_force': &quot;([(1, '=', 1)] if user.has_group('base.group_system') or user.has_group('stock.group_stock_manager') else (['|', ('ddpc_source_warehouse_id', 'in', user.ddpc_warehouse_ids.ids), ('ddpc_dest_warehouse_id', 'in', user.ddpc_warehouse_ids.ids)] if user.ddpc_warehouse_ids else [('id', '=', 0)]))&quot;
+        }"/>
+    </function>
+</odoo>

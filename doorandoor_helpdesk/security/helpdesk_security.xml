@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_ddhd" model="ir.module.category">
+        <field name="name">DoorAndDoor Soporte</field>
+        <field name="sequence">37</field>
+    </record>
+    <record id="group_ddhd_technician" model="res.groups">
+        <field name="name">Técnico de soporte</field>
+        <field name="category_id" ref="module_category_ddhd"/>
+    </record>
+    <record id="group_ddhd_manager" model="res.groups">
+        <field name="name">Responsable de soporte</field>
+        <field name="category_id" ref="module_category_ddhd"/>
+        <field name="implied_ids" eval="[(4, ref('group_ddhd_technician'))]"/>
+    </record>
+    <record id="group_ddhd_local_responsible" model="res.groups">
+        <field name="name">Responsable local de casos</field>
+        <field name="category_id" ref="module_category_ddhd"/>
+        <field name="comment">Permite consultar y dar seguimiento a los casos de las oficinas y almacenes operativos asignados al usuario, sin acceso global de soporte.</field>
+    </record>
+    <record id="rule_ddhd_user_own" model="ir.rule">
+        <field name="name">Usuarios ven sus propios tickets</field>
+        <field name="model_id" ref="model_doorandoor_helpdesk_ticket"/>
+        <field name="domain_force">[('requester_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="rule_ddhd_technician_all_company" model="ir.rule">
+        <field name="name">Soporte ve tickets de sus compañías</field>
+        <field name="model_id" ref="model_doorandoor_helpdesk_ticket"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('group_ddhd_technician'))]"/>
+    </record>
+    <record id="rule_ddhd_local_responsible_scope" model="ir.rule">
+        <field name="name">Responsables locales ven casos de sus sedes</field>
+        <field name="model_id" ref="model_doorandoor_helpdesk_ticket"/>
+        <field name="domain_force">['&amp;', ('company_id', 'in', company_ids), '|', '&amp;', ('office_id', '!=', False), ('office_id', '=', user.ddco_office_id.id), '&amp;', ('warehouse_id', '!=', False), ('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_ddhd_local_responsible'))]"/>
+    </record>
+    <record id="rule_ddhd_system_all_company" model="ir.rule">
+        <field name="name">Administrador/Ajustes ve todos los tickets</field>
+        <field name="model_id" ref="model_doorandoor_helpdesk_ticket"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+    </record>
+</odoo>

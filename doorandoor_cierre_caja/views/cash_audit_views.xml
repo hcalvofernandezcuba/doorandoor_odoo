@@ -1,0 +1,48 @@
+<odoo>
+    <record id="view_ddcc_cash_audit_list" model="ir.ui.view">
+        <field name="name">doorandoor.cash.audit.list</field>
+        <field name="model">doorandoor.cash.audit</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'counted' and difference_amount != 0" decoration-success="state == 'counted' and difference_amount == 0">
+                <field name="name"/>
+                <field name="audit_at"/>
+                <field name="register_id"/>
+                <field name="auditor_id"/>
+                <field name="expected_amount"/>
+                <field name="counted_amount"/>
+                <field name="difference_amount"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_ddcc_cash_audit_form" model="ir.ui.view">
+        <field name="name">doorandoor.cash.audit.form</field>
+        <field name="model">doorandoor.cash.audit</field>
+        <field name="arch" type="xml">
+            <form string="Arqueo de caja">
+                <header>
+                    <button name="action_print_worksheet" type="object" string="Imprimir hoja de arqueo" class="btn-secondary" invisible="state != 'prepared'"/>
+                    <button name="action_block_cash" type="object" string="Bloquear caja para conteo presencial" class="btn-warning" invisible="state != 'prepared' or cash_blocked"/>
+                    <button name="action_confirm_count" type="object" string="Registrar conteo físico" class="btn-primary" invisible="state != 'prepared'"/>
+                    <button name="action_open_session" type="object" string="Abrir caja auditada"/>
+                    <field name="state" widget="statusbar" statusbar_visible="prepared,counted"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group><field name="register_id"/><field name="session_id"/><field name="audit_at"/><field name="printed_at"/><field name="cash_blocked"/><field name="blocked_at"/><field name="auditor_id"/></group>
+                        <group><field name="expected_amount"/><field name="counted_amount"/><field name="difference_amount"/></group>
+                    </group>
+                    <div class="alert alert-info" invisible="state != 'prepared'">Imprima la hoja, cuente el efectivo físicamente y capture solo las cantidades encontradas. El esperado fue congelado al iniciar este arqueo.</div>
+                    <field name="line_ids" readonly="state == 'counted'"><list editable="bottom" create="false" delete="false"><field name="denomination_id" readonly="1"/><field name="expected_quantity" readonly="1"/><field name="counted_quantity"/><field name="difference_quantity" readonly="1"/><field name="expected_amount" readonly="1"/><field name="counted_amount" readonly="1"/><field name="difference_amount" readonly="1"/></list></field>
+                    <field name="movement_snapshot_ids" readonly="1"><list><field name="payment_date"/><field name="move_id"/><field name="cashier_id"/><field name="payment_amount"/><field name="tender_amount"/><field name="change_amount"/></list></field>
+                    <group><field name="note" readonly="state == 'counted'"/><field name="counted_at"/></group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_ddcc_cash_audit" model="ir.actions.act_window">
+        <field name="name">Auditorías de caja</field><field name="res_model">doorandoor.cash.audit</field><field name="view_mode">list,form</field>
+    </record>
+</odoo>

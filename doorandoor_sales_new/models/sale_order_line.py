@@ -72,13 +72,23 @@ class SaleOrderLine(models.Model):
 
     ddsn_bonus_source = fields.Selection(
         [
+            ("fixed_price", "Fixed Price"),
+            ("product", "Product"),
             ("partner", "Customer"),
+            ("constructor", "Constructor"),
             ("group", "Group"),
             ("manual", "Manual"),
         ],
         string="Bonus Source",
         readonly=True,
         copy=False,
+    )
+
+    ddsn_bonus_rule_reference = fields.Char(
+        string="Bonus Rule", readonly=True, copy=False
+    )
+    ddsn_bonus_authorized_by_id = fields.Many2one(
+        "res.users", string="Bonus Authorized By", readonly=True, copy=False
     )
 
     def _ddsn_get_stock_control_product(self):
@@ -124,10 +134,16 @@ class SaleOrderLine(models.Model):
         )
         return base_line.product_id, required_qty, product
 
-    @api.onchange("product_id", "product_uom_qty")
+    def _ddsn_select_supply_warehouse(self):
+        """Sales always consume from the commercial office warehouse."""
+        self.ensure_one()
+        return self.order_id.warehouse_id
+
+    @api.onchange("product_id", "product_uom_qty", "order_id.warehouse_id")
     def _onchange_ddsn_warn_insufficient_stock(self):
         for line in self:
-            warehouse = line.order_id.warehouse_id
+            warehouse = line._ddsn_select_supply_warehouse()
+            line.ddsn_supply_warehouse_id = warehouse
             control_product, required_qty, transformed_product = line._ddsn_get_stock_control_product()
             if (
                 not warehouse
@@ -159,7 +175,7 @@ class SaleOrderLine(models.Model):
                         "La cantidad solicitada supera la existencia disponible."
                         "%(transformed_detail)s\nProducto controlado: %(product)s"
                         "\nAlmacén: %(warehouse)s\nCantidad requerida: %(required).2f"
-                        "\nCantidad disponible: %(available).2f\n\nPuede continuar con la venta."
+                        "\nCantidad disponible: %(available).2f\n\nAl confirmar se creará una solicitud para Logística."
                     )
                     % {
                         "transformed_detail": transformed_detail,
@@ -211,10 +227,7 @@ class SaleOrderLine(models.Model):
         if not product or product.type not in ("product", "consu"):
             return False
 
-        warehouses = self.env["stock.warehouse"].search(
-            [("company_id", "=", self.order_id.company_id.id)],
-            order="sequence, id",
-        )
+        warehouses = self._ddsn_visible_stock_warehouses()
         if not warehouses:
             return False
 
@@ -270,10 +283,7 @@ class SaleOrderLine(models.Model):
         if not product or product.type not in ("product", "consu"):
             return False
 
-        warehouses = self.env["stock.warehouse"].search(
-            [("company_id", "=", self.order_id.company_id.id)],
-            order="sequence, id",
-        )
+        warehouses = self._ddsn_visible_stock_warehouses()
         if not warehouses:
             return False
 
@@ -306,10 +316,7 @@ class SaleOrderLine(models.Model):
         if not product or product.type not in ("product", "consu"):
             return False
 
-        warehouses = self.env["stock.warehouse"].search(
-            [("company_id", "=", self.order_id.company_id.id)],
-            order="sequence, id",
-        )
+        warehouses = self._ddsn_visible_stock_warehouses()
         if not warehouses:
             return False
 
@@ -328,6 +335,14 @@ class SaleOrderLine(models.Model):
             lines.append(f"{warehouse_label}: {qty:.2f}")
 
         return "\n".join(lines) or False
+
+    def _ddsn_visible_stock_warehouses(self):
+        self.ensure_one()
+        if self.env.user.has_group("stock.group_stock_manager") or self.env.user.has_group("base.group_system"):
+            return self.env["stock.warehouse"].search(
+                [("company_id", "=", self.order_id.company_id.id)], order="sequence, id"
+            )
+        return self.order_id.warehouse_id
 
     def _ddsn_get_committed_qty_for_display(self, warehouse=False):
         self.ensure_one()
@@ -388,34 +403,105 @@ class SaleOrderLine(models.Model):
         for line in self:
             if not line.product_id or line.display_type:
                 continue
-            if line.discount:
-                line.ddsn_bonus_percent = line.discount
-                line.ddsn_bonus_source = "manual"
+            if line.product_id.ddsn_fixed_price:
+                line._ddsn_apply_automatic_bonus()
                 continue
+            if line.ddsn_bonus_source == "manual" and line.discount:
+                line.ddsn_bonus_percent = line.discount
+                continue
+            line._ddsn_apply_automatic_bonus()
 
-            partner = line.order_id.partner_id.commercial_partner_id or line.order_id.partner_id
-            partner_bonus = partner.ddsn_bonus_percent
-            group_bonus = partner._ddsn_get_group_bonus_percent()
+    def _ddsn_get_automatic_bonus_candidate(self):
+        self.ensure_one()
+        product = self.product_id
+        if product and product._ddsn_product_bonus_is_current():
+            return (
+                product.ddsn_product_bonus_percent,
+                "product",
+                product.display_name,
+                product.ddsn_product_bonus_authorized_by_id,
+            )
+        partner = self.order_id.partner_id
+        if not partner:
+            return 0.0, False, False, False
+        partner = partner.commercial_partner_id or partner
+        if partner._ddsn_bonus_is_current():
+            return (
+                partner.ddsn_bonus_percent,
+                "partner",
+                partner.display_name,
+                partner.ddsn_bonus_authorized_by_id,
+            )
+        category = partner._ddsn_get_group_bonus_category()
+        if category:
+            return (
+                category.ddsn_bonus_percent,
+                "group",
+                category.display_name,
+                category.ddsn_bonus_authorized_by_id,
+            )
+        return 0.0, False, False, False
 
-            if partner_bonus:
-                line.discount = partner_bonus
-                line.ddsn_bonus_percent = partner_bonus
-                line.ddsn_bonus_source = "partner"
-            elif group_bonus:
-                line.discount = group_bonus
-                line.ddsn_bonus_percent = group_bonus
-                line.ddsn_bonus_source = "group"
+    def _ddsn_apply_automatic_bonus(self):
+        for line in self:
+            if line.product_id.ddsn_fixed_price:
+                line.update({
+                    "discount": 0.0,
+                    "ddsn_bonus_percent": 0.0,
+                    "ddsn_bonus_source": "fixed_price",
+                    "ddsn_bonus_rule_reference": line.product_id.display_name,
+                    "ddsn_bonus_authorized_by_id": False,
+                })
+                continue
+            if line.ddsn_bonus_source == "manual" and line.discount:
+                continue
+            percent, source, reference, authorized_by = line._ddsn_get_automatic_bonus_candidate()
+            line.update({
+                "discount": percent,
+                "ddsn_bonus_percent": percent,
+                "ddsn_bonus_source": source,
+                "ddsn_bonus_rule_reference": reference,
+                "ddsn_bonus_authorized_by_id": authorized_by.id if authorized_by else False,
+            })
+        return True
 
     @api.onchange("discount")
     def _onchange_ddsn_sync_bonus_percent(self):
         for line in self:
+            if line.product_id.ddsn_fixed_price:
+                line.discount = 0.0
+                line.ddsn_bonus_percent = 0.0
+                line.ddsn_bonus_source = "fixed_price"
+                line.ddsn_bonus_rule_reference = line.product_id.display_name
+                line.ddsn_bonus_authorized_by_id = False
+                continue
             line.ddsn_bonus_percent = line.discount or 0.0
             if not line.discount:
                 line.ddsn_bonus_source = False
-            elif line.ddsn_bonus_source not in ("partner", "group"):
+            elif line.ddsn_bonus_source not in ("partner", "constructor", "group"):
                 line.ddsn_bonus_source = "manual"
+                line.ddsn_bonus_rule_reference = "Ajuste manual"
+                line.ddsn_bonus_authorized_by_id = self.env.user
+
+    def _prepare_invoice_line(self, **optional_values):
+        values = super()._prepare_invoice_line(**optional_values)
+        values.update({
+            "ddsn_bonus_percent": self.ddsn_bonus_percent,
+            "ddsn_bonus_source": self.ddsn_bonus_source,
+            "ddsn_bonus_rule_reference": self.ddsn_bonus_rule_reference,
+            "ddsn_bonus_authorized_by_id": self.ddsn_bonus_authorized_by_id.id,
+        })
+        return values
 
     def write(self, vals):
+        if vals.get("discount", 0.0):
+            replacement = self.env["product.product"].browse(vals.get("product_id"))
+            for line in self:
+                target_product = replacement or line.product_id
+                if target_product.ddsn_fixed_price:
+                    raise ValidationError(_(
+                        "El ITEM %(product)s tiene Precio fijo y no admite descuentos ni bonificaciones."
+                    ) % {"product": target_product.display_name})
         if (
             {"price_unit", "discount"}.intersection(vals)
             and not self.env.context.get("ddsn_automatic_pricing")
@@ -448,6 +534,35 @@ class SaleOrderLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        vals_list = [dict(vals) for vals in vals_list]
+        Product = self.env["product.product"]
+        for vals in vals_list:
+            product = Product.browse(vals.get("product_id"))
+            if not product:
+                continue
+            if product.ddsn_fixed_price:
+                vals.update({
+                    "discount": 0.0,
+                    "ddsn_bonus_percent": 0.0,
+                    "ddsn_bonus_source": "fixed_price",
+                    "ddsn_bonus_rule_reference": product.display_name,
+                    "ddsn_bonus_authorized_by_id": False,
+                })
+            elif vals.get("discount", 0.0) and self.env.user.has_group("base.group_system"):
+                vals.update({
+                    "ddsn_bonus_percent": vals["discount"],
+                    "ddsn_bonus_source": "manual",
+                    "ddsn_bonus_rule_reference": "Ajuste manual",
+                    "ddsn_bonus_authorized_by_id": self.env.user.id,
+                })
+        if (
+            not self.env.context.get("ddsn_automatic_pricing")
+            and not self.env.user.has_group("base.group_system")
+        ):
+            vals_list = [
+                {key: value for key, value in vals.items() if key not in {"price_unit", "discount"}}
+                for vals in vals_list
+            ]
         order_ids = {vals.get("order_id") for vals in vals_list if vals.get("order_id")}
         locked_orders = self.env["sale.order"].browse(order_ids).filtered(
             lambda order: order.state in ("sale", "done")
@@ -456,7 +571,17 @@ class SaleOrderLine(models.Model):
             raise ValidationError(
                 _("No se pueden agregar productos a una cotización confirmada. Devuélvala a borrador primero.")
             )
-        return super().create(vals_list)
+        lines = super().create(vals_list)
+        automatic_lines = lines.filtered(
+            lambda line: line.product_id
+            and not line.product_id.ddsn_fixed_price
+            and line.ddsn_bonus_source != "manual"
+        )
+        if automatic_lines:
+            automatic_lines.with_context(
+                ddsn_automatic_pricing=True
+            )._ddsn_apply_automatic_bonus()
+        return lines
 
     def unlink(self):
         if self.filtered(lambda line: line.order_id.state in ("sale", "done")):

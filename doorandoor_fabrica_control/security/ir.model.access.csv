@@ -8,3 +8,7 @@ access_ddfc_machining_handoff_user,access.ddfc.machining.handoff.user,model_ddfc
 access_ddfc_machining_handoff_manager,access.ddfc.machining.handoff.manager,model_ddfc_machining_handoff,mrp.group_mrp_manager,1,1,1,1
 access_ddfc_machining_handoff_line_user,access.ddfc.machining.handoff.line.user,model_ddfc_machining_handoff_line,mrp.group_mrp_user,1,1,1,0
 access_ddfc_machining_handoff_line_manager,access.ddfc.machining.handoff.line.manager,model_ddfc_machining_handoff_line,mrp.group_mrp_manager,1,1,1,1
+access_ddfc_prehung_family_user,access.ddfc.prehung.family.user,model_ddfc_prehung_family,mrp.group_mrp_user,1,0,0,0
+access_ddfc_prehung_family_manager,access.ddfc.prehung.family.manager,model_ddfc_prehung_family,mrp.group_mrp_manager,1,1,1,1
+access_ddfc_prehung_component_rule_user,access.ddfc.prehung.component.rule.user,model_ddfc_prehung_component_rule,mrp.group_mrp_user,1,0,0,0
+access_ddfc_prehung_component_rule_manager,access.ddfc.prehung.component.rule.manager,model_ddfc_prehung_component_rule,mrp.group_mrp_manager,1,1,1,1

@@ -1,0 +1,23 @@
+<odoo>
+    <record id="account_payment_register_form_ddtp_card_fee" model="ir.ui.view">
+        <field name="name">account.payment.register.form.ddtp.card.fee</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount']" position="after">
+                <field name="ddtp_card_fee_rate" invisible="1"/>
+                <field name="ddtp_card_fee_rate_display" invisible="1"/>
+                <field name="ddtp_card_fee_amount" invisible="1"/>
+                <field name="ddtp_card_total_amount" invisible="1"/>
+                <div class="alert alert-info" invisible="not ddsr_stripe_checkout_mode">
+                    <strong>Pago con tarjeta</strong><br/>
+                    Cobro actual: <field name="amount" class="oe_inline" readonly="1"/> ·
+                    Cargo de procesamiento (<field name="ddtp_card_fee_rate_display" class="oe_inline" readonly="1"/>%):
+                    <field name="ddtp_card_fee_amount" class="oe_inline" readonly="1"/><br/>
+                    Total a cobrar: <field name="ddtp_card_total_amount" class="oe_inline" readonly="1"/>.
+                    El cargo se factura por separado y queda vinculado a la factura original.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

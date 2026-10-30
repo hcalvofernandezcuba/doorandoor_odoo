@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_ddco_office" model="ir.ui.view">
+        <field name="name">res.users.form.ddco.office</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Commercial Office" name="ddco_commercial_office" groups="account.group_account_manager,base.group_system">
+                    <group>
+                        <field name="ddco_office_id" options="{'no_create_edit': False}"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        Esta oficina determina el impuesto aplicado a las ventas y facturas creadas por este vendedor.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

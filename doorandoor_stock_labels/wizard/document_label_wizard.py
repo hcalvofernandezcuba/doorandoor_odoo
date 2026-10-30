@@ -10,14 +10,20 @@ class DocumentLabelWizard(models.TransientModel):
     production_id = fields.Many2one("mrp.production", readonly=True)
     company_id = fields.Many2one("res.company", required=True, default=lambda self: self.env.company)
     quantity = fields.Integer(string="Labels Quantity", default=1, required=True)
+    label_format = fields.Selection(
+        [("small", "Almacén — Zebra 3×1"), ("large", "Entrega — Zebra 4×6")],
+        string="Tamaño de etiqueta", default="small", required=True,
+    )
 
     @api.model
     def default_get(self, field_list):
         values = super().default_get(field_list)
         if self.env.context.get("default_move_id"):
             values["move_id"] = self.env.context["default_move_id"]
+            values["label_format"] = "large"
         if self.env.context.get("default_production_id"):
             values["production_id"] = self.env.context["default_production_id"]
+            values["label_format"] = "small"
         return values
 
     def _get_document_title(self):
@@ -82,6 +88,7 @@ class DocumentLabelWizard(models.TransientModel):
                     "document_name": document_name,
                     "customer_name": customer_name,
                     "product_name": product.display_name or "",
+                    "variant_attributes": line._ddpc_get_configuration_attributes(),
                     "label_model": tmpl.ddsl_label_model or "",
                     "label_design": tmpl.ddsl_label_design or "",
                     "label_size": tmpl.ddsl_label_size or "",
@@ -109,6 +116,15 @@ class DocumentLabelWizard(models.TransientModel):
             "document_name": document_name,
             "customer_name": customer_name,
             "product_name": product.display_name or "",
+            "variant_attributes": [
+                {
+                    "name": value.attribute_id.display_name or "",
+                    "value": value.product_attribute_value_id.display_name or "",
+                }
+                for value in product.product_template_attribute_value_ids.sorted(
+                    lambda item: (item.attribute_id.sequence, item.attribute_id.id, item.id)
+                )
+            ],
             "label_model": tmpl.ddsl_label_model or "",
             "label_design": tmpl.ddsl_label_design or "",
             "label_size": tmpl.ddsl_label_size or "",
@@ -136,5 +152,10 @@ class DocumentLabelWizard(models.TransientModel):
             )
         if self.quantity > 1:
             payloads = payloads * self.quantity
-        action = self.env.ref("doorandoor_stock_labels.action_report_ddsl_document_labels")
+        action_xmlid = (
+            "doorandoor_stock_labels.action_report_ddsl_document_labels_large"
+            if self.label_format == "large"
+            else "doorandoor_stock_labels.action_report_ddsl_document_labels"
+        )
+        action = self.env.ref(action_xmlid)
         return action.report_action(self, data={"labels": payloads})

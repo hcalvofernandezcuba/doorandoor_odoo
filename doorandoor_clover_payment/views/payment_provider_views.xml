@@ -1,0 +1,22 @@
+<odoo>
+    <record id="payment_provider_form_ddcl_clover" model="ir.ui.view">
+        <field name="name">payment.provider.form.ddcl.clover</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='configuration']" position="inside">
+                <group string="Clover Ecommerce" invisible="code != 'clover'">
+                    <field name="ddcl_environment"/>
+                    <field name="ddcl_integration_type"/>
+                    <field name="ddcl_merchant_id"/>
+                    <field name="ddcl_public_token" password="True"/>
+                    <field name="ddcl_private_token" password="True"/>
+                    <field name="ddcl_mock_mode" groups="base.group_system"/>
+                    <div invisible="not ddcl_mock_mode" class="text-warning">
+                        El simulador es exclusivamente local: no transmite ni almacena datos de tarjeta.
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

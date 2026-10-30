@@ -32,6 +32,8 @@
             <form>
                 <header>
                     <button name="action_print_control_report" type="object" string="Imprimir" class="btn-secondary"/>
+                    <button name="action_send_control_report_email" type="object"
+                            string="Enviar por correo" class="btn-secondary"/>
                     <button name="action_report" type="object" string="Reportar" invisible="state != 'draft'"/>
                     <button name="action_open_match_wizard" type="object" string="Asociar pago/factura"
                             groups="doorandoor_control_cobros.group_ddc_official_payment"

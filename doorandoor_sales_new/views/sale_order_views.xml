@@ -8,25 +8,49 @@
             <field name="priority">110</field>
             <field name="arch" type="xml">
                 <xpath expr="//header" position="inside">
-                    <!-- Botón para crear prefactura manualmente desde cotización confirmada -->
+                    <button
+                        name="action_ddsn_admin_set_draft"
+                        type="object"
+                        string="Devolver a borrador"
+                        class="btn-secondary"
+                        groups="base.group_system"
+                        invisible="state not in ('sale', 'done')"
+                        confirm="Esta acción devolverá la venta a borrador y cancelará únicamente sus solicitudes logísticas pendientes. ¿Desea continuar?"/>
+                    <!-- Crear la prefactura desde la cotización confirmada. -->
                     <button
                         name="action_ddsn_register_quote"
                         type="object"
-                        string="Crear Prefactura"
+                        string="Crear prefactura"
                         class="btn-primary"
                         invisible="state not in ('sale', 'done') or ddsn_preinvoice_move_id"/>
                     <button
                         name="action_view_ddsn_preinvoice"
                         type="object"
-                        string="Abrir Prefactura"
+                        string="Abrir prefactura"
                         invisible="not ddsn_preinvoice_move_id"/>
                     <field name="ddsn_quote_registered" invisible="1"/>
                     <field name="ddsn_preinvoice_move_id" invisible="1"/>
+                    <field name="ddsn_po_first_flow" invisible="1"/>
+                    <field name="ddsn_po_issued_at" invisible="1"/>
+                    <button
+                        name="action_ddsn_print_po"
+                        type="object"
+                        string="Imprimir PO"
+                        class="btn-primary"
+                        invisible="not ddsn_po_first_flow or not ddsn_preinvoice_move_id or not ddsn_po_issued_at"/>
                     <button
                         name="action_ddsn_change_supply_warehouse"
                         type="object"
                         string="Cambiar almacén proveedor"
                         invisible="state == 'cancel' or not order_line"/>
+                </xpath>
+
+                <xpath expr="//header/button[@id='create_invoice']" position="attributes">
+                    <attribute name="invisible">ddsn_po_first_flow or invoice_status != 'to invoice'</attribute>
+                </xpath>
+
+                <xpath expr="//header/button[@id='create_invoice_percentage']" position="attributes">
+                    <attribute name="invisible">ddsn_po_first_flow or invoice_status != 'no' or state != 'sale'</attribute>
                 </xpath>
 
                 <xpath expr="//h1/field[@name='name']" position="attributes">
@@ -49,7 +73,7 @@
                     <field
                         name="ddsn_flow_stage"
                         widget="statusbar"
-                        statusbar_visible="quotation,preinvoice,invoiced"/>
+                        statusbar_visible="quotation,preinvoice,po,invoiced"/>
                 </xpath>
             </field>
         </record>
@@ -99,6 +123,8 @@
                     <field name="ddsn_warehouse_stock_html" string="Warehouses HTML" widget="html" optional="hide" readonly="1"/>
                     <field name="ddsn_bonus_percent" string="Bonus %" optional="show" readonly="1"/>
                     <field name="ddsn_bonus_source" string="Bonus Source" optional="hide" readonly="1"/>
+                    <field name="ddsn_bonus_rule_reference" string="Bonus Rule" optional="hide" readonly="1"/>
+                    <field name="ddsn_bonus_authorized_by_id" string="Authorized By" optional="hide" readonly="1"/>
                 </xpath>
                 <xpath expr="//field[@name='order_line']/list/field[@name='price_unit']" position="before">
                     <field name="ddsn_can_edit_commercial_price" column_invisible="True"/>

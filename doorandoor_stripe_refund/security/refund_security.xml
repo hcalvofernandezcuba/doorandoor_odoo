@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rule_stripe_refund_request_user" model="ir.rule">
+        <field name="name">Solicitudes Stripe propias del comercial</field>
+        <field name="model_id" ref="model_doorandoor_stripe_refund_request"/>
+        <field name="groups" eval="[(4, ref('doorandoor_control_cobros.group_ddc_user'))]"/>
+        <field name="domain_force">[('requested_by_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_stripe_refund_request_manager" model="ir.rule">
+        <field name="name">Control de Cobros ve todas las solicitudes Stripe</field>
+        <field name="model_id" ref="model_doorandoor_stripe_refund_request"/>
+        <field name="groups" eval="[(4, ref('doorandoor_control_cobros.group_ddc_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_stripe_refund_request_system" model="ir.rule">
+        <field name="name">Administradores del sistema ven todas las devoluciones Stripe</field>
+        <field name="model_id" ref="model_doorandoor_stripe_refund_request"/>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_stripe_refund_request_line_user" model="ir.rule">
+        <field name="name">Líneas de devoluciones Stripe propias del comercial</field>
+        <field name="model_id" ref="model_doorandoor_stripe_refund_request_line"/>
+        <field name="groups" eval="[(4, ref('doorandoor_control_cobros.group_ddc_user'))]"/>
+        <field name="domain_force">[('request_id.requested_by_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_stripe_refund_request_line_manager" model="ir.rule">
+        <field name="name">Control de Cobros ve todas las líneas de devolución</field>
+        <field name="model_id" ref="model_doorandoor_stripe_refund_request_line"/>
+        <field name="groups" eval="[(4, ref('doorandoor_control_cobros.group_ddc_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_stripe_refund_request_line_system" model="ir.rule">
+        <field name="name">Administradores del sistema ven todas las líneas Stripe</field>
+        <field name="model_id" ref="model_doorandoor_stripe_refund_request_line"/>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

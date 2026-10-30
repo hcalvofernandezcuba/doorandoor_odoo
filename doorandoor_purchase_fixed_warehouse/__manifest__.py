@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Purchase Fixed Warehouse",
-    "version": "18.0.1.0.5",
+    "version": "18.0.1.3.0",
     "category": "Purchases/Inventory",
-    "summary": "18.0.1.0.5 - Incorpora identidad corporativa de doorandoor a compras por almacén",
+    "summary": "18.0.1.3.0 - Enruta por ITEM las compras entre lote y predespacho",
     "description": """
 DoorAndDoor Purchase Fixed Warehouse
 ===================================
@@ -18,6 +18,29 @@ Comportamiento:
 
 Historial resumido
 ------------------
+
+- 18.0.1.3.0
+  Clasifica cada cantidad recibida según su origen logístico. Las reposiciones
+  proponen un lote compatible; las cantidades vinculadas a factura u orden de
+  entrega proponen predespacho, incluso dentro de una recepción mixta.
+
+- 18.0.1.2.2
+  Adapta la herencia del reporte de recepción al formato físico 3x1 y presenta
+  el origen de la compra en una línea compacta sin impedir la actualización
+  del módulo de etiquetas.
+
+- 18.0.1.2.1
+  Permite imprimir desde la recepción todos los productos comprados aunque no
+  estén marcados individualmente y añade a esos labels el origen logístico.
+
+- 18.0.1.2.0
+  Selecciona el almacén a abastecer y distribuye automáticamente cada compra
+  entre ventas pendientes y reposición, evitando asociaciones duplicadas.
+
+- 18.0.1.1.0
+  Registra por cantidad si una compra atiende una venta o una reposicion,
+  muestra facturas y documentos origen en la orden/PDF y los imprime en los
+  labels enviados al proveedor.
 
 - 18.0.1.0.0
   Se crea el modulo para forzar el almacen de recepcion en compras, resaltar el boton de validar orden, agregar un reporte de entradas por almacen y exponer desde compras el flujo de lotes, seriales y labels.
@@ -39,11 +62,16 @@ Historial resumido
     "website": "https://doorandoor.com",
     "depends": [
         "purchase_stock",
+        "sale_management",
         "doorandoor_stock_labels",
+        "doorandoor_sales_new",
+        "doorandoor_inventory_variant_count",
     ],
     "data": [
+        "security/ir.model.access.csv",
         "views/res_config_settings_views.xml",
         "views/purchase_order_views.xml",
+        "views/purchase_order_report.xml",
         "views/stock_receipt_report_views.xml",
     ],
     "installable": True,

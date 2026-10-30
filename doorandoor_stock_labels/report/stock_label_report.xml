@@ -3,40 +3,49 @@
     <data>
         <template id="stock_labels_report">
             <t t-call="web.html_container">
-                <div style="padding:10mm 10mm 10mm 10mm;font-size:0;">
-                        <t t-foreach="labels" t-as="label">
-                            <div style="display:inline-block;vertical-align:top;width:90mm;height:66mm;margin:0 6mm 10mm 0;padding:0;box-sizing:border-box;page-break-inside:avoid;">
-                                <div style="border:1px solid #d9d9d9;height:100%;padding:4mm;box-sizing:border-box;background:#fff;">
-                                    <div style="display:table;width:100%;height:100%;">
-                                        <div style="display:table-row;">
-                                            <div style="display:table-cell;vertical-align:top;padding-right:4mm;">
-                                        <div>
-                                            <div style="font-size:13px;font-weight:700;line-height:1.2;word-break:break-word;">
-                                                <t t-esc="label.get('product_name')"/>
-                                            </div>
-                                            <div t-if="label.get('default_code')" style="margin-top:3px;font-size:10px;">
-                                                Ref: <t t-esc="label.get('default_code')"/>
-                                            </div>
-                                            <div t-if="label.get('lot_name')" style="margin-top:2px;font-size:10px;">
-                                                Serie: <t t-esc="label.get('lot_name')"/>
-                                            </div>
-                                        </div>
-                                                <div style="margin-top:6mm;text-align:center;">
-                                                    <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')" style="max-width:100%;width:auto;height:14mm;display:inline-block;"/>
-                                                </div>
-                                            </div>
-                                            <div style="display:table-cell;vertical-align:bottom;width:24mm;text-align:center;">
-                                                <img t-if="label.get('mobile_qr_src')" t-att-src="label.get('mobile_qr_src')" style="width:21mm;height:21mm;display:inline-block;"/>
-                                                <div style="font-size:8px;word-break:break-word;line-height:1.1;margin-top:3mm;">
-                                                    <t t-esc="label.get('label_reference')"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                <style>
+                    html, body.o_body_html, body.o_body_html.container, #wrapwrap, #wrapwrap main {width:76mm !important;margin:0 !important;padding:0 !important;}
+                    .ddsl-stock-3x1 {display:block !important;width:76mm !important;height:25mm !important;margin:0 !important;padding:1mm 2mm !important;box-sizing:border-box !important;overflow:hidden !important;position:relative !important;page-break-inside:avoid !important;}
+                </style>
+                <t t-foreach="labels" t-as="label">
+                    <div class="page ddsl-stock-3x1" t-attf-style="page-break-after:#{'auto' if label_last else 'always'} !important;">
+                        <div style="position:absolute;left:1.5mm;top:0.8mm;width:73mm;height:10.5mm;overflow:hidden;color:#000;font-size:8px;line-height:1.05;">
+                            <div style="font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><t t-esc="label.get('product_name')"/></div>
+                            <div style="font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                <span t-if="label.get('default_code')">Ref: <t t-esc="label.get('default_code')"/></span>
+                                <span t-if="label.get('lot_name')"> · Serie: <t t-esc="label.get('lot_name')"/></span>
                             </div>
-                        </t>
-                </div>
+                        </div>
+                        <div style="position:absolute;left:1.5mm;right:1.5mm;bottom:0.7mm;text-align:center;white-space:nowrap;overflow:hidden;">
+                            <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')" style="width:73mm !important;max-width:none !important;height:10.8mm !important;display:block;margin:0 auto;"/>
+                            <div style="font-size:8px;font-weight:700;line-height:1;"><t t-esc="label.get('label_reference')"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <template id="stock_labels_report_large">
+            <t t-call="web.html_container">
+                <style>
+                    html, body.o_body_html, body.o_body_html.container, #wrapwrap, #wrapwrap main {width:101.6mm !important;min-width:101.6mm !important;max-width:101.6mm !important;margin:0 !important;padding:0 !important;}
+                    .ddsl-stock-large {display:block !important;width:101.6mm !important;height:151.8mm !important;margin:0 !important;padding:3mm !important;box-sizing:border-box !important;overflow:hidden !important;position:relative !important;page-break-inside:avoid !important;}
+                </style>
+                <t t-foreach="labels" t-as="label">
+                    <div class="page ddsl-stock-large" t-attf-style="font-size:0;page-break-after:#{'auto' if label_last else 'always'} !important;">
+                        <div style="border:0.35mm solid #222;height:145.8mm;padding:6mm;box-sizing:border-box;background:#fff;color:#000;position:relative;overflow:hidden;">
+                            <div style="text-align:center;font-size:22px;font-weight:700;">DOORANDOOR</div>
+                            <div style="text-align:center;font-size:11px;">WWW.DOORANDOOR.COM</div>
+                            <div style="margin-top:9mm;font-size:18px;font-weight:700;line-height:1.25;word-break:break-word;"><t t-esc="label.get('product_name')"/></div>
+                            <div t-if="label.get('default_code')" style="margin-top:4mm;font-size:14px;">Ref: <t t-esc="label.get('default_code')"/></div>
+                            <div t-if="label.get('lot_name')" style="margin-top:2mm;font-size:14px;">Serie: <t t-esc="label.get('lot_name')"/></div>
+                            <div style="position:absolute;left:6mm;right:6mm;bottom:7mm;text-align:center;">
+                                <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')" style="max-width:80mm;height:27mm;"/>
+                                <div style="font-size:14px;font-weight:700;"><t t-esc="label.get('label_reference')"/></div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
             </t>
         </template>
 
@@ -46,7 +55,17 @@
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">doorandoor_stock_labels.stock_labels_report</field>
             <field name="report_file">doorandoor_stock_labels.stock_labels_report</field>
+            <field name="paperformat_id" ref="doorandoor_stock_labels.paperformat_ddsl_zebra_3x1_landscape"/>
             <field name="print_report_name">'Stock Labels - %s' % (data.get('picking_name') or 'Picking')</field>
+        </record>
+        <record id="action_report_ddsl_stock_labels_large" model="ir.actions.report">
+            <field name="name">Stock Labels — Large 4×6</field>
+            <field name="model">ddsl.stock.label.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">doorandoor_stock_labels.stock_labels_report_large</field>
+            <field name="report_file">doorandoor_stock_labels.stock_labels_report_large</field>
+            <field name="paperformat_id" ref="doorandoor_stock_labels.paperformat_ddsl_zebra_4x6_portrait"/>
+            <field name="print_report_name">'Stock Labels Large - %s' % (data.get('picking_name') or 'Picking')</field>
         </record>
     </data>
 </odoo>

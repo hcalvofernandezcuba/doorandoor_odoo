@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_load_plan_reports" model="ir.actions.act_window">
+        <field name="name">Manifiestos y hojas de ruta</field>
+        <field name="res_model">doorandoor.load.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_load_plan_search"/>
+        <field name="context">{}</field>
+    </record>
+
+    <record id="view_ddcc_linked_picking_list" model="ir.ui.view">
+        <field name="name">stock.picking.ddcc.linked.list</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <list string="Documentos asociados a cargas" create="0" delete="0">
+                <field name="name"/>
+                <field name="origin" optional="show"/>
+                <field name="picking_type_id"/>
+                <field name="location_id"/>
+                <field name="location_dest_id"/>
+                <field name="partner_id" optional="show"/>
+                <field name="scheduled_date"/>
+                <field name="ddcc_load_plan_names"/>
+                <field name="ddcc_load_stop_names"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddcc_linked_picking_search" model="ir.ui.view">
+        <field name="name">stock.picking.ddcc.linked.search</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <search string="Documentos asociados a cargas">
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="partner_id"/>
+                <field name="ddcc_load_plan_names"/>
+                <filter string="Pendientes" name="pending" domain="[('state','not in',('done','cancel'))]"/>
+                <filter string="Completados" name="done" domain="[('state','=','done')]"/>
+                <separator/>
+                <filter string="Tipo de operación" name="group_type" context="{'group_by':'picking_type_id'}"/>
+                <filter string="Estado" name="group_state" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddcc_linked_pickings" model="ir.actions.act_window">
+        <field name="name">Documentos asociados</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_ddcc_linked_picking_list"/>
+        <field name="search_view_id" ref="view_ddcc_linked_picking_search"/>
+        <field name="domain">[('ddcc_load_stop_ids','!=',False)]</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+</odoo>

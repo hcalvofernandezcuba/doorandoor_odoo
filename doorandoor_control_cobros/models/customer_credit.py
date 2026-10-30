@@ -56,7 +56,7 @@ class DoorAndDoorCustomerCredit(models.Model):
                     WHERE p.payment_type = 'inbound'
                       AND p.partner_type = 'customer'
                       AND am.state = 'posted'
-                      AND aa.code_store ->> p.company_id::text LIKE '1200__'
+                      AND aa.code_store ->> p.company_id::text LIKE '120%'
                       AND aa.code_store ->> p.company_id::text != '120000'
                       AND aml.credit > 0
                     GROUP BY

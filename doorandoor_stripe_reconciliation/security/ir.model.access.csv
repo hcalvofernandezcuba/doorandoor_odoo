@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddsr_settlement_account_user,ddsr.settlement.account.user,model_doorandoor_stripe_settlement,account.group_account_user,1,1,0,0
+access_ddsr_settlement_account_manager,ddsr.settlement.account.manager,model_doorandoor_stripe_settlement,account.group_account_manager,1,1,1,0
+access_ddsr_settlement_line_account_user,ddsr.settlement.line.account.user,model_doorandoor_stripe_settlement_line,account.group_account_user,1,0,0,0
+access_ddsr_settlement_line_account_manager,ddsr.settlement.line.account.manager,model_doorandoor_stripe_settlement_line,account.group_account_manager,1,1,1,0
+

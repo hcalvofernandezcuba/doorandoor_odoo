@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 190" role="img" aria-labelledby="title desc">
+  <title id="title">Door and Door</title>
+  <desc id="desc">Puertas, Ventanas, Impacto</desc>
+  <rect width="760" height="190" fill="none"/>
+  <path d="M34 34H182M34 34v48M726 34H578M726 34v48M34 156h148M34 156v-48M726 156H578M726 156v-48"
+        fill="none" stroke="#C9A96B" stroke-width="5" stroke-linecap="square"/>
+  <text x="380" y="108" text-anchor="middle"
+        font-family="Montserrat, Arial, sans-serif" font-size="72" font-weight="800" letter-spacing="-4">
+    <tspan fill="#0B1F33">DOOR</tspan><tspan fill="#C9A96B"> &amp; </tspan><tspan fill="#0B1F33">DOOR</tspan>
+  </text>
+  <text x="380" y="142" text-anchor="middle" fill="#0B1F33"
+        font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="7">
+    PUERTAS · VENTANAS · IMPACTO
+  </text>
+</svg>
+

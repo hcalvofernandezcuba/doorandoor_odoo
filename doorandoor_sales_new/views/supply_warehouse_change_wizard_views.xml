@@ -16,7 +16,7 @@
                     <field name="reason" placeholder="Ej.: coordinación logística con el almacén de destino"/>
                 </group>
                 <div class="alert alert-info" role="alert">
-                    La selección se conservará en cotización, prefactura y factura. Si ya existe una
+                    La selección se conservará en cotización, prefactura, PO y factura fiscal. Si ya existe una
                     prereserva, su disponibilidad se validará nuevamente en el almacén seleccionado.
                 </div>
                 <footer>

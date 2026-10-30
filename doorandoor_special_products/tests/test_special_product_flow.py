@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
+from odoo.fields import Command
 from odoo.tests import TransactionCase, tagged
 
 
@@ -89,6 +92,42 @@ class TestSpecialProductFlow(TransactionCase):
         bom.bom_line_ids[0].product_qty = 4.0
         self.assertEqual(template.ddsp_bom_state, "draft")
 
+    def test_new_special_is_scheduled_for_archive_after_thirty_days(self):
+        today = fields.Date.context_today(self.env["product.template"])
+        special = self.env["product.template"].create(
+            {
+                "name": "Especial con ciclo de archivo",
+                "ddsp_is_special": True,
+                "ddsp_product_kind": "special",
+            }
+        )
+        self.assertEqual(special.ddsp_archive_after_date, today + timedelta(days=30))
+
+    def test_expired_special_and_its_bom_are_archived_not_deleted(self):
+        special = self.env["product.template"].create(
+            {
+                "name": "Especial vencido para archivo",
+                "is_storable": True,
+                "ddsp_is_special": True,
+                "ddsp_product_kind": "special",
+                "ddsp_archive_after_date": fields.Date.context_today(
+                    self.env["product.template"]
+                ),
+            }
+        )
+        bom = self.env["mrp.bom"].create(
+            {
+                "product_tmpl_id": special.id,
+                "product_id": special.product_variant_id.id,
+                "product_qty": 1.0,
+            }
+        )
+        self.env["product.template"]._ddsp_archive_inactive_special_products()
+        self.assertFalse(special.with_context(active_test=False).active)
+        self.assertFalse(bom.with_context(active_test=False).active)
+        self.assertTrue(special.with_context(active_test=False).exists())
+        self.assertTrue(bom.with_context(active_test=False).exists())
+
     def test_special_product_always_uses_mrp_route(self):
         invoice_line = self._create_invoice_line()
         invoice_line.product_id.product_tmpl_id.ddsp_is_special = True
@@ -101,6 +140,44 @@ class TestSpecialProductFlow(TransactionCase):
             }
         )
         self.assertEqual(invoice_line.move_id._ddsn_get_line_route(fulfillment, 0.5), "ready_mrp")
+
+    def test_limited_salesperson_can_mark_special_sold_without_catalog_write(self):
+        special = self.base_product.product_tmpl_id.copy(
+            {
+                "name": "Especial para vendedor limitado",
+                "ddsp_is_special": True,
+                "ddsp_bom_state": "validated",
+            }
+        )
+        salesperson = self.env["res.users"].with_context(no_reset_password=True).create(
+            {
+                "name": "Vendedor limitado de especiales",
+                "login": "ddsp-limited-salesperson",
+                "groups_id": [
+                    Command.set(
+                        [
+                            self.env.ref("base.group_user").id,
+                            self.env.ref("sales_team.group_sale_salesman").id,
+                            self.env.ref("account.group_account_invoice").id,
+                        ]
+                    )
+                ],
+            }
+        )
+        sale_date = fields.Date.from_string("2026-10-21")
+
+        with self.assertRaises(AccessError):
+            special.with_user(salesperson).write({"name": "Cambio no autorizado"})
+
+        special.with_user(salesperson)._ddsp_mark_sold(sale_date)
+
+        self.assertEqual(special.ddsp_sale_date, sale_date)
+        self.assertEqual(special.ddsp_last_activity_date, sale_date)
+        self.assertEqual(
+            special.ddsp_archive_after_date,
+            fields.Date.from_string("2026-11-20"),
+        )
+        self.assertEqual(special.name, "Especial para vendedor limitado")
 
     def test_configurator_creates_real_special_values_and_complete_name(self):
         finish = self.env["product.attribute"].create(

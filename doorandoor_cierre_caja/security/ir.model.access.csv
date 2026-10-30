@@ -1,0 +1,40 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddcc_register_manager,ddcc register manager,model_doorandoor_cash_register,doorandoor_cierre_caja.group_cash_manager,1,1,1,1
+access_ddcc_denomination_manager,ddcc denomination manager,model_doorandoor_cash_denomination,doorandoor_cierre_caja.group_cash_manager,1,1,1,1
+access_ddcc_register_cashier,ddcc register cashier read,model_doorandoor_cash_register,doorandoor_cierre_caja.group_cashier,1,0,0,0
+access_ddcc_denomination_cashier,ddcc denomination cashier read,model_doorandoor_cash_denomination,doorandoor_cierre_caja.group_cashier,1,0,0,0
+access_ddcc_session_cashier,ddcc session cashier,model_doorandoor_cash_session,doorandoor_cierre_caja.group_cashier,1,1,1,0
+access_ddcc_line_cashier,ddcc line cashier,model_doorandoor_cash_session_line,doorandoor_cierre_caja.group_cashier,1,1,1,0
+access_ddcc_movement_cashier,ddcc movement cashier,model_doorandoor_cash_movement,doorandoor_cierre_caja.group_cashier,1,0,0,0
+access_ddcc_movement_line_cashier,ddcc movement line cashier,model_doorandoor_cash_movement_line,doorandoor_cierre_caja.group_cashier,1,0,0,0
+access_ddcc_open_wizard,ddcc open wizard,model_doorandoor_cash_open_wizard,doorandoor_cierre_caja.group_cashier,1,1,1,1
+access_ddcc_open_line_wizard,ddcc open line wizard,model_doorandoor_cash_open_wizard_line,doorandoor_cierre_caja.group_cashier,1,1,1,1
+access_ddcc_close_wizard,ddcc close wizard,model_doorandoor_cash_close_wizard,doorandoor_cierre_caja.group_cashier,1,1,1,1
+access_ddcc_close_line_wizard,ddcc close line wizard,model_doorandoor_cash_close_wizard_line,doorandoor_cierre_caja.group_cashier,1,1,1,1
+access_ddcc_tender_cashier,ddcc tender cashier,model_doorandoor_cash_tender_line,doorandoor_cierre_caja.group_cashier,1,1,1,1
+access_ddcc_change_cashier,ddcc change cashier,model_doorandoor_cash_change_line,doorandoor_cierre_caja.group_cashier,1,1,1,1
+access_ddcc_register_system,ddcc register system,model_doorandoor_cash_register,base.group_system,1,1,1,1
+access_ddcc_denomination_system,ddcc denomination system,model_doorandoor_cash_denomination,base.group_system,1,1,1,1
+access_ddcc_session_system,ddcc session system,model_doorandoor_cash_session,base.group_system,1,1,1,1
+access_ddcc_line_system,ddcc line system,model_doorandoor_cash_session_line,base.group_system,1,1,1,1
+access_ddcc_movement_system,ddcc movement system,model_doorandoor_cash_movement,base.group_system,1,0,0,0
+access_ddcc_movement_line_system,ddcc movement line system,model_doorandoor_cash_movement_line,base.group_system,1,0,0,0
+access_ddcc_audit_manager,ddcc audit manager,model_doorandoor_cash_audit,doorandoor_cierre_caja.group_cash_manager,1,1,1,0
+access_ddcc_audit_line_manager,ddcc audit line manager,model_doorandoor_cash_audit_line,doorandoor_cierre_caja.group_cash_manager,1,1,1,0
+access_ddcc_audit_movement_manager,ddcc audit movement manager,model_doorandoor_cash_audit_movement,doorandoor_cierre_caja.group_cash_manager,1,0,1,0
+access_ddcc_audit_movement_line_manager,ddcc audit movement line manager,model_doorandoor_cash_audit_movement_line,doorandoor_cierre_caja.group_cash_manager,1,0,1,0
+access_ddcc_audit_system,ddcc audit system,model_doorandoor_cash_audit,base.group_system,1,1,1,0
+access_ddcc_audit_line_system,ddcc audit line system,model_doorandoor_cash_audit_line,base.group_system,1,1,1,0
+access_ddcc_audit_movement_system,ddcc audit movement system,model_doorandoor_cash_audit_movement,base.group_system,1,0,1,0
+access_ddcc_audit_movement_line_system,ddcc audit movement line system,model_doorandoor_cash_audit_movement_line,base.group_system,1,0,1,0
+access_ddcc_audit_wizard_manager,ddcc audit wizard manager,model_doorandoor_cash_audit_wizard,doorandoor_cierre_caja.group_cash_manager,1,1,1,1
+access_ddcc_audit_wizard_line_manager,ddcc audit wizard line manager,model_doorandoor_cash_audit_wizard_line,doorandoor_cierre_caja.group_cash_manager,1,1,1,1
+access_ddcc_audit_wizard_system,ddcc audit wizard system,model_doorandoor_cash_audit_wizard,base.group_system,1,1,1,1
+access_ddcc_audit_wizard_line_system,ddcc audit wizard line system,model_doorandoor_cash_audit_wizard_line,base.group_system,1,1,1,1
+access_ddcc_cash_request_cashier,ddcc cash request cashier,model_doorandoor_cash_collection_request,doorandoor_cierre_caja.group_cashier,1,1,1,0
+access_ddcc_cash_request_system,ddcc cash request system,model_doorandoor_cash_collection_request,base.group_system,1,1,1,0
+access_ddcc_cash_request_user,ddcc cash request user,model_doorandoor_cash_collection_request,base.group_user,1,0,1,0
+access_ddcc_open_wizard_system,ddcc open wizard system,model_doorandoor_cash_open_wizard,base.group_system,1,1,1,1
+access_ddcc_open_line_wizard_system,ddcc open line wizard system,model_doorandoor_cash_open_wizard_line,base.group_system,1,1,1,1
+access_ddcc_close_wizard_system,ddcc close wizard system,model_doorandoor_cash_close_wizard,base.group_system,1,1,1,1
+access_ddcc_close_line_wizard_system,ddcc close line wizard system,model_doorandoor_cash_close_wizard_line,base.group_system,1,1,1,1

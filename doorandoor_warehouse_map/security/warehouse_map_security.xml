@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="rule_ddwm_position_allowed_warehouse" model="ir.rule">
+        <field name="name">Posiciones del mapa por almacenes autorizados</field>
+        <field name="model_id" ref="model_doorandoor_warehouse_map_position"/>
+        <field name="groups" eval="[(4, ref('doorandoor_inventory_variant_count.group_inventory_count_user'))]"/>
+        <field name="domain_force">([('company_id', 'in', company_ids)] if user.has_group('base.group_system') or (not user.ddpc_warehouse_ids and user.has_group('doorandoor_inventory_variant_count.group_inventory_count_manager')) else [('company_id', 'in', company_ids), ('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)])</field>
+    </record>
+
+    <record id="rule_ddwm_movement_analysis_allowed_warehouse" model="ir.rule">
+        <field name="name">Análisis de movimientos por almacenes autorizados</field>
+        <field name="model_id" ref="model_doorandoor_stock_movement_analysis"/>
+        <field name="groups" eval="[(4, ref('doorandoor_inventory_variant_count.group_inventory_count_manager')), (4, ref('doorandoor_mobile_hanger.group_ddmh_supervisor'))]"/>
+        <field name="domain_force">([('company_id', 'in', company_ids)] if user.has_group('base.group_system') or not user.ddpc_warehouse_ids else [('company_id', 'in', company_ids), ('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)])</field>
+    </record>
+
+    <record id="rule_ddwm_batch_document_movement_allowed_warehouse" model="ir.rule">
+        <field name="name">Trazabilidad documental por almacenes autorizados</field>
+        <field name="model_id" ref="model_doorandoor_batch_document_movement"/>
+        <field name="groups" eval="[(4, ref('doorandoor_inventory_variant_count.group_inventory_count_user')), (4, ref('doorandoor_mobile_hanger.group_ddmh_supervisor'))]"/>
+        <field name="domain_force">([('company_id', 'in', company_ids)] if user.has_group('base.group_system') or (not user.ddpc_warehouse_ids and user.has_group('doorandoor_inventory_variant_count.group_inventory_count_manager')) else [('company_id', 'in', company_ids), ('warehouse_id', 'in', user.ddpc_warehouse_ids.ids)])</field>
+    </record>
+</odoo>

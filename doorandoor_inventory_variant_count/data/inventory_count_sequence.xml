@@ -6,5 +6,19 @@
         <field name="padding">5</field>
         <field name="company_id" eval="False"/>
     </record>
+    <record id="seq_inventory_unit_serial" model="ir.sequence">
+        <field name="name">Inventory Unit Serial</field>
+        <field name="code">inventory.unit.serial</field>
+        <field name="prefix"></field>
+        <field name="padding">8</field>
+        <field name="number_next">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+    <record id="seq_inventory_serial_receipt" model="ir.sequence">
+        <field name="name">Ingreso serializado</field>
+        <field name="code">inventory.serial.receipt</field>
+        <field name="prefix">ISR/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
 </odoo>
-

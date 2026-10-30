@@ -4,3 +4,5 @@ access_doorandoor_payment_release_log_user,access.doorandoor.payment.release.log
 access_doorandoor_pickup_order_user,access.doorandoor.pickup.order.user,model_doorandoor_pickup_order,base.group_user,1,1,1,1
 access_doorandoor_pickup_order_line_user,access.doorandoor.pickup.order.line.user,model_doorandoor_pickup_order_line,base.group_user,1,1,1,1
 access_ddsn_supply_warehouse_change_wizard_user,access.ddsn.supply.warehouse.change.wizard.user,model_ddsn_supply_warehouse_change_wizard,base.group_user,1,1,1,1
+access_ddsn_stock_transfer_request_user,access.ddsn.stock.transfer.request.user,model_ddsn_stock_transfer_request,base.group_user,1,0,1,0
+access_ddsn_stock_transfer_request_manager,access.ddsn.stock.transfer.request.manager,model_ddsn_stock_transfer_request,stock.group_stock_manager,1,1,1,0

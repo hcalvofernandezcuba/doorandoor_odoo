@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Product Config",
-    "version": "18.0.1.8.2",
+    "version": "18.0.1.19.0",
     "category": "Sales",
-    "summary": "18.0.1.8.2 - Restringe la configuración de precios de variantes a Ajustes",
+    "summary": "18.0.1.19.0 - Producto e ITEM visibles juntos en cotizaciones",
     "description": """
 DoorAndDoor Product Config
 ==========================
@@ -26,6 +26,22 @@ impuestos, descuentos y procesos posteriores.
 
 Alcance funcional
 -----------------
+
+Version 18.0.1.19.0
+-------------------
+
+Muestra en las líneas de cotización dos datos separados y simultáneos:
+`Producto`, con la plantilla comercial, e `ITEM / Variante`, con todos los
+atributos de la variante seleccionada por el configurador. Conserva oculto el
+campo técnico de variante y no modifica precios ni la selección guiada.
+
+Version 18.0.1.18.1
+-------------------
+
+Permite que vendedores limitados completen el configurador estándar cuando la
+combinación seleccionada requiere materializar una variante. La elevación se
+limita a la plantilla vendible ya seleccionada dentro del configurador, sin
+otorgar permisos generales para modificar productos.
 
 - Se agrega un campo `ddpc_variant_extra_price` en `product.product`.
 - El usuario puede editarlo desde la vista heredada del producto.
@@ -88,6 +104,80 @@ Estructura tecnica
 
 Control de versiones
 --------------------
+
+- `18.0.1.19.0`: agrega `ITEM / Variante` a la lista y al formulario de las
+  líneas de cotización, junto al Producto, usando la variante realmente
+  seleccionada por el configurador.
+
+- `18.0.1.18.0`: agrega `ITEM / Variante` como campo visual de búsqueda y
+  opción de agrupación en Inventario > Productos > Variantes de producto.
+  Acepta varios valores separados por espacios y exige que todos pertenezcan
+  a la variante.
+
+- `18.0.1.17.1`: permite a vendedores internos y usuarios de facturacion
+  reactivar una variante dinamica valida desde el configurador nativo. Eleva
+  exclusivamente esa operacion tecnica, conserva factura, cantidad y precio
+  bajo el usuario real y no concede edicion administrativa de plantillas.
+
+- `18.0.1.17.0`: amplía el selector central de variantes para localizar ITEMs
+  por una o varias palabras de sus valores de atributos. Conserva nombre,
+  referencia, barcode, dominios de cada vista y permisos existentes.
+
+- `18.0.1.16.0`: restaura en facturas el modal nativo `Configure su producto`
+  validado en Local, conservando la plantilla antes del onchange para abrir y
+  filtrar inmediatamente sus atributos y variantes.
+
+- `18.0.1.15.3`: conserva el identificador de la plantilla antes del onchange
+  de la línea de factura, evitando que Odoo lo limpie antes de abrir Armar
+  producto y permitiendo filtrar inmediatamente sus variables válidas.
+
+- `18.0.1.15.2`: crea en servidor una línea pendiente con cuenta e impuestos
+  al elegir la plantilla, abre inmediatamente Armar producto y elimina esa línea
+  si el vendedor cancela. Evita que Odoo descarte la fila editable antes de abrir
+  el configurador.
+
+- `18.0.1.15.1`: abre Armar producto directamente desde el evento de selección
+  de la plantilla. Evita que la reconstrucción de una fila editable de factura
+  omita el configurador al interpretar la selección como carga inicial.
+
+- `18.0.1.15.0`: reemplaza en facturas el selector nativo masivo de variantes
+  por el formulario guiado Armar producto al escoger una plantilla base. Guarda
+  primero la línea para preservar impuestos, cliente y trazabilidad, y recarga
+  el documento al cerrar el configurador.
+
+- `18.0.1.14.0`: configura Hinges como opcion informativa condicional: solo se
+  muestra y exige para Interior Door Pre-Hung, sin crear items adicionales ni
+  contaminar las combinaciones Slab/Bifold.
+
+- `18.0.1.13.0`: incorpora el rol Editor de precios finales para permitir el
+  sprint de actualización de precios sin otorgar Administración/Ajustes.
+
+- `18.0.1.11.0`: usa el precio final de la variante seleccionada como origen
+  comercial en cotizaciones, prefacturas y facturas, conservando moneda,
+  unidad de medida e impuestos del documento.
+
+- `18.0.1.10.2`: sustituye en las fichas de variante el precio base compartido
+  por el precio propio del item, editable solo por Administradores/Ajustes.
+
+- `18.0.1.10.1`: muestra el precio final editable para Administradores/Ajustes
+  en la ficha simplificada de variante utilizada desde Inventario.
+
+- `18.0.1.10.0`: incorpora una lista editable para que Administradores/Ajustes
+  definan el precio final de cada item o variante sin calcular manualmente el
+  adicional sobre el precio base.
+
+- `18.0.1.9.1`: trata PH color como Color y Hand, Mano o Swin como Swing para
+  conservar el orden comercial con los nombres existentes del catálogo.
+
+- `18.0.1.9.0`: ordena el configurador como Marca, Modelo, Ancho, Alto, Color,
+  Swing y luego el resto; Color utiliza la misma lista de valores activos que
+  las demás variantes.
+
+- `18.0.1.8.4`: evita repetir el nombre del atributo dentro de su valor al
+  presentar la configuración en factura y labels.
+
+- `18.0.1.8.3`: muestra en cada línea de factura un resumen de Marca,
+  dimensiones, atributos de variante y opciones informativas, sin duplicados.
 
 - `18.0.1.8.0`: cotizaciones, prefacturas y facturas muestran una sola entrada
   por plantilla de producto. La variante tecnica permanece oculta y se asigna
@@ -189,6 +279,7 @@ Control de versiones
         "stock",
     ],
     "data": [
+        "security/product_price_security.xml",
         "security/ir.model.access.csv",
         "data/custom_variant_cron.xml",
         "views/product_views.xml",

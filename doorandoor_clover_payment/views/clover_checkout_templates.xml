@@ -1,0 +1,37 @@
+<odoo>
+    <template id="otp_verification_page" name="Clover payment authorization">
+        <html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Autorizar pago Clover</title><link rel="stylesheet" href="/doorandoor_clover_payment/static/src/css/clover_checkout.css?v=18.0.1.6.0"/></head>
+        <body class="bg-light"><main class="container py-5 ddcl-checkout"><div class="card shadow-sm mx-auto"><div class="card-body p-4"><h3>Autorizar pago con tarjeta</h3><p>Factura <strong t-esc="operation.invoice_id.name"/> · Importe: <strong t-esc="operation.amount"/> <t t-esc="operation.currency_id.name"/></p><div t-if="error" class="ddcl-card-error" role="alert" t-esc="error"/><div t-if="notice" class="alert alert-success" role="status" t-esc="notice"/><t t-if="operation.otp_verified_at"><div class="alert alert-success" role="status">El código ya fue validado. Puede continuar al formulario seguro de Clover.</div><a t-att-href="checkout_url" class="btn btn-primary mt-2">Continuar al pago</a></t><t t-elif="not operation.otp_sent_at"><p>Indique el titular de la tarjeta. Debe coincidir con el cliente o con un contacto autorizado de su empresa.</p><form method="post"><input type="hidden" name="csrf_token" t-att-value="csrf_token"/><input type="hidden" name="send_otp" value="1"/><label class="form-label" for="cardholder_name">Nombre del titular de la tarjeta</label><input id="cardholder_name" name="cardholder_name" required="required" autofocus="autofocus" class="form-control"/><button type="submit" class="btn btn-primary mt-4">Validar titular y enviar código</button></form></t><t t-else=""><p t-if="operation.otp_delivery == 'telegram'">Enviamos un código de seis dígitos por <strong>Telegram al canal de pruebas local</strong>.</p><p t-else="">Enviamos un código de seis dígitos al correo registrado: <strong t-esc="operation.otp_email"/>.</p><p class="text-muted mb-3">Si el código es incorrecto, venció o ya fue usado, no se realizará ningún cargo. Puede solicitar uno nuevo y continuar con la misma factura.</p><form method="post"><input type="hidden" name="csrf_token" t-att-value="csrf_token"/><label class="form-label" for="code">Código de autorización</label><input id="code" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required="required" autofocus="autofocus" class="form-control"/><button type="submit" class="btn btn-primary mt-4">Validar y continuar</button></form><form method="post" class="mt-2"><input type="hidden" name="csrf_token" t-att-value="csrf_token"/><input type="hidden" name="resend" value="1"/><button type="submit" class="btn btn-secondary">Solicitar código nuevo</button></form></t></div></div></main></body></html>
+    </template>
+    <template id="checkout_page" name="Clover secure card payment">
+        <html lang="es">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <title>Pago seguro Clover</title>
+                <link rel="stylesheet" href="/doorandoor_clover_payment/static/src/css/clover_checkout.css?v=18.0.1.6.0"/>
+            </head>
+            <body class="bg-light">
+            <main class="container py-5 ddcl-checkout" t-att-data-operation-id="operation.id" t-att-data-public-token="provider.ddcl_public_token" t-att-data-merchant-id="provider.ddcl_merchant_id" t-att-data-return-url="return_url" t-att-data-charge-url="charge_url" t-att-data-csrf-token="csrf_token">
+                <div class="card shadow-sm mx-auto" style="max-width: 620px;"><div class="card-body p-4">
+                    <h3 class="mb-1">Pago con tarjeta</h3>
+                    <p class="text-muted">Factura <t t-esc="operation.invoice_id.name"/> · Total a cobrar: <strong><t t-esc="operation.amount"/> <t t-esc="operation.currency_id.name"/></strong></p>
+                    <div class="alert alert-info" role="status">Los datos de la tarjeta se capturan directamente por Clover. Door &amp; Door no almacena número, vencimiento ni CVC.</div>
+                    <form id="ddcl-payment-form">
+                        <label class="form-label">Titular autorizado</label><div class="form-control bg-light" role="status"><t t-esc="operation.cardholder_name"/></div><div class="form-text mb-3">Validado contra el cliente antes de abrir este formulario.</div>
+                        <label class="form-label">Número de tarjeta</label><div id="ddcl-card-number" class="ddcl-card-field"/>
+                        <label class="form-label mt-3">Vencimiento</label><div id="ddcl-card-date" class="ddcl-card-field"/>
+                        <label class="form-label mt-3">CVC</label><div id="ddcl-card-cvv" class="ddcl-card-field"/>
+                        <label class="form-label mt-3">Código postal</label><div id="ddcl-card-postal" class="ddcl-card-field"/>
+                        <div id="ddcl-card-error" class="ddcl-card-error mt-3" role="alert"/>
+                        <button id="ddcl-submit" type="submit" class="btn btn-primary mt-4">Cobrar con tarjeta</button>
+                        <a t-att-href="return_url" class="btn btn-secondary mt-4 ms-2">Cancelar</a>
+                    </form><div class="clover-footer mt-3"/>
+                </div></div>
+            </main>
+            <script t-att-src="sdk_url"/>
+            <script type="text/javascript" src="/doorandoor_clover_payment/static/src/js/clover_checkout.js?v=18.0.1.6.0"/>
+            </body>
+        </html>
+    </template>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_register_ddcl_amount_guard" model="ir.ui.view">
+        <field name="name">account.payment.register.form.ddcl.amount.guard</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="priority">1000</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount']" position="attributes">
+                <attribute name="readonly">ddcl_clover_ecommerce_mode</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_form_ddhd_ticket" model="ir.ui.view">
+        <field name="name">sale.order.form.ddhd.ticket</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ddhd_create_ticket" type="object" string="Crear ticket de soporte"
+                        icon="fa-life-ring" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_form_ddhd_ticket" model="ir.ui.view">
+        <field name="name">account.move.form.ddhd.ticket</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ddhd_create_ticket" type="object" string="Crear ticket de soporte"
+                        icon="fa-life-ring" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_inventory_count_form_ddhd_ticket" model="ir.ui.view">
+        <field name="name">inventory.count.session.form.ddhd.ticket</field>
+        <field name="model">inventory.count.session</field>
+        <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_inventory_count_session_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ddhd_create_ticket" type="object" string="Crear ticket de soporte"
+                        icon="fa-life-ring" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_inventory_serial_batch_form_ddhd_ticket" model="ir.ui.view">
+        <field name="name">inventory.serial.label.batch.form.ddhd.ticket</field>
+        <field name="model">inventory.serial.label.batch</field>
+        <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_inventory_serial_batch_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ddhd_create_ticket" type="object" string="Crear ticket de soporte"
+                        icon="fa-life-ring" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

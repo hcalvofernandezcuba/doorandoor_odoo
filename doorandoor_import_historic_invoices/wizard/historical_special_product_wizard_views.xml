@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_legacy_special_product_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.legacy.special.product.wizard.form</field>
+        <field name="model">doorandoor.legacy.special.product.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Crear ITEM especial histórico">
+                <div class="alert alert-info" role="alert">
+                    Este ITEM se crea para reconstruir y validar el ciclo histórico. No genera una orden de fabricación y su configuración fabril queda pendiente.
+                </div>
+                <group>
+                    <field name="line_id"/>
+                    <field name="name"/>
+                    <field name="category_id" invisible="1"/>
+                </group>
+                <group invisible="1">
+                    <field name="size"/><field name="swing"/><field name="color"/>
+                    <field name="glass"/><field name="model_code"/><field name="notes"/>
+                </group>
+                <footer>
+                    <button name="action_create_historical_special" type="object" string="Crear ITEM y continuar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

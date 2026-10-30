@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_form_ddco_office" model="ir.ui.view">
+        <field name="name">sale.order.form.ddco.office</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="ddco_office_id" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='warehouse_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="options">{'no_open': True, 'no_create': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_account_move_form_ddco_office" model="ir.ui.view">
+        <field name="name">account.move.form.ddco.office</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_user_id']" position="after">
+                <field name="ddco_office_id" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sale_order_supply_warehouse_locked" model="ir.ui.view">
+        <field name="name">sale.order.supply.warehouse.locked</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="doorandoor_sales_new.view_order_form_inherit_ddsn_stock_visibility"/>
+        <field name="priority">200</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ddsn_supply_warehouse_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="options">{'no_open': True, 'no_create': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_supply_warehouse_locked" model="ir.ui.view">
+        <field name="name">account.move.supply.warehouse.locked</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="doorandoor_sales_new.view_move_form_inherit_doorandoor_sales_new"/>
+        <field name="priority">200</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ddsn_supply_warehouse_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="options">{'no_open': True, 'no_create': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

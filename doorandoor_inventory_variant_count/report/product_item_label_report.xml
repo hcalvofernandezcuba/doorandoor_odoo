@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="paperformat_inventory_serial_zebra_3x1" model="report.paperformat">
+        <field name="name">DoorAndDoor Serial Zebra 3x1 - Alineado</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_width">76</field>
+        <field name="page_height">25</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
     <template id="product_labels_report_inventory_items"
               inherit_id="doorandoor_stock_labels.product_labels_report">
         <xpath expr="//t[@t-foreach='labels']" position="replace">
@@ -35,6 +50,9 @@
                                  style="margin-top:2mm;text-align:center;color:#a00000;font-weight:700;font-size:15px;">
                                 <t t-esc="label.get('inventory_warning')"/>
                             </div>
+                            <div t-if="label.get('serial_batch')" style="margin-top:2mm;font-size:15px;">
+                                <strong>LOTE:</strong> <t t-esc="label.get('serial_batch')"/>
+                            </div>
                         </div>
 
                         <div style="position:absolute;left:5mm;right:5mm;bottom:7mm;text-align:center;white-space:nowrap;">
@@ -42,7 +60,9 @@
                                  t-att-src="label.get('barcode_src')"
                                  style="width:78mm;height:36mm;display:inline-block;"/>
                             <div style="font-size:18px;font-weight:700;line-height:1.1;letter-spacing:0.6px;margin-top:1.5mm;">
-                                BARCODE: <t t-esc="label.get('product_code')"/>
+                                <t t-if="label.get('is_unit_serial')">SERIAL: </t>
+                                <t t-else="">BARCODE: </t>
+                                <t t-esc="label.get('product_code')"/>
                             </div>
                         </div>
                     </div>
@@ -50,5 +70,52 @@
                 </div>
             </t>
         </xpath>
+    </template>
+    <record id="action_report_inventory_serial_labels" model="ir.actions.report">
+        <field name="name">Labels serializados</field>
+        <field name="model">inventory.serial.label.batch</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_inventory_variant_count.inventory_serial_labels_report_small</field>
+        <field name="report_file">doorandoor_inventory_variant_count.inventory_serial_labels_report_small</field>
+        <field name="paperformat_id" ref="paperformat_inventory_serial_zebra_3x1"/>
+        <field name="print_report_name">'Labels serializados - %s' % (object.name or 'Lote')</field>
+    </record>
+
+    <template id="inventory_serial_labels_report_small">
+        <t t-call="web.html_container">
+            <style>
+                html, body.o_body_html, body.o_body_html.container, #wrapwrap, #wrapwrap main {
+                    width:101.33mm !important; margin:0 !important; padding:0 !important;
+                }
+                .ddii-serial-3x1 {
+                    display:block !important; width:100mm !important; height:30mm !important;
+                    margin:0 !important; padding:0 !important; box-sizing:border-box !important;
+                    overflow:hidden !important; position:relative !important;
+                    page-break-inside:avoid !important;
+                    font-family:"DejaVu Sans", sans-serif !important;
+                }
+            </style>
+            <t t-foreach="labels" t-as="label">
+                <div class="page ddii-serial-3x1"
+                     t-attf-style="page-break-after:#{'avoid' if label_last else 'always'} !important;">
+                    <div style="position:absolute;left:1.33mm;top:0.93mm;width:97.33mm;height:10.4mm;overflow:hidden;font-size:10px;line-height:1.08;color:#000;">
+                        <div style="font-size:12.7px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            <span>DOORANDOOR | </span>
+                            <t t-esc="label.get('product_name')"/>
+                        </div>
+                        <div style="white-space:normal;overflow:hidden;max-height:2.2em;">
+                            <t t-esc="label.get('variant_description')"/>
+                        </div>
+                    </div>
+                    <div style="position:absolute;left:2.67mm;right:2.67mm;top:10.67mm;height:18.7mm;text-align:center;white-space:nowrap;overflow:hidden;">
+                        <img t-if="label.get('barcode_src')" t-att-src="label.get('barcode_src')"
+                             style="width:94.67mm !important;max-width:none !important;height:13mm !important;display:block;margin:0 auto;"/>
+                        <div style="font-size:10.7px;font-weight:700;line-height:1;">
+                            SERIAL: <t t-esc="label.get('unit_serial')"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
     </template>
 </odoo>

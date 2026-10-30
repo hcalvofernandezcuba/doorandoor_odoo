@@ -112,6 +112,28 @@ No mezcle en una misma línea el conteo directo de variantes con el conteo de
 sus componentes. Si existen lotes, paquetes o propietarios, registre la
 cantidad en el detalle correcto.
 
+### Carga inicial mediante producto y atributos
+
+Cuando la mercancía aún no tiene existencia cargada o resulta difícil localizar
+la variante entre miles de combinaciones:
+
+1. Abra **Physical Counts → Count Sessions** y cree una sesión para la
+   ubicación interna exacta.
+2. Pulse **Start and Load Stock**. Una ubicación vacía puede comenzar sin
+   líneas.
+3. En **Barcode Capture**, pulse **Agregar producto configurado**.
+4. Seleccione primero la plantilla y luego un valor para cada atributo.
+5. Revise la variante resultante, existencia actual y ubicación.
+6. Escriba la cantidad física total encontrada.
+7. Use **Agregar y continuar** para registrar el producto siguiente o
+   **Agregar y cerrar** para volver a la sesión.
+8. Revise las líneas en **Variants / Adjustment** antes de pasar a revisión.
+
+Un atributo dinámico, como `swing`, crea la variante real solamente cuando se
+confirma una combinación nueva. Esa variante puede tener stock, barcode y
+label propios. El selector no crea cantidades reales hasta que un responsable
+valida el ajuste.
+
 ### Revisión y ajuste
 
 1. Pulse **Revisar** al terminar el recorrido físico.
@@ -137,6 +159,24 @@ segunda revisión.
 Si falta el barcode de una variante, use **Generar barcode**. El sistema genera
 uno solo cuando el campo está vacío y nunca reemplaza automáticamente uno
 existente.
+
+### Label único para insumos por lote
+
+Para bisagras, tornillos u otros insumos administrados por cantidad:
+
+1. El producto debe ser almacenable y usar seguimiento **Por lotes**.
+2. Registre el lote real en la recepción o cree el lote autorizado para la
+   carga inicial.
+3. Imprima una sola etiqueta por lote, aunque contenga muchas unidades.
+4. En un conteo, escriba la cantidad física en **Cantidad por lectura** y
+   escanee una vez el Code128 del lote.
+5. Confirme que la línea resultante conserva producto, lote y ubicación.
+6. En carga inicial la cantidad se suma; en conteo físico total sustituye la
+   existencia teórica del lote cuando el responsable valida.
+
+No use campañas de seriales unitarios para estos insumos. Una partida nueva
+requiere un lote nuevo; los consumos de fábrica descuentan parcialmente del
+mismo lote y deben quedar respaldados por la orden de fabricación.
 
 ## 9. Cierre del turno
 

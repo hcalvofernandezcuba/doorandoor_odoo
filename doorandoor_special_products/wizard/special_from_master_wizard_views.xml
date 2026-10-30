@@ -14,20 +14,44 @@
                     <field name="move_id" invisible="1"/>
                     <field name="company_id" invisible="1"/>
                     <field name="currency_id" invisible="1"/>
+                    <field name="allow_vendor_price" invisible="1"/>
                     <group>
                         <group string="Plantilla">
-                            <field name="master_template_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="create_new_master"
+                                   groups="doorandoor_special_products.group_ddsp_master_template_creator"/>
+                            <field name="master_template_id"
+                                   required="not create_new_master"
+                                   invisible="create_new_master"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="new_master_name"
+                                   required="create_new_master"
+                                   invisible="not create_new_master"/>
+                            <field name="new_master_output_name"
+                                   required="create_new_master"
+                                   invisible="not create_new_master"/>
+                            <field name="new_master_family"
+                                   required="create_new_master"
+                                   invisible="not create_new_master"/>
+                            <field name="new_master_reference"
+                                   invisible="not create_new_master"
+                                   placeholder="Opcional; se genera automaticamente"/>
                             <field name="base_variant_id"
+                                   invisible="create_new_master"
                                    placeholder="Seleccione la configuración que servirá de referencia"
                                    options="{'no_create': True, 'no_open': True}"/>
                             <field name="master_bom_id"
+                                   invisible="create_new_master"
                                    placeholder="Opcional: se creara una LDM automatica"
                                    options="{'no_create': True, 'no_open': True}"/>
                         </group>
                         <group string="Venta">
                             <field name="quantity"/>
-                            <field name="price_unit" readonly="1"
-                                   help="Precio base mas el adicional configurado por Administracion en la variante seleccionada."/>
+                            <field name="price_unit" readonly="not allow_vendor_price"
+                                   help="En plantillas autorizadas, introduzca el precio cotizado por el proveedor. En las demas se usa el precio administrativo configurado."/>
+                            <div class="alert alert-warning" role="alert"
+                                 invisible="not allow_vendor_price">
+                                Introduzca el precio vigente cotizado por el proveedor para este producto especial.
+                            </div>
                         </group>
                     </group>
                     <group string="Configuración completa del nuevo producto">
@@ -66,6 +90,8 @@
                             <div class="alert alert-info mt-2" role="alert">
                                 Desmarque los componentes que no formarán parte del Especial.
                                 Puede ajustar cantidades o agregar componentes nuevos.
+                                Al crear una plantilla nueva debe incluir al menos un componente real;
+                                esta receta quedará guardada para los próximos productos de la familia.
                             </div>
                         </page>
                         <page string="Operaciones de fabricación">

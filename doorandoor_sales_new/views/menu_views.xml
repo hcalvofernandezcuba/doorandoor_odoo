@@ -14,6 +14,21 @@
             action="action_doorandoor_fulfillment_line"
             sequence="10"/>
 
+        <record id="action_doorandoor_po_sales" model="ir.actions.act_window">
+            <field name="name">POs</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain">[('ddsn_po_first_flow', '=', True), ('ddsn_po_issued_at', '!=', False)]</field>
+            <field name="context">{'create': False}</field>
+        </record>
+
+        <menuitem
+            id="menu_doorandoor_po_sales"
+            name="POs"
+            parent="menu_doorandoor_sales_new_root"
+            action="action_doorandoor_po_sales"
+            sequence="5"/>
+
         <menuitem
             id="menu_doorandoor_payment_release_log"
             name="Payment Release Logs"

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="s_showrooms" name="Oficinas con video">
+        <section class="s_ddsr_showrooms pt64 pb64" data-snippet="s_ddsr_showrooms" data-name="Oficinas con video">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <span class="ddsr_eyebrow">DOOR &amp; DOOR</span>
+                    <h2>Visite nuestras oficinas</h2>
+                    <p>Conozca nuestros productos, reciba asesoría y vea cada ubicación antes de visitarnos.</p>
+                </div>
+                <t t-set="showrooms" t-value="request.env['doorandoor.website.showroom'].sudo().search([('active', '=', True), ('website_published', '=', True)], order='sequence, name')"/>
+                <div t-if="showrooms" class="row g-4">
+                    <t t-foreach="showrooms" t-as="showroom">
+                        <div class="col-md-6 col-lg-4">
+                            <article class="ddsr_card h-100">
+                                <img t-if="showroom.image_1920" t-att-src="'/web/image/doorandoor.website.showroom/%s/image_1920' % showroom.id" t-att-alt="showroom.name" loading="lazy"/>
+                                <div t-else="" class="ddsr_placeholder">D<span>&amp;</span>D</div>
+                                <div class="ddsr_body">
+                                    <h3><t t-esc="showroom.name"/></h3>
+                                    <p t-if="showroom.street"><t t-esc="showroom.street"/><br/><t t-esc="showroom.city"/><t t-if="showroom.state_name">, <t t-esc="showroom.state_name"/></t><t t-if="showroom.zip"> <t t-esc="showroom.zip"/></t></p>
+                                    <p t-if="showroom.phone"><a t-att-href="'tel:%s' % showroom.phone"><t t-esc="showroom.phone"/></a></p>
+                                    <a t-if="showroom.has_video" class="btn ddsr_video_button" data-bs-toggle="modal" t-att-data-bs-target="'#ddsr-video-%s' % showroom.id">Ver video de esta oficina</a>
+                                    <a t-if="showroom.map_url" t-att-href="showroom.map_url" target="_blank" rel="noopener" class="ddsr_map_link">Ver en el mapa →</a>
+                                </div>
+                            </article>
+                        </div>
+                        <div t-if="showroom.has_video" class="modal fade" t-att-id="'ddsr-video-%s' % showroom.id" tabindex="-1" t-att-aria-label="showroom.name">
+                            <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><t t-esc="showroom.name"/></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"/></div><div class="modal-body p-0">
+                                <iframe t-if="showroom.video_source == 'external' and showroom.video_embed_url" class="ddsr_video" t-att-src="showroom.video_embed_url" title="Video de la oficina" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen"/>
+                                <video t-elif="showroom.video_source == 'upload' and showroom.video_file" class="ddsr_video" controls="controls" preload="metadata"><source t-att-src="'/web/content/doorandoor.website.showroom/%s/video_file/%s?download=false' % (showroom.id, showroom.video_filename or 'showroom.mp4')" type="video/mp4"/></video>
+                            </div></div></div>
+                        </div>
+                    </t>
+                </div>
+                <div t-else="" class="ddsr_empty text-center p-4">Configure y publique las oficinas desde Website › Oficinas y Showrooms.</div>
+            </div>
+        </section>
+    </template>
+
+    <template id="showroom_snippets" inherit_id="website.snippets" name="Snippet de oficinas DoorAndDoor">
+        <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+            <t t-snippet="doorandoor_website_showrooms.s_showrooms" string="Oficinas con video" group="content">
+                <keywords>oficinas, showrooms, sucursales, ubicaciones, video, tiendas</keywords>
+            </t>
+        </xpath>
+    </template>
+</odoo>

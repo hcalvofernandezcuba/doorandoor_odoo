@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_details_doorandoor" inherit_id="portal.portal_my_details" name="Datos DoorAndDoor del cliente">
+        <xpath expr="//t[@t-call='portal.portal_my_details_fields']" position="after">
+            <div class="col-12 ddwr_portal_section"><h3>Relación comercial</h3></div>
+            <div class="col-xl-6 mb-3">
+                <label for="ddwr_customer_type">Tipo de cliente</label>
+                <select name="ddwr_customer_type" id="ddwr_customer_type" class="form-select" required="required">
+                    <option value="individual" t-att-selected="partner.ddwr_customer_type == 'individual'">Cliente particular</option>
+                    <option value="builder" t-att-selected="partner.ddwr_customer_type == 'builder'">Constructor / empresa constructora</option>
+                    <option value="builder_client" t-att-selected="partner.ddwr_customer_type == 'builder_client'">Cliente asociado a una constructora</option>
+                </select>
+            </div>
+            <div class="col-xl-6 mb-3 ddwr_builder_association_fields">
+                <label for="ddwr_builder_name_claim">Constructora asociada</label>
+                <input type="text" name="ddwr_builder_name_claim" id="ddwr_builder_name_claim" class="form-control"
+                       t-att-value="partner.ddwr_builder_name_claim"/>
+                <div class="form-text">Escriba el nombre; no se muestra el directorio interno.</div>
+            </div>
+            <div class="col-xl-6 mb-3">
+                <label for="ddwr_builder_license">Licencia del constructor</label>
+                <input type="text" name="ddwr_builder_license" id="ddwr_builder_license" class="form-control"
+                       t-att-value="partner.ddwr_builder_license"/>
+            </div>
+            <div class="col-xl-6 mb-3">
+                <label for="ddwr_state_name">Estado / provincia declarado</label>
+                <input type="text" name="ddwr_state_name" id="ddwr_state_name" class="form-control" required="required"
+                       t-att-value="partner.ddwr_state_name"/>
+            </div>
+            <div class="col-12 mb-3">
+                <label for="ddwr_project_interest">Proyecto o productos de interés</label>
+                <textarea name="ddwr_project_interest" id="ddwr_project_interest" class="form-control" rows="3"><t t-esc="partner.ddwr_project_interest or ''"/></textarea>
+            </div>
+            <div class="col-12 mb-4">
+                <span class="badge text-bg-light">Estado del perfil: <t t-esc="dict(partner._fields['ddwr_registration_status'].selection).get(partner.ddwr_registration_status)"/></span>
+            </div>
+        </xpath>
+    </template>
+</odoo>
+

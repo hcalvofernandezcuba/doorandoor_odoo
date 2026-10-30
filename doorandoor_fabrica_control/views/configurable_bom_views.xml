@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ddfc_prehung_family_list" model="ir.ui.view">
+        <field name="name">ddfc.prehung.family.list</field>
+        <field name="model">ddfc.prehung.family</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="finished_product_tmpl_id"/>
+                <field name="slab_product_tmpl_id"/>
+                <field name="generated_bom_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddfc_prehung_family_form" model="ir.ui.view">
+        <field name="name">ddfc.prehung.family.form</field>
+        <field name="model">ddfc.prehung.family</field>
+        <field name="arch" type="xml">
+            <form string="Familia Prehung configurable">
+                <header>
+                    <button name="action_generate_existing_variant_boms" type="object"
+                            string="Generar LdM de variantes existentes" class="btn-primary"
+                            groups="mrp.group_mrp_manager"
+                            confirm="Se resolverán Slab, Jamb y bisagras y se crearán únicamente las LdM faltantes. ¿Continuar?"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_generated_boms" type="object" class="oe_stat_button" icon="fa-cogs">
+                            <field name="generated_bom_count" widget="statinfo" string="LdM generadas"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archivada" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title"><label for="name"/><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <group string="Producto Prehung terminado">
+                                <field name="active" invisible="1"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="finished_product_tmpl_id"/>
+                                <field name="type_attribute_id"/>
+                                <field name="prehung_type_value_ids" widget="many2many_tags"/>
+                            </group>
+                            <group string="Slab que utilizará esta familia">
+                                <field name="slab_product_tmpl_id" string="Producto base Slab"/>
+                                <field name="slab_type_value_id" string="Tipo de Slab"/>
+                                <field name="slab_qty" string="Cantidad por Prehung"/>
+                                <field name="slab_label_policy" readonly="1"/>
+                                <field name="slab_ignored_attribute_ids" widget="many2many_tags"/>
+                            </group>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        La familia solo resuelve componentes y genera LdM nativas. Las solicitudes,
+                        salidas de almacén, movimientos internos y entradas de terminados continúan
+                        bajo los controles existentes de Fábrica, Producción-Almacén y Hanger.
+                    </div>
+                    <notebook>
+                        <page string="Componentes: Slab, Jamb y bisagras">
+                            <group string="Slab resuelto por atributos" col="4">
+                                <field name="slab_product_tmpl_id" readonly="1"/>
+                                <field name="slab_type_value_id" readonly="1"/>
+                                <field name="slab_qty" readonly="1"/>
+                                <field name="slab_label_policy" readonly="1"/>
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                El Slab forma parte de cada LdM como componente obligatorio.
+                                La variante exacta se determina por marca, clase, ancho, alto y color
+                                del Prehung; por eso aquí se muestra su familia y no un único ITEM fijo.
+                            </div>
+                            <separator string="Reglas de Jamb y bisagras"/>
+                            <field name="component_rule_ids" context="{'default_family_id': id}">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="active"/>
+                                    <field name="role"/>
+                                    <field name="required_value_ids" widget="many2many_tags"/>
+                                    <field name="component_product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="label_policy"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddfc_prehung_family" model="ir.actions.act_window">
+        <field name="name">LdM configurables Prehung</field>
+        <field name="res_model">ddfc.prehung.family</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Configure una familia Prehung.</p>
+            <p>Odoo resolverá el Slab equivalente, el Jamb y las bisagras antes de crear una LdM concreta.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_ddfc_prehung_family" name="LdM configurables Prehung"
+              parent="mrp.menu_mrp_configuration" action="action_ddfc_prehung_family"
+              sequence="45" groups="mrp.group_mrp_user"/>
+
+    <record id="view_mrp_bom_form_ddfc_prehung" model="ir.ui.view">
+        <field name="name">mrp.bom.form.ddfc.prehung</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_tmpl_id']" position="after">
+                <field name="ddfc_bom_kind" readonly="1"/>
+                <field name="ddfc_stock_production" groups="mrp.group_mrp_manager"
+                       invisible="ddfc_bom_kind in ('special', 'prehung')"/>
+                <field name="ddfc_prehung_family_id" readonly="1" invisible="not ddfc_prehung_family_id"/>
+                <field name="ddfc_resolution_signature" readonly="1" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='bom_line_ids']/list/field[@name='product_id']" position="after">
+                <field name="ddfc_component_role" optional="show"/>
+                <field name="ddfc_label_policy" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_mrp_bom_list_ddfc_classification" model="ir.ui.view">
+        <field name="name">mrp.bom.list.ddfc.classification</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_tmpl_id']" position="after">
+                <field name="ddfc_bom_kind" optional="show"/>
+                <field name="ddfc_stock_production" optional="hide" groups="mrp.group_mrp_manager"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_mrp_bom_search_ddfc_classification" model="ir.ui.view">
+        <field name="name">mrp.bom.search.ddfc.classification</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.view_mrp_bom_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="ddfc_special_boms" string="Productos especiales"
+                        domain="[('ddfc_bom_kind', '=', 'special')]"/>
+                <filter name="ddfc_prehung_boms" string="Prehung estándar"
+                        domain="[('ddfc_bom_kind', '=', 'prehung')]"/>
+                <filter name="ddfc_stock_boms" string="Producción para stock"
+                        domain="[('ddfc_bom_kind', '=', 'stock')]"/>
+                <filter name="ddfc_unclassified_boms" string="Sin clasificar"
+                        domain="[('ddfc_bom_kind', '=', 'other')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="ddfc_group_bom_kind" string="Tipo de LdM"
+                            context="{'group_by': 'ddfc_bom_kind'}"/>
+                    <filter name="ddfc_group_prehung_family" string="Familia Prehung"
+                            context="{'group_by': 'ddfc_prehung_family_id'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

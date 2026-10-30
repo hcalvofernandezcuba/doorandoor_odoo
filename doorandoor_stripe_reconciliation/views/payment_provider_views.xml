@@ -1,0 +1,24 @@
+<odoo>
+    <record id="payment_provider_form_ddsr" model="ir.ui.view">
+        <field name="name">payment.provider.form.ddsr</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Conciliación bancaria Stripe" invisible="code != 'stripe'">
+                    <field name="journal_id"/>
+                    <button name="action_ddsr_prepare_payment_journal" type="object"
+                            string="Preparar diario Stripe" class="btn-primary"/>
+                    <button name="action_ddsr_set_journal_immediate" type="object"
+                            string="Marcar diario como vía inmediata" class="btn-secondary"
+                            invisible="not journal_id"/>
+                    <field name="ddsr_bank_journal_id"/>
+                    <field name="ddsr_auto_sync"/>
+                    <field name="ddsr_last_sync_at"/>
+                    <button name="action_ddsr_sync_settlements" type="object"
+                            string="Sincronizar liquidaciones" class="btn-primary"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

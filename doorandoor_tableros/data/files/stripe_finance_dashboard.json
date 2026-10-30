@@ -1,0 +1,133 @@
+{
+  "version": 21,
+  "sheets": [
+    {
+      "id": "dd18stripe-finance-dashboard-0001",
+      "name": "Stripe",
+      "colNumber": 8,
+      "rowNumber": 100,
+      "rows": {
+        "1": { "size": 34 },
+        "2": { "size": 34 },
+        "3": { "size": 34 }
+      },
+      "cols": {
+        "0": { "size": 160 }, "1": { "size": 160 },
+        "2": { "size": 160 }, "3": { "size": 160 },
+        "4": { "size": 160 }, "5": { "size": 160 },
+        "6": { "size": 160 }, "7": { "size": 160 }
+      },
+      "cells": {
+        "A1": { "content": "[Stripe · Finanzas]" },
+        "A2": { "content": "Cobros, devoluciones y liquidaciones sincronizados en Odoo." },
+        "A3": { "content": "Tablero informativo: no crea pagos ni ejecuta operaciones en Stripe." }
+      },
+      "styles": {}, "formats": {}, "borders": {},
+      "conditionalFormats": [], "tables": [],
+      "areGridLinesVisible": false, "isVisible": true,
+      "headerGroups": {}, "dataValidationRules": [], "comments": {},
+      "figures": [
+        {
+          "id": "stripe-charges-date", "x": 0, "y": 110, "width": 760, "height": 320, "tag": "chart",
+          "data": {
+            "title": { "text": "Cobros Stripe confirmados por fecha" }, "background": "#FFFFFF", "legendPosition": "none",
+            "metaData": { "groupBy": ["create_date:month"], "measure": "amount", "order": null, "resModel": "payment.transaction", "mode": "line" },
+            "searchParams": { "comparison": null, "context": { "group_by": ["create_date"] }, "domain": [["provider_code","=","stripe"],["state","=","done"],["operation","!=","refund"],["amount",">",0]], "groupBy": ["create_date"], "orderBy": [] },
+            "type": "odoo_line", "verticalAxisPosition": "left", "stacked": false, "fillArea": true,
+            "fieldMatching": {
+              "stripe-filter-date": { "chain": "create_date", "type": "date", "offset": 0 },
+              "stripe-filter-partner": { "chain": "partner_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "stripe-charges-state", "x": 780, "y": 110, "width": 470, "height": 320, "tag": "chart",
+          "data": {
+            "title": { "text": "Cobros Stripe por estado" }, "background": "#FFFFFF", "legendPosition": "none",
+            "metaData": { "groupBy": ["state"], "measure": "amount", "order": null, "resModel": "payment.transaction", "mode": "bar" },
+            "searchParams": { "comparison": null, "context": { "group_by": ["state"] }, "domain": [["provider_code","=","stripe"],["operation","!=","refund"],["amount",">",0]], "groupBy": ["state"], "orderBy": [] },
+            "type": "odoo_bar", "verticalAxisPosition": "left", "stacked": false,
+            "fieldMatching": {
+              "stripe-filter-date": { "chain": "create_date", "type": "date", "offset": 0 },
+              "stripe-filter-partner": { "chain": "partner_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "stripe-top-partners", "x": 0, "y": 450, "width": 620, "height": 320, "tag": "chart",
+          "data": {
+            "title": { "text": "Clientes por monto cobrado" }, "background": "#FFFFFF", "legendPosition": "none",
+            "metaData": { "groupBy": ["partner_id"], "measure": "amount", "order": "desc", "resModel": "payment.transaction", "mode": "bar" },
+            "searchParams": { "comparison": null, "context": { "group_by": ["partner_id"] }, "domain": [["provider_code","=","stripe"],["state","=","done"],["operation","!=","refund"],["amount",">",0]], "groupBy": ["partner_id"], "orderBy": [] },
+            "type": "odoo_bar", "verticalAxisPosition": "left", "stacked": false,
+            "fieldMatching": {
+              "stripe-filter-date": { "chain": "create_date", "type": "date", "offset": 0 },
+              "stripe-filter-partner": { "chain": "partner_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "stripe-refunds-state", "x": 640, "y": 450, "width": 610, "height": 320, "tag": "chart",
+          "data": {
+            "title": { "text": "Devoluciones Stripe por estado" }, "background": "#FFFFFF", "legendPosition": "none",
+            "metaData": { "groupBy": ["state"], "measure": "amount", "order": null, "resModel": "doorandoor.stripe.refund.request", "mode": "bar" },
+            "searchParams": { "comparison": null, "context": { "group_by": ["state"] }, "domain": [["amount",">",0]], "groupBy": ["state"], "orderBy": [] },
+            "type": "odoo_bar", "verticalAxisPosition": "left", "stacked": false,
+            "fieldMatching": {
+              "stripe-filter-date": { "chain": "create_date", "type": "date", "offset": 0 },
+              "stripe-filter-partner": { "chain": "partner_id", "type": "many2one" }
+            }
+          }
+        },
+        {
+          "id": "stripe-settlement-gross", "x": 0, "y": 790, "width": 620, "height": 320, "tag": "chart",
+          "data": {
+            "title": { "text": "Importe bruto por liquidación" }, "background": "#FFFFFF", "legendPosition": "none",
+            "metaData": { "groupBy": ["arrival_date:month"], "measure": "gross_amount", "order": null, "resModel": "doorandoor.stripe.settlement", "mode": "line" },
+            "searchParams": { "comparison": null, "context": { "group_by": ["arrival_date"] }, "domain": [], "groupBy": ["arrival_date"], "orderBy": [] },
+            "type": "odoo_line", "verticalAxisPosition": "left", "stacked": false, "fillArea": true,
+            "fieldMatching": { "stripe-filter-date": { "chain": "arrival_date", "type": "date", "offset": 0 } }
+          }
+        },
+        {
+          "id": "stripe-settlement-fees", "x": 640, "y": 790, "width": 610, "height": 320, "tag": "chart",
+          "data": {
+            "title": { "text": "Comisiones Stripe por liquidación" }, "background": "#FFFFFF", "legendPosition": "none",
+            "metaData": { "groupBy": ["arrival_date:month"], "measure": "fee_amount", "order": null, "resModel": "doorandoor.stripe.settlement", "mode": "bar" },
+            "searchParams": { "comparison": null, "context": { "group_by": ["arrival_date"] }, "domain": [], "groupBy": ["arrival_date"], "orderBy": [] },
+            "type": "odoo_bar", "verticalAxisPosition": "left", "stacked": false,
+            "fieldMatching": { "stripe-filter-date": { "chain": "arrival_date", "type": "date", "offset": 0 } }
+          }
+        },
+        {
+          "id": "stripe-settlement-net", "x": 0, "y": 1130, "width": 620, "height": 320, "tag": "chart",
+          "data": {
+            "title": { "text": "Neto enviado al banco por estado" }, "background": "#FFFFFF", "legendPosition": "none",
+            "metaData": { "groupBy": ["stripe_status"], "measure": "payout_amount", "order": null, "resModel": "doorandoor.stripe.settlement", "mode": "bar" },
+            "searchParams": { "comparison": null, "context": { "group_by": ["stripe_status"] }, "domain": [], "groupBy": ["stripe_status"], "orderBy": [] },
+            "type": "odoo_bar", "verticalAxisPosition": "left", "stacked": false,
+            "fieldMatching": { "stripe-filter-date": { "chain": "arrival_date", "type": "date", "offset": 0 } }
+          }
+        },
+        {
+          "id": "stripe-settlement-difference", "x": 640, "y": 1130, "width": 610, "height": 320, "tag": "chart",
+          "data": {
+            "title": { "text": "Diferencias de conciliación" }, "background": "#FFFFFF", "legendPosition": "none",
+            "metaData": { "groupBy": ["match_state"], "measure": "difference_amount", "order": null, "resModel": "doorandoor.stripe.settlement", "mode": "bar" },
+            "searchParams": { "comparison": null, "context": { "group_by": ["match_state"] }, "domain": [], "groupBy": ["match_state"], "orderBy": [] },
+            "type": "odoo_bar", "verticalAxisPosition": "left", "stacked": false,
+            "fieldMatching": { "stripe-filter-date": { "chain": "arrival_date", "type": "date", "offset": 0 } }
+          }
+        }
+      ]
+    }
+  ],
+  "styles": {}, "formats": {}, "borders": {}, "revisionId": "1",
+  "uniqueFigureIds": [], "settings": { "locale": "es_419" },
+  "pivots": {}, "pivotNextId": 1, "customTableStyles": {}, "odooVersion": 18,
+  "globalFilters": [
+    { "id": "stripe-filter-date", "type": "date", "label": "Periodo", "rangeType": "from_to", "defaultValue": [] },
+    { "id": "stripe-filter-partner", "type": "relation", "label": "Cliente", "modelName": "res.partner", "includeChildren": false, "defaultValue": [] }
+  ],
+  "lists": {}, "listNextId": 1, "chartOdooMenusReferences": {}
+}

@@ -38,7 +38,13 @@ class DoorandoorTelegramUserLink(models.Model):
     notify_manufacturing = fields.Boolean(string="Fabricación", default=True)
     notify_warehouse = fields.Boolean(string="Almacén y traslados", default=True)
     notify_tasks = fields.Boolean(string="Tareas y actividades", default=True)
-    message_ids = fields.One2many("doorandoor.telegram.message", "link_id", string="Mensajes")
+    telegram_message_ids = fields.One2many(
+        "doorandoor.telegram.message", "link_id", string="Conversación Telegram"
+    )
+    outgoing_message = fields.Text(
+        string="Nuevo mensaje", store=False,
+        groups="doorandoor_telegram_integration.group_ddtg_manager",
+    )
 
     _sql_constraints = [
         ("ddtg_link_bot_user_unique", "unique(bot_id, user_id)", "El usuario ya tiene un vínculo con este bot."),
@@ -63,6 +69,30 @@ class DoorandoorTelegramUserLink(models.Model):
             raise UserError(_("Solo puede desvincular su propia cuenta de Telegram."))
         own_links.write({"state": "revoked", "revoked_at": fields.Datetime.now()})
         return True
+
+    def action_send_chat_message(self):
+        self.ensure_one()
+        if not self.env.user.has_group("doorandoor_telegram_integration.group_ddtg_manager"):
+            raise UserError(_("Solo un administrador de Telegram puede iniciar conversaciones desde Odoo."))
+        if self.state != "active":
+            raise UserError(_("El vínculo Telegram no está activo."))
+        text = (self.outgoing_message or "").strip()
+        if not text:
+            raise ValidationError(_("Escriba el mensaje que desea enviar."))
+        result = self.bot_id.send_message(self.telegram_chat_id, text)
+        self.env["doorandoor.telegram.message"].sudo().create({
+            "bot_id": self.bot_id.id, "link_id": self.id,
+            "direction": "outgoing", "telegram_chat_id": self.telegram_chat_id,
+            "telegram_message_id": str((result or {}).get("message_id") or ""),
+            "text": text,
+        })
+        self.outgoing_message = False
+        return {"type": "ir.actions.client", "tag": "reload"}
+
+    def action_receive_chat_messages(self):
+        self.ensure_one()
+        self.bot_id.action_poll_now()
+        return {"type": "ir.actions.client", "tag": "reload"}
 
 
 class DoorandoorTelegramActivation(models.Model):

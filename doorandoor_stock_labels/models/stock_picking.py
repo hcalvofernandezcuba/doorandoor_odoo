@@ -1,8 +1,15 @@
-from odoo import _, models
+from odoo import _, fields, models
 
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
+
+    ddsl_receipt_count_ids = fields.One2many(
+        "ddsl.stock.receipt.count",
+        "picking_id",
+        string="Conteos fisicos de recepcion",
+        copy=False,
+    )
 
     def action_open_ddsl_serial_wizard(self):
         self.ensure_one()
@@ -53,3 +60,13 @@ class StockPicking(models.Model):
         if incoming_pickings:
             return incoming_pickings[0].action_open_ddsl_receipt_scan_wizard()
         return result
+
+
+class StockMove(models.Model):
+    _inherit = "stock.move"
+
+    ddsl_receipt_scan_generated = fields.Boolean(
+        string="Creado por conteo de recepcion",
+        copy=False,
+        help="Identifica movimientos no previstos creados al aplicar un conteo fisico.",
+    )

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_label_wizard_zebra" model="ir.ui.view">
+        <field name="name">ddsl.product.label.wizard.zebra</field>
+        <field name="model">ddsl.product.label.wizard</field>
+        <field name="inherit_id" ref="doorandoor_stock_labels.view_ddsl_product_label_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//footer/button[@name='action_print_labels']" position="attributes">
+                <attribute name="string">Vista previa PDF</attribute>
+                <attribute name="class">btn-secondary</attribute>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_print_labels']" position="before">
+                <button name="action_print_zebra" type="object" string="Imprimir en Zebra" class="btn-primary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_stock_label_wizard_zebra" model="ir.ui.view">
+        <field name="name">ddsl.stock.label.wizard.zebra</field>
+        <field name="model">ddsl.stock.label.wizard</field>
+        <field name="inherit_id" ref="doorandoor_stock_labels.view_ddsl_stock_label_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//footer/button[@name='action_print_labels']" position="attributes">
+                <attribute name="string">Vista previa PDF</attribute>
+                <attribute name="class">btn-secondary</attribute>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_print_labels']" position="before">
+                <button name="action_print_zebra" type="object" string="Imprimir en Zebra" class="btn-primary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_document_label_wizard_zebra" model="ir.ui.view">
+        <field name="name">ddsl.document.label.wizard.zebra</field>
+        <field name="model">ddsl.document.label.wizard</field>
+        <field name="inherit_id" ref="doorandoor_stock_labels.view_ddsl_document_label_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//footer/button[@name='action_print_labels']" position="attributes">
+                <attribute name="string">Vista previa PDF</attribute>
+                <attribute name="class">btn-secondary</attribute>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_print_labels']" position="before">
+                <button name="action_print_zebra" type="object" string="Imprimir en Zebra" class="btn-primary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

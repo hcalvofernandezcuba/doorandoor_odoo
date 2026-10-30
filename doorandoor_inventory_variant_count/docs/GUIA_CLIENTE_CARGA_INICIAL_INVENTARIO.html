@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía de carga inicial de inventario — DoorAndDoor</title>
+<style>
+  @page { size: Letter; margin: 17mm 16mm 18mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #273142; font-size: 10.5pt; line-height: 1.42; margin: 0; }
+  h1 { color: #604c8d; font-size: 25pt; margin: 8px 0 5px; }
+  h2 { color: #604c8d; font-size: 16pt; border-bottom: 2px solid #d9d1e8; padding-bottom: 4px; margin: 22px 0 10px; }
+  h3 { color: #3f3557; font-size: 12.5pt; margin: 16px 0 7px; }
+  p { margin: 6px 0 9px; }
+  ol, ul { margin: 6px 0 10px 23px; padding: 0; }
+  li { margin: 4px 0; }
+  .cover { min-height: 220mm; padding-top: 26mm; page-break-after: always; }
+  .brand { color: #7c6aa8; font-weight: bold; letter-spacing: 1.5px; font-size: 12pt; }
+  .subtitle { font-size: 15pt; color: #536070; margin-top: 12px; }
+  .version { margin-top: 28px; color: #6c7580; }
+  .route { background: #f3f0f8; border-left: 5px solid #735da5; padding: 11px 14px; font-size: 12pt; font-weight: bold; margin: 12px 0; }
+  .new { background: #eaf7ef; border: 1px solid #90c9a2; border-radius: 5px; padding: 10px 13px; margin: 12px 0; }
+  .warning { background: #fff6df; border: 1px solid #e6c56b; border-radius: 5px; padding: 10px 13px; margin: 12px 0; }
+  .important { background: #edf4fb; border: 1px solid #9fc3e5; border-radius: 5px; padding: 10px 13px; margin: 12px 0; }
+  .step { page-break-inside: avoid; border: 1px solid #ddd8e6; border-radius: 6px; margin: 10px 0; padding: 10px 13px; }
+  .step strong:first-child { color: #604c8d; }
+  table { width: 100%; border-collapse: collapse; margin: 9px 0 14px; page-break-inside: avoid; }
+  th { background: #6f5a9b; color: white; text-align: left; padding: 7px; }
+  td { border: 1px solid #d7dce2; padding: 7px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8f9fb; }
+  .page-break { page-break-before: always; }
+  .footer { margin-top: 25px; padding-top: 8px; border-top: 1px solid #ddd; color: #727b86; font-size: 9pt; }
+</style>
+</head>
+<body>
+  <section class="cover">
+    <div class="brand">DOORANDDOOR</div>
+    <h1>Guía de carga inicial de inventario</h1>
+    <div class="subtitle">Selección guiada de productos y variantes en Odoo</div>
+    <div class="new">
+      <strong>Nueva función:</strong> se incorpora una entrada en español para encontrar
+      productos por plantilla y seleccionar sus atributos, sin recorrer manualmente
+      miles de variantes.
+    </div>
+    <div class="route">Conteos físicos → Sesiones de conteo → Agregar producto configurado</div>
+    <p class="version">Versión funcional: 18.0.1.10.2<br>Documento para validación del cliente</p>
+  </section>
+
+  <h2>1. Objetivo</h2>
+  <p>Facilitar la carga inicial y el conteo de inventario. El operador selecciona
+  primero el producto y luego Marca, Ancho, Alto, modelo, color, cristal, swing y
+  los demás atributos aplicables. Odoo encuentra la variante exacta o crea una
+  variante dinámica cuando la combinación todavía no existe.</p>
+  <div class="important"><strong>Control:</strong> el asistente prepara el conteo,
+  pero no modifica existencias inmediatamente. El inventario cambia únicamente
+  cuando un responsable valida el ajuste.</div>
+
+  <h2>2. Permisos necesarios</h2>
+  <table>
+    <tr><th>Perfil</th><th>Funciones</th></tr>
+    <tr><td>Contador de inventario</td><td>Crear sesiones, seleccionar variantes, registrar cantidades y enviar a revisión.</td></tr>
+    <tr><td>Responsable de conteo</td><td>Todas las funciones anteriores y validación final del ajuste.</td></tr>
+  </table>
+  <p>Si no aparece el menú <strong>Conteos físicos</strong>, un administrador debe
+  revisar los permisos del usuario y este debe volver a iniciar sesión.</p>
+
+  <h2>3. Nueva entrada del menú</h2>
+  <p>Después del despliegue aparecerá la nueva aplicación o entrada principal:</p>
+  <div class="route">Conteos físicos</div>
+  <p>Sus opciones serán:</p>
+  <ul>
+    <li><strong>Sesiones de conteo:</strong> crear y validar cargas o conteos físicos.</li>
+    <li><strong>Importar conteos de ítems:</strong> carga masiva mediante archivo.</li>
+    <li><strong>Configuración → Ítems de conteo por variante:</strong> disponible para responsables.</li>
+  </ul>
+
+  <div class="page-break"></div>
+  <h2>4. Paso a paso: crear una sesión</h2>
+  <div class="step"><strong>Paso 1.</strong> Abra <strong>Conteos físicos → Sesiones de conteo</strong>.</div>
+  <div class="step"><strong>Paso 2.</strong> Pulse <strong>Nuevo</strong>.</div>
+  <div class="step"><strong>Paso 3.</strong> Seleccione la ubicación interna exacta donde se cargará o contará la mercancía.</div>
+  <div class="step"><strong>Paso 4.</strong> Compruebe fecha, responsable y compañía; luego guarde.</div>
+  <div class="step"><strong>Paso 5.</strong> Pulse <strong>Iniciar y cargar existencias</strong>.</div>
+  <p>Si la ubicación está vacía, la sesión puede comenzar sin líneas. Esto es normal
+  durante una carga inicial.</p>
+
+  <h2>5. Paso a paso: seleccionar el producto</h2>
+  <div class="step"><strong>Paso 1.</strong> En <strong>Captura por código de barras</strong>, pulse <strong>Agregar producto configurado</strong>.</div>
+  <div class="step"><strong>Paso 2.</strong> En <strong>Producto</strong>, seleccione la plantilla: Impact Doors, Impact Windows, Interior Door u otra.</div>
+  <div class="step"><strong>Paso 3.</strong> Seleccione exactamente un valor para cada atributo solicitado.</div>
+  <div class="step"><strong>Paso 4.</strong> Revise el resumen y la <strong>Variante resultante</strong>.</div>
+  <div class="step"><strong>Paso 5.</strong> Compruebe la ubicación y la <strong>Existencia actual</strong>.</div>
+  <div class="step"><strong>Paso 6.</strong> Escriba la <strong>Cantidad contada</strong>, entendida como el total físico encontrado.</div>
+  <div class="step"><strong>Paso 7.</strong> Mantenga <strong>Generar barcode</strong> marcado si la variante debe recibir un código para etiquetas y conteos posteriores.</div>
+
+  <h3>Botones del asistente</h3>
+  <table>
+    <tr><th>Botón</th><th>Resultado</th></tr>
+    <tr><td>Agregar y continuar</td><td>Guarda la variante en la sesión y abre un asistente nuevo para cargar el producto siguiente.</td></tr>
+    <tr><td>Agregar y cerrar</td><td>Guarda la variante y regresa a la sesión de conteo.</td></tr>
+    <tr><td>Cancelar</td><td>Cierra el asistente sin agregar el producto.</td></tr>
+  </table>
+
+  <div class="warning"><strong>Importante:</strong> si una variante ya existe en la
+  sesión sin lote, paquete o propietario, el sistema actualiza su cantidad contada
+  y evita crear una línea duplicada.</div>
+
+  <div class="page-break"></div>
+  <h2>6. Revisar y validar el inventario</h2>
+  <ol>
+    <li>Abra la pestaña <strong>Variantes / Ajuste</strong>.</li>
+    <li>Revise variante, existencia esperada, cantidad contada, diferencia y unidad.</li>
+    <li>Compruebe lote, paquete y propietario cuando se utilice trazabilidad.</li>
+    <li>Pulse <strong>Revisar</strong>.</li>
+    <li>Si existe un error, pulse <strong>Volver al conteo</strong> y corríjalo.</li>
+    <li>Un responsable pulsa <strong>Validar ajuste</strong> y confirma la advertencia.</li>
+  </ol>
+  <div class="warning"><strong>Validar ajuste modifica el inventario real.</strong>
+  Debe realizarse únicamente después de comprobar físicamente las cantidades.</div>
+
+  <h2>7. Verificar e imprimir la etiqueta</h2>
+  <ol>
+    <li>Abra <strong>Inventario → Productos → Productos</strong>.</li>
+    <li>Abra la plantilla utilizada.</li>
+    <li>Pulse <strong>Labels de productos</strong>.</li>
+    <li>Seleccione <strong>Variantes</strong>.</li>
+    <li>Localice la combinación agregada y revise atributos, referencia y barcode.</li>
+    <li>Seleccione almacén, cantidad de copias y lote de impresión.</li>
+    <li>Pulse <strong>Print</strong> y compruebe el PDF antes de imprimir.</li>
+  </ol>
+  <p>El label individual debe identificar inequívocamente la combinación física.
+  No debe utilizarse el label general de la plantilla para conteos de variantes.</p>
+
+  <h2>8. Atributos dinámicos</h2>
+  <p>Un atributo dinámico como <strong>swing</strong> no genera previamente decenas de
+  miles de combinaciones vacías. Cuando el operador selecciona una combinación
+  nueva, Odoo crea una variante real que puede tener stock, barcode, referencia y
+  etiqueta propios.</p>
+
+  <h2>9. Orden de validación y despliegue</h2>
+  <ol>
+    <li><strong>Local:</strong> validación técnica y funcional interna.</li>
+    <li><strong>Pruebas:</strong> validación del cliente con productos y ubicaciones de ensayo.</li>
+    <li><strong>Gestión:</strong> despliegue final después de aprobación escrita.</li>
+  </ol>
+  <p>La disponibilidad en Pruebas o Gestión se comunicará expresamente después de
+  cada despliegue. Este documento no autoriza por sí mismo cambios en producción.</p>
+
+  <h2>10. Lista rápida de comprobación</h2>
+  <ul>
+    <li>La ubicación seleccionada es correcta.</li>
+    <li>Todos los atributos corresponden al producto físico.</li>
+    <li>La cantidad registrada es el total contado, no un incremento.</li>
+    <li>La variante tiene barcode si será etiquetada o escaneada.</li>
+    <li>Las diferencias fueron revisadas antes de validar.</li>
+    <li>El label muestra los atributos completos de la variante.</li>
+  </ul>
+
+  <div class="footer">DoorAndDoor — Guía de carga inicial de inventario — Versión 18.0.1.10.2</div>
+</body>
+</html>

@@ -7,10 +7,17 @@
                 <field name="name"/>
                 <field name="date"/>
                 <field name="location_id"/>
+                <field name="count_mode"/>
+                <field name="load_reference" optional="show"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
                 <field name="line_count"/>
                 <field name="difference_count"/>
-                <field name="state" widget="badge"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-muted="state in ('draft', 'cancel')"
+                       decoration-info="state == 'counting'"
+                       decoration-warning="state == 'review'"
+                       decoration-success="state == 'done'"/>
                 <field name="company_id" groups="base.group_multi_company"/>
             </list>
         </field>
@@ -39,19 +46,42 @@
         <field name="arch" type="xml">
             <form class="o_inventory_count_mobile">
                 <header>
-                    <button name="action_start" string="Start and Load Stock" type="object" class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_review" string="Review" type="object" class="btn-primary" invisible="state != 'counting'"/>
-                    <button name="action_back_to_counting" string="Back to Counting" type="object" invisible="state != 'review'"/>
-                    <button name="action_validate" string="Validate Adjustment" type="object" class="btn-primary" invisible="state != 'review'" groups="doorandoor_inventory_variant_count.group_inventory_count_manager" confirm="This will apply the physical inventory adjustment. Continue?"/>
-                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancel')"/>
-                    <button name="action_reset_draft" string="Reset to Draft" type="object" invisible="state != 'cancel'" groups="doorandoor_inventory_variant_count.group_inventory_count_manager"/>
+                    <button name="action_start" string="Iniciar y cargar existencias" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_review" string="Revisar" type="object" class="btn-primary" invisible="state != 'counting'"/>
+                    <button name="action_print_serial_audit"
+                            string="Control de seriales"
+                            type="object"
+                            invisible="not serial_campaign_id or state == 'draft'"/>
+                    <button name="action_back_to_counting" string="Volver al conteo" type="object" invisible="state != 'review'"/>
+                    <button name="action_validate" string="Validar ajuste" type="object" class="btn-primary" invisible="state != 'review'" groups="doorandoor_inventory_variant_count.group_inventory_count_manager" confirm="Esta acción aplicará el ajuste físico de inventario. ¿Desea continuar?"/>
+                    <button name="action_cancel" string="Cancelar" type="object" invisible="state in ('done', 'cancel')"/>
+                    <button name="action_reset_draft" string="Restablecer a borrador" type="object" invisible="state != 'cancel'" groups="doorandoor_inventory_variant_count.group_inventory_count_manager"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,counting,review,done"/>
                 </header>
                 <sheet>
                     <div class="oe_title"><h1><field name="name"/></h1></div>
                     <group>
                         <group>
-                            <field name="location_id" readonly="state != 'draft'"/>
+                            <field name="allowed_location_ids" invisible="1"/>
+                            <field name="location_id"
+                                   readonly="state != 'draft'"
+                                   options="{'no_create': True, 'no_create_edit': True, 'no_search_more': True}"/>
+                            <field name="count_mode" readonly="state != 'draft'"/>
+                            <field name="load_reference"
+                                   invisible="count_mode != 'additive'"
+                                   required="count_mode == 'additive'"
+                                   readonly="state != 'draft'"
+                                   placeholder="Ej.: TAMPA-LOTE-003"/>
+                            <field name="serial_campaign_id"
+                                   readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="allowed_serial_batch_ids" invisible="1"/>
+                            <field name="serial_batch_id"
+                                   invisible="not serial_campaign_id"
+                                   required="serial_campaign_id and state == 'draft'"
+                                   readonly="state != 'draft'"
+                                   domain="[('id', 'in', allowed_serial_batch_ids)]"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
                             <field name="date" readonly="state != 'draft'"/>
                             <field name="user_id" readonly="state in ('done', 'cancel')"/>
                         </group>
@@ -59,15 +89,34 @@
                             <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
                             <field name="line_count"/>
                             <field name="difference_count"/>
+                            <field name="serial_expected_count" invisible="not serial_campaign_id"/>
+                            <field name="serial_counted_count" invisible="not serial_campaign_id"/>
+                            <field name="serial_pending_count" invisible="not serial_campaign_id"/>
                         </group>
                     </group>
-                    <group string="Barcode Capture" invisible="state != 'counting'" class="o_inventory_scan_box">
-                        <field name="barcode_input" placeholder="Scan item barcode..."/>
+                    <div class="alert alert-info" role="alert"
+                         invisible="count_mode != 'additive' or state == 'cancel'">
+                        Carga inicial acumulativa: la cantidad contada en este lote se sumará
+                        a la existencia mostrada como Esperado. Revise Existencia resultante antes
+                        de validar.
+                    </div>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not serial_campaign_id or state == 'cancel'">
+                        Conteo serializado por lote: solo se aceptan etiquetas únicas del lote seleccionado.
+                        Un segundo escaneo de la misma unidad será rechazado en todas sus sesiones.
+                    </div>
+                    <group string="Captura por código de barras" invisible="state != 'counting'" class="o_inventory_scan_box">
+                        <field name="barcode_input" placeholder="Escanee el código de barras..."/>
                         <field name="scan_qty"/>
-                        <button name="action_scan" string="Add Scan" type="object" class="btn-primary" icon="fa-barcode"/>
+                        <button name="action_scan" string="Agregar lectura" type="object" class="btn-primary" icon="fa-barcode"/>
+                        <button name="action_open_configured_product"
+                                string="Agregar producto configurado"
+                                type="object"
+                                class="btn-secondary"
+                                icon="fa-sliders"/>
                     </group>
                     <notebook>
-                        <page string="Items to Count" name="items">
+                        <page string="Ítems para contar" name="items">
                             <field name="item_line_ids" readonly="state not in ('counting', 'review')" context="{'default_session_id': id}">
                                 <list editable="bottom" import="true" decoration-danger="is_counted and difference_qty != 0" decoration-success="is_counted and difference_qty == 0">
                                     <field name="product_id" readonly="1"/>
@@ -82,22 +131,27 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Variants / Adjustment" name="variants">
+                        <page string="Variantes / Ajuste" name="variants">
                             <field name="line_ids" readonly="state in ('done', 'cancel')">
                                 <list decoration-danger="is_counted and difference_qty != 0" decoration-success="is_counted and difference_qty == 0">
                                     <field name="product_id" readonly="1"/>
                                     <field name="lot_id" optional="show" readonly="1"/>
                                     <field name="package_id" optional="hide" readonly="1"/>
                                     <field name="owner_id" optional="hide" readonly="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="cost_price" string="Costo" optional="show" groups="base.group_system"/>
+                                    <field name="sale_price" string="Precio" optional="show" groups="base.group_system"/>
                                     <field name="expected_qty" readonly="1"/>
                                     <field name="counted_qty" readonly="item_line_ids"/>
                                     <field name="is_counted" readonly="item_line_ids"/>
                                     <field name="difference_qty" readonly="1"/>
+                                    <field name="result_qty" string="Existencia resultante" readonly="1"/>
+                                    <field name="price_configured" optional="hide" groups="base.group_system"/>
                                     <field name="uom_id" readonly="1"/>
                                 </list>
                             </field>
                         </page>
-                        <page string="Notes"><field name="note" placeholder="Observations, incidents, or approvals..."/></page>
+                        <page string="Notas"><field name="note" placeholder="Observaciones, incidencias o aprobaciones..."/></page>
                     </notebook>
                 </sheet>
                 <chatter/>
@@ -105,14 +159,14 @@
         </field>
     </record>
     <record id="action_inventory_count_session" model="ir.actions.act_window">
-        <field name="name">Inventory Count Sessions</field>
+        <field name="name">Sesiones de conteo de inventario</field>
         <field name="res_model">inventory.count.session</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_inventory_count_session_search"/>
         <field name="context">{'search_default_open': 1}</field>
     </record>
     <record id="action_inventory_count_item_lines" model="ir.actions.act_window">
-        <field name="name">Import / Edit Item Counts</field>
+        <field name="name">Importar o editar conteos de ítems</field>
         <field name="res_model">inventory.count.item.line</field>
         <field name="view_mode">list</field>
         <field name="domain">[('state', '=', 'counting')]</field>

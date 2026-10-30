@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="doorandoor_warehouse_map.WarehouseMap">
+        <div class="o_ddwm">
+            <header class="o_ddwm_header">
+                <div>
+                    <h1>Mapa del almacén</h1>
+                    <p>Vista lógica del avance por posiciones y lotes serializados.</p>
+                </div>
+            </header>
+
+            <t t-if="state.loading">
+                <div class="o_ddwm_empty"><i class="fa fa-spinner fa-spin"/> Cargando mapa…</div>
+            </t>
+            <t t-else="">
+                <section class="o_ddwm_toolbar">
+                    <div class="o_ddwm_selector">
+                        <label for="ddwm_warehouse"><i class="fa fa-filter"/> Almacén</label>
+                        <select id="ddwm_warehouse" t-on-change="onWarehouseChange">
+                            <t t-foreach="state.warehouses" t-as="warehouse" t-key="warehouse.id">
+                                <option t-att-value="warehouse.id"
+                                        t-att-selected="warehouse.id === state.selectedWarehouseId"
+                                        t-esc="warehouse.name"/>
+                            </t>
+                        </select>
+                    </div>
+
+                    <div class="o_ddwm_product_search">
+                        <label for="ddwm_product_search"><i class="fa fa-search"/> Localizar producto o label</label>
+                        <div class="o_ddwm_product_search_control">
+                            <input id="ddwm_product_search" type="search"
+                                   placeholder="Label, producto, variante, barcode o ubicación…"
+                                   autocomplete="off"
+                                   t-att-value="state.productQuery"
+                                   t-on-input="onProductSearchInput"
+                                   t-on-focus="() => state.productSearchOpen = state.productQuery.trim().length &gt;= 2"/>
+                            <i t-if="state.productSearching" class="fa fa-spinner fa-spin o_ddwm_search_spinner"/>
+                            <div t-if="state.productSearchOpen" class="o_ddwm_search_results">
+                                <div t-if="state.productSearching and !state.productResults.length" class="o_ddwm_search_empty">Buscando…</div>
+                                <button t-foreach="state.productResults" t-as="result"
+                                        t-key="result.batch_id" type="button"
+                                        t-on-click="() => this.locateProduct(result)">
+                                    <span class="o_ddwm_search_product" t-esc="result.product"/>
+                                    <span class="o_ddwm_search_location">
+                                        <strong t-esc="result.batch_name"/> · <t t-esc="result.warehouse_name"/>
+                                    </span>
+                                    <small t-if="result.matched_labels.length">
+                                        Label: <t t-esc="result.matched_labels.join(', ')"/>
+                                    </small>
+                                    <small><t t-esc="result.serials"/> unidades · <t t-esc="result.pending"/> pendientes</small>
+                                </button>
+                                <div t-if="!state.productSearching and !state.productResults.length" class="o_ddwm_search_empty">
+                                    No se encontraron ubicaciones activas.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <nav class="o_ddwm_view_switcher" aria-label="Modo de visualización">
+                        <button type="button" t-att-class="'btn ' + (state.viewMode === 'classic' ? 'btn-primary' : 'btn-light')"
+                                t-on-click="() => this.setViewMode('classic')">
+                            <i class="fa fa-th"/> Vista clásica
+                        </button>
+                        <button type="button" t-att-class="'btn ' + (state.viewMode === 'front' ? 'btn-primary' : 'btn-light')"
+                                t-on-click="() => this.setViewMode('front')">
+                            <i class="fa fa-building-o"/> Vista frontal
+                        </button>
+                        <button type="button" t-att-class="'btn ' + (state.viewMode === 'aisle' ? 'btn-primary' : 'btn-light')"
+                                t-on-click="() => this.setViewMode('aisle')">
+                            <i class="fa fa-align-justify"/> Vista de pasillo
+                        </button>
+                        <button type="button" t-att-class="'btn ' + (state.viewMode === 'top' ? 'btn-primary' : 'btn-light')"
+                                t-on-click="() => this.setViewMode('top')">
+                            <i class="fa fa-th-large"/> Vista superior
+                        </button>
+                    </nav>
+                </section>
+
+                <section class="o_ddwm_summary">
+                    <div class="o_ddwm_metric"><span>Lotes</span><strong t-esc="state.summary.batches || 0"/></div>
+                    <div class="o_ddwm_metric"><span>Entradas por lote</span><strong t-esc="state.summary.lot_entries || 0"/></div>
+                    <div class="o_ddwm_metric o_ddwm_metric--green"><span>Existencia actual</span><strong t-esc="state.summary.current_stock || 0"/></div>
+                    <div class="o_ddwm_metric"><span>Labels activos</span><strong t-esc="state.summary.serials || 0"/></div>
+                    <div class="o_ddwm_metric o_ddwm_metric--blue"><span>Contados</span><strong t-esc="state.summary.counted || 0"/></div>
+                    <div class="o_ddwm_metric o_ddwm_metric--green"><span>Validados</span><strong t-esc="state.summary.validated || 0"/></div>
+                    <div class="o_ddwm_metric o_ddwm_metric--amber"><span>Pendientes</span><strong t-esc="state.summary.pending || 0"/></div>
+                    <div class="o_ddwm_metric o_ddwm_metric--empty"><span>Espacios disponibles</span><strong t-esc="state.summary.available || 0"/></div>
+                </section>
+
+                <div class="o_ddwm_workspace">
+                    <main class="o_ddwm_map">
+                        <t t-if="!state.warehouses.length">
+                            <div class="o_ddwm_empty">No tiene almacenes autorizados para visualizar.</div>
+                        </t>
+                        <t t-elif="!state.zones.length">
+                            <div class="o_ddwm_empty">Este almacén todavía no tiene lotes serializados activos.</div>
+                        </t>
+                        <t t-foreach="state.zones" t-as="zone" t-key="zone.name">
+                            <section class="o_ddwm_zone">
+                                <div class="o_ddwm_zone_title">
+                                    <div>
+                                        <span t-esc="zone.name"/>
+                                        <span t-if="zone.structured" class="o_ddwm_zone_path">
+                                            <t t-if="zone.warehouse_code">
+                                                Almacén <strong t-esc="zone.warehouse_code"/> ·
+                                            </t>
+                                            Pasillo <strong t-esc="zone.aisle"/>
+                                        </span>
+                                    </div>
+                                    <small>
+                                        <t t-esc="zone.horizontal_count"/> posiciones horizontales ·
+                                        <t t-esc="zone.product_count"/> productos
+                                    </small>
+                                </div>
+                                <t t-if="state.viewMode === 'classic'">
+                                    <div class="o_ddwm_quadrants">
+                                        <section t-foreach="zone.horizontal_positions" t-as="quadrant"
+                                                 t-key="quadrant.name" class="o_ddwm_quadrant">
+                                            <div class="o_ddwm_quadrant_title">
+                                                Posición horizontal <strong t-esc="quadrant.name"/>
+                                                <small><t t-esc="quadrant.items.length"/> productos</small>
+                                            </div>
+                                            <div class="o_ddwm_positions">
+                                                <button t-foreach="quadrant.classic_items" t-as="item" t-key="item.key"
+                                                        type="button"
+                                                        t-att-data-ddwm-key="item.key"
+                                                        t-att-class="'o_ddwm_position o_ddwm_position--' + item.status + (state.selected?.key === item.key ? ' is-selected' : '')"
+                                                        t-on-click="() => this.selectPosition(item)">
+                                                    <span class="o_ddwm_position_ref" t-esc="item.reference"/>
+                                                    <span t-if="item.side !== 'C'" class="o_ddwm_product_slot">
+                                                        <t t-esc="item.side"/><t t-if="item.slot_number &gt; 1" t-esc="item.slot_number"/>
+                                                    </span>
+                                                    <span class="o_ddwm_position_product" t-esc="item.product || 'Vacío'"/>
+                                                    <span class="o_ddwm_position_progress">
+                                                        <strong><t t-esc="item.current_stock"/> actuales · <t t-esc="item.lot_entries"/> entradas</strong>
+                                                        <small t-esc="item.status_label"/>
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </t>
+
+                                <t t-elif="state.viewMode === 'front'">
+                                    <div class="o_ddwm_front_help">
+                                        <i class="fa fa-arrow-up"/> Los niveles se leen de abajo hacia arriba; las subdivisiones permanecen dentro del mismo nivel.
+                                    </div>
+                                    <div class="o_ddwm_racks">
+                                        <section t-foreach="zone.horizontal_positions" t-as="quadrant"
+                                                 t-key="quadrant.name" class="o_ddwm_rack">
+                                            <div class="o_ddwm_quadrant_title">
+                                                Posición horizontal <strong t-esc="quadrant.name"/>
+                                                <small><t t-esc="quadrant.items.length"/> productos</small>
+                                            </div>
+                                            <div class="o_ddwm_rack_levels">
+                                                <section t-foreach="quadrant.levels" t-as="level" t-key="level.name"
+                                                         class="o_ddwm_rack_level">
+                                                    <div class="o_ddwm_level_label">Nivel <strong t-esc="level.name"/></div>
+                                                    <div class="o_ddwm_level_slots">
+                                                        <button t-foreach="level.items" t-as="item" t-key="item.key"
+                                                                type="button"
+                                                                t-att-data-ddwm-key="item.key"
+                                                                t-att-class="'o_ddwm_slot ' + (level.items.length === 1 ? 'o_ddwm_slot--single' : 'o_ddwm_slot--' + item.side.toLowerCase()) + ' o_ddwm_position--' + item.status + (state.selected?.key === item.key ? ' is-selected' : '')"
+                                                                t-att-style="'--ddwm-left-count:' + level.left_count + ';--ddwm-right-count:' + level.right_count"
+                                                                t-on-click="() => this.selectPosition(item)">
+                                                            <span class="o_ddwm_position_ref" t-esc="item.reference"/>
+                                                            <span class="o_ddwm_position_product" t-esc="item.product || 'Vacío'"/>
+                                                            <span class="o_ddwm_position_progress">
+                                                                <strong><t t-esc="item.current_stock"/> actuales · <t t-esc="item.lot_entries"/> entradas</strong>
+                                                                <small t-esc="item.status_label"/>
+                                                            </span>
+                                                        </button>
+                                                    </div>
+                                                </section>
+                                            </div>
+                                            <div class="o_ddwm_rack_floor">PISO · NIVEL 1</div>
+                                        </section>
+                                    </div>
+                                </t>
+
+                                <t t-elif="state.viewMode === 'aisle'">
+                                    <div class="o_ddwm_aisle">
+                                        <section t-foreach="zone.horizontal_positions" t-as="quadrant"
+                                                 t-key="quadrant.name" class="o_ddwm_aisle_position">
+                                            <header>Posición <strong t-esc="quadrant.name"/></header>
+                                            <div class="o_ddwm_aisle_levels">
+                                                <div t-foreach="quadrant.levels" t-as="level" t-key="level.name" class="o_ddwm_aisle_level">
+                                                    <strong class="o_ddwm_aisle_quantity">
+                                                        <small>Cant.</small>
+                                                        <t t-esc="level.serials || 0"/>
+                                                    </strong>
+                                                    <div>
+                                                        <button t-foreach="level.items" t-as="item" t-key="item.key" type="button"
+                                                                t-att-data-ddwm-key="item.key"
+                                                                t-att-class="'o_ddwm_aisle_chip ' + (level.items.length === 1 ? 'o_ddwm_aisle_chip--single' : 'o_ddwm_aisle_chip--' + item.side.toLowerCase())"
+                                                                t-on-click="() => this.selectPosition(item)">
+                                                            <strong t-esc="item.reference"/>
+                                                            <span t-esc="item.product || 'Vacío'"/>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </t>
+
+                                <t t-else="">
+                                    <div class="o_ddwm_top_view">
+                                        <div class="o_ddwm_top_corridor">PASILLO <t t-esc="zone.aisle"/> · SENTIDO DE RECORRIDO →</div>
+                                        <div class="o_ddwm_top_positions">
+                                            <button t-foreach="zone.horizontal_positions" t-as="quadrant" t-key="quadrant.name"
+                                                    type="button" class="o_ddwm_top_position"
+                                                    t-att-data-ddwm-zone="zone.name"
+                                                    t-att-data-ddwm-horizontal="quadrant.name"
+                                                    t-on-click="() => this.selectPosition(quadrant.items[0])">
+                                                <strong>Posición <t t-esc="quadrant.name"/></strong>
+                                                <span><t t-esc="quadrant.items.length"/> productos · <t t-esc="quadrant.serials"/> unidades</span>
+                                                <small><t t-esc="quadrant.validated"/> validadas · <t t-esc="quadrant.pending"/> pendientes</small>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </t>
+                            </section>
+                        </t>
+                    </main>
+
+                    <aside class="o_ddwm_detail">
+                        <t t-if="!state.selected">
+                            <div class="o_ddwm_detail_placeholder">
+                                <i class="fa fa-map-marker"/>
+                                <span>Seleccione una posición para consultar sus detalles.</span>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <img t-if="state.selected.image_url" t-att-src="state.selected.image_url" t-att-alt="state.selected.product || 'Vacío'"/>
+                            <div t-else="" class="o_ddwm_empty_icon"><i class="fa fa-cube"/></div>
+                            <span t-att-class="'o_ddwm_badge o_ddwm_badge--' + state.selected.status"
+                                  t-esc="state.selected.status_label"/>
+                            <h2 t-esc="state.selected.reference"/>
+                            <p class="o_ddwm_detail_product" t-esc="state.selected.product || 'Vacío'"/>
+                            <dl>
+                                <dt>Campaña</dt><dd t-esc="state.selected.campaign"/>
+                                <dt t-if="state.selected.horizontal_position">Posición horizontal</dt>
+                                <dd t-if="state.selected.horizontal_position" t-esc="state.selected.horizontal_position"/>
+                                <dt t-if="state.selected.vertical_position">Posición vertical</dt>
+                                <dd t-if="state.selected.vertical_position" t-esc="state.selected.vertical_position"/>
+                                <dt>Entradas por lote</dt><dd t-esc="state.selected.lot_entries"/>
+                                <dt>Existencia actual</dt><dd t-esc="state.selected.current_stock"/>
+                                <dt>Labels activos</dt><dd t-esc="state.selected.serials"/>
+                                <dt>Contados</dt><dd t-esc="state.selected.counted"/>
+                                <dt>Validados</dt><dd t-esc="state.selected.validated"/>
+                                <dt>Pendientes</dt><dd t-esc="state.selected.pending"/>
+                                <dt t-if="state.selected.batch_id">Documentos de salida</dt>
+                                <dd t-if="state.selected.batch_id" t-esc="state.selected.out_document_count || 0"/>
+                                <dt t-if="state.selected.batch_id">Unidades salidas</dt>
+                                <dd t-if="state.selected.batch_id" t-esc="state.selected.out_done_qty || 0"/>
+                                <dt t-if="state.selected.batch_id">En proceso de salida</dt>
+                                <dd t-if="state.selected.batch_id" t-esc="state.selected.out_pending_qty || 0"/>
+                                <dt t-if="state.selected.is_empty">Capacidad estimada</dt>
+                                <dd t-if="state.selected.is_empty" t-esc="state.selected.capacity || 'Sin definir'"/>
+                                <dt t-if="state.selected.note">Observaciones</dt>
+                                <dd t-if="state.selected.note" t-esc="state.selected.note"/>
+                                <dt>Última sesión</dt><dd t-esc="state.selected.session_name || 'Sin sesión'"/>
+                                <dt>Estado sesión</dt><dd t-esc="state.selected.session_state_label || '—'"/>
+                            </dl>
+                            <section t-if="state.selected.out_documents?.length" class="o_ddwm_document_trace">
+                                <h3>Últimas salidas por documento</h3>
+                                <button t-foreach="state.selected.out_documents" t-as="document"
+                                        t-key="document.id" type="button"
+                                        t-on-click="() => this.openMovementDocument(document)">
+                                    <span><strong t-esc="document.name"/> · <t t-esc="document.state_label"/></span>
+                                    <small><t t-esc="document.quantity"/> label(s) · <t t-esc="document.destination"/></small>
+                                    <small t-esc="document.labels.join(', ')"/>
+                                </button>
+                            </section>
+                            <button t-if="state.selected.batch_id" type="button" class="btn btn-primary w-100" t-on-click="openBatch">Abrir lote</button>
+                            <button t-if="state.selected.batch_id" type="button"
+                                    class="btn btn-outline-danger w-100 mt-2"
+                                    t-on-click="openBatchMovements">Ver movimientos documentados</button>
+                            <button t-if="state.selected.position_id" type="button"
+                                    class="btn btn-outline-secondary w-100 mt-2"
+                                    t-on-click="openPhysicalPosition">Abrir posición física</button>
+                            <button t-if="state.selected.session_id" type="button"
+                                    class="btn btn-outline-primary w-100 mt-2"
+                                    t-on-click="openSession">Abrir sesión de conteo</button>
+                        </t>
+                    </aside>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="terms_and_conditions" name="Términos y condiciones DoorAndDoor">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5 ddwr_legal_page">
+                    <h1>Términos y condiciones</h1>
+                    <p class="lead">Condiciones generales para el uso del portal digital de DoorAndDoor.</p>
+                    <h2>Cuenta del cliente</h2>
+                    <p>El cliente debe proporcionar información verdadera y mantenerla actualizada. Las credenciales son personales y no deben compartirse.</p>
+                    <h2>Solicitudes, cotizaciones y compras</h2>
+                    <p>Los productos, medidas, precios, disponibilidad, instalación y fechas de entrega quedan sujetos a la cotización u orden confirmada por DoorAndDoor.</p>
+                    <h2>Uso permitido</h2>
+                    <p>El portal debe utilizarse exclusivamente para consultar y gestionar relaciones comerciales legítimas con DoorAndDoor.</p>
+                    <h2>Información del portal</h2>
+                    <p>DoorAndDoor procura mantener la información actualizada. Ante una discrepancia, prevalecerán los documentos comerciales formalmente confirmados.</p>
+                    <h2>Contacto</h2>
+                    <p>Las preguntas sobre estas condiciones pueden enviarse mediante la página <a href="/contactus">Contáctanos</a>.</p>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <template id="privacy_policy" name="Política de privacidad DoorAndDoor">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5 ddwr_legal_page">
+                    <h1>Política de privacidad</h1>
+                    <p class="lead">Información sobre el tratamiento de datos en el portal de DoorAndDoor.</p>
+                    <h2>Datos recopilados</h2>
+                    <p>Recopilamos los datos de identificación, contacto, dirección, relación comercial y proyecto que el cliente proporciona al registrarse o actualizar su perfil.</p>
+                    <h2>Finalidad</h2>
+                    <p>Utilizamos estos datos para administrar la cuenta, atender solicitudes, preparar cotizaciones, gestionar compras, facturación, entregas y servicio al cliente.</p>
+                    <h2>Acceso y seguridad</h2>
+                    <p>La cuenta creada es de portal y no concede acceso interno al sistema. Cada cliente puede consultar únicamente la información comercial autorizada para su cuenta.</p>
+                    <h2>Asociación con constructoras</h2>
+                    <p>El nombre de la constructora se declara como texto libre para verificación interna. No publicamos el directorio de constructoras registradas.</p>
+                    <h2>Actualización de datos</h2>
+                    <p>El cliente puede mantener sus datos desde su cuenta. Para otras solicitudes relacionadas con sus datos puede utilizar la página <a href="/contactus">Contáctanos</a>.</p>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

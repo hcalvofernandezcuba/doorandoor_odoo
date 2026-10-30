@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_warehouse_map" model="ir.actions.client">
+        <field name="name">Mapa del almacén</field>
+        <field name="tag">doorandoor_warehouse_map.dashboard</field>
+    </record>
+
+    <record id="view_ddwm_label_locator_form" model="ir.ui.view">
+        <field name="name">doorandoor.label.locator.form</field>
+        <field name="model">doorandoor.label.locator</field>
+        <field name="arch" type="xml">
+            <form string="Localizar labels">
+                <sheet>
+                    <h1>Localizador global de labels</h1>
+                    <p class="text-muted">Consulte un label o pegue varios separados por espacios, comas o líneas.</p>
+                    <group>
+                        <field name="query" placeholder="Ejemplo: 00023504, 00023505"/>
+                        <field name="found_count" readonly="1"/>
+                        <field name="missing_labels" readonly="1" invisible="not missing_labels"/>
+                    </group>
+                    <button name="action_search" type="object" string="Localizar" class="btn-primary" icon="fa-search"/>
+                    <field name="line_ids" nolabel="1" readonly="1">
+                        <list string="Ubicaciones" create="0" delete="0">
+                            <field name="code"/>
+                            <field name="product_id"/>
+                            <field name="status" widget="badge"
+                                   decoration-success="status == 'available'"
+                                   decoration-info="status in ('reserved', 'predispatch')"
+                                   decoration-warning="status in ('transit', 'pending')"
+                                   decoration-muted="status in ('delivered', 'inactive')"/>
+                            <field name="warehouse_id"/>
+                            <field name="batch_id"/>
+                            <field name="position_id"/>
+                            <field name="location_id" optional="show"/>
+                            <field name="picking_id" optional="show"/>
+                            <field name="invoice_id" optional="hide"/>
+                            <field name="reserved_by_id" optional="hide"/>
+                            <field name="reserved_at" optional="hide"/>
+                            <button name="action_open_map" type="object" string="Mapa" icon="fa-map-marker"
+                                    invisible="not warehouse_id or not batch_id"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ddwm_label_locator" model="ir.actions.act_window">
+        <field name="name">Localizar labels</field>
+        <field name="res_model">doorandoor.label.locator</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="view_ddwm_batch_document_movement_list" model="ir.ui.view">
+        <field name="name">doorandoor.batch.document.movement.list</field>
+        <field name="model">doorandoor.batch.document.movement</field>
+        <field name="arch" type="xml">
+            <list string="Trazabilidad documental por lote" create="0" edit="0" delete="0"
+                  default_order="movement_datetime desc">
+                <field name="movement_datetime"/>
+                <field name="warehouse_id"/>
+                <field name="batch_id"/>
+                <field name="serial_code" string="Label"/>
+                <field name="product_id"/>
+                <field name="movement_kind" widget="badge"
+                       decoration-success="movement_kind == 'in'"
+                       decoration-danger="movement_kind == 'out'"/>
+                <field name="picking_id"/>
+                <field name="document_state" widget="badge"
+                       decoration-success="document_state == 'done'"
+                       decoration-info="document_state == 'assigned'"
+                       decoration-muted="document_state == 'cancel'"/>
+                <field name="evidence_kind" widget="badge"
+                       decoration-success="evidence_kind == 'scan'"
+                       decoration-warning="evidence_kind == 'reservation'"/>
+                <field name="quantity" sum="Total unidades"/>
+                <field name="origin" optional="show"/>
+                <field name="operator_id" optional="show"/>
+                <field name="source_warehouse_id" optional="hide"/>
+                <field name="destination_warehouse_id" optional="show"/>
+                <field name="source_location_id" optional="hide"/>
+                <field name="destination_location_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddwm_batch_document_movement_pivot" model="ir.ui.view">
+        <field name="name">doorandoor.batch.document.movement.pivot</field>
+        <field name="model">doorandoor.batch.document.movement</field>
+        <field name="arch" type="xml">
+            <pivot string="Unidades documentadas por lote" disable_linking="0">
+                <field name="warehouse_id" type="row"/>
+                <field name="batch_id" type="row"/>
+                <field name="picking_id" type="row"/>
+                <field name="movement_datetime" type="col" interval="day"/>
+                <field name="quantity" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_ddwm_batch_document_movement_search" model="ir.ui.view">
+        <field name="name">doorandoor.batch.document.movement.search</field>
+        <field name="model">doorandoor.batch.document.movement</field>
+        <field name="arch" type="xml">
+            <search string="Trazabilidad documental por lote">
+                <field name="serial_code"/>
+                <field name="batch_id"/>
+                <field name="product_id"/>
+                <field name="picking_id"/>
+                <field name="warehouse_id"/>
+                <field name="origin"/>
+                <filter string="Entradas" name="movement_in" domain="[('movement_kind','=','in')]"/>
+                <filter string="Salidas" name="movement_out" domain="[('movement_kind','=','out')]"/>
+                <filter string="Completadas" name="document_done" domain="[('document_state','=','done')]"/>
+                <filter string="En proceso" name="document_open" domain="[('document_state','not in',('done','cancel'))]"/>
+                <filter string="Leídas con Hanger" name="evidence_scan" domain="[('evidence_kind','=','scan')]"/>
+                <separator/>
+                <filter string="Almacén" name="group_warehouse" context="{'group_by':'warehouse_id'}"/>
+                <filter string="Lote" name="group_batch" context="{'group_by':'batch_id'}"/>
+                <filter string="Documento" name="group_document" context="{'group_by':'picking_id'}"/>
+                <filter string="Estado" name="group_state" context="{'group_by':'document_state'}"/>
+                <filter string="Día" name="group_day" context="{'group_by':'movement_datetime:day'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddwm_batch_document_movement" model="ir.actions.act_window">
+        <field name="name">Trazabilidad documental por lote</field>
+        <field name="res_model">doorandoor.batch.document.movement</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="search_view_id" ref="view_ddwm_batch_document_movement_search"/>
+        <field name="context">{'search_default_movement_out': 1, 'search_default_group_batch': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No existen labels vinculados a documentos para estos filtros.</p>
+            <p>La vista conserva el lote físico leído, el label, el documento, el estado y su destino.</p>
+        </field>
+    </record>
+
+    <record id="view_inventory_serial_batch_document_trace" model="ir.ui.view">
+        <field name="name">inventory.serial.label.batch.document.trace</field>
+        <field name="model">inventory.serial.label.batch</field>
+        <field name="inherit_id" ref="doorandoor_inventory_variant_count.view_inventory_serial_batch_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_ddwm_open_document_movements" type="object"
+                            class="oe_stat_button" icon="fa-truck">
+                        <field name="ddwm_out_document_count" widget="statinfo" string="Documentos de salida"/>
+                    </button>
+                </div>
+            </xpath>
+            <field name="pending_serial_count" position="after">
+                <field name="ddwm_out_done_qty"/>
+                <field name="ddwm_out_pending_qty"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_ddwm_position_list" model="ir.ui.view">
+        <field name="name">doorandoor.warehouse.map.position.list</field>
+        <field name="model">doorandoor.warehouse.map.position</field>
+        <field name="arch" type="xml">
+            <list string="Estructura física" editable="bottom" multi_edit="1" open_form_view="1"
+                  default_order="warehouse_id, aisle, horizontal_position, vertical_position desc, side, slot_number">
+                <field name="warehouse_id"/>
+                <field name="warehouse_prefix" optional="show"/>
+                <field name="aisle"/>
+                <field name="horizontal_position"/>
+                <field name="vertical_position"/>
+                <field name="side"/>
+                <field name="slot_number"/>
+                <field name="custom_suffix" optional="hide"/>
+                <field name="name" readonly="1"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'available'"
+                       decoration-info="status == 'reserved'"
+                       decoration-danger="status == 'blocked'"
+                       decoration-warning="status == 'maintenance'"/>
+                <field name="capacity" optional="show" readonly="1"/>
+                <field name="note" optional="hide"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddwm_position_form" model="ir.ui.view">
+        <field name="name">doorandoor.warehouse.map.position.form</field>
+        <field name="model">doorandoor.warehouse.map.position</field>
+        <field name="arch" type="xml">
+            <form string="Posición física">
+                <sheet>
+                    <div class="oe_title"><label for="name"/><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group string="Ubicación">
+                            <field name="warehouse_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   readonly="context.get('ddwm_receipt_position_create') or context.get('ddwm_batch_position_create')"/>
+                            <field name="warehouse_prefix"/>
+                            <field name="aisle"/>
+                            <field name="horizontal_position"/>
+                            <field name="vertical_position"/>
+                        </group>
+                        <group string="Espacio">
+                            <field name="side"/>
+                            <field name="slot_number" invisible="side == 'C'"/>
+                            <field name="custom_suffix" invisible="side != 'C'"/>
+                            <field name="status"/>
+                            <field name="capacity" readonly="1"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group><field name="note" placeholder="Uso previsto, restricciones o referencia física…"/></group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ddwm_position_search" model="ir.ui.view">
+        <field name="name">doorandoor.warehouse.map.position.search</field>
+        <field name="model">doorandoor.warehouse.map.position</field>
+        <field name="arch" type="xml">
+            <search string="Estructura física">
+                <field name="name"/>
+                <field name="warehouse_id"/>
+                <field name="aisle"/>
+                <field name="horizontal_position"/>
+                <filter string="Disponibles" name="available" domain="[('status','=','available')]"/>
+                <filter string="Reservados" name="reserved" domain="[('status','=','reserved')]"/>
+                <filter string="Bloqueados" name="blocked" domain="[('status','in',('blocked','maintenance'))]"/>
+                <separator/>
+                <filter string="Almacén" name="group_warehouse" context="{'group_by':'warehouse_id'}"/>
+                <filter string="Pasillo" name="group_aisle" context="{'group_by':'aisle'}"/>
+                <filter string="Horizontal" name="group_horizontal" context="{'group_by':'horizontal_position'}"/>
+                <filter string="Estado" name="group_status" context="{'group_by':'status'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddwm_position" model="ir.actions.act_window">
+        <field name="name">Configuración física</field>
+        <field name="res_model">doorandoor.warehouse.map.position</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_ddwm_position_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Defina aquí todos los espacios físicos, incluso los que todavía están vacíos.</p></field>
+    </record>
+
+    <record id="view_ddwm_warehouse_conditions_list" model="ir.ui.view">
+        <field name="name">stock.warehouse.ddwm.conditions.list</field>
+        <field name="model">stock.warehouse</field>
+        <field name="arch" type="xml">
+            <list string="Condiciones físicas por almacén" editable="bottom" create="0" delete="0">
+                <field name="name" readonly="1"/>
+                <field name="code" readonly="1"/>
+                <field name="ddwm_vertical_level_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_ddwm_warehouse_conditions" model="ir.actions.act_window">
+        <field name="name">Condiciones del almacén</field>
+        <field name="res_model">stock.warehouse</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_ddwm_warehouse_conditions_list"/>
+        <field name="help" type="html"><p>Indique la cantidad real de niveles verticales de cada almacén. El mapa mostrará como Vacío cualquier nivel todavía no ocupado.</p></field>
+    </record>
+
+    <record id="view_ddwm_stock_movement_analysis_list" model="ir.ui.view">
+        <field name="name">doorandoor.stock.movement.analysis.list</field>
+        <field name="model">doorandoor.stock.movement.analysis</field>
+        <field name="arch" type="xml">
+            <list string="Análisis de movimientos por ITEM" create="0" edit="0" delete="0"
+                  default_order="movement_datetime desc">
+                <field name="movement_datetime"/>
+                <field name="warehouse_id"/>
+                <field name="aisle"/>
+                <field name="positions" optional="show"/>
+                <field name="product_id"/>
+                <field name="current_stock" sum="Existencia actual"/>
+                <field name="quantity_in" sum="Total entradas"
+                       decoration-success="quantity_in &gt; 0"/>
+                <field name="quantity_out" sum="Total salidas"
+                       decoration-danger="quantity_out &gt; 0"/>
+                <field name="net_quantity" sum="Movimiento neto"/>
+                <field name="movement_kind" widget="badge"
+                       decoration-success="movement_kind == 'in'"
+                       decoration-danger="movement_kind == 'out'"/>
+                <field name="picking_id"/>
+                <field name="stock_move_id" optional="hide"/>
+                <field name="picking_type_id" optional="show"/>
+                <field name="origin" optional="show"/>
+                <field name="operator_id" optional="show"/>
+                <field name="source_location_id" optional="hide"/>
+                <field name="destination_location_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ddwm_stock_movement_analysis_pivot" model="ir.ui.view">
+        <field name="name">doorandoor.stock.movement.analysis.pivot</field>
+        <field name="model">doorandoor.stock.movement.analysis</field>
+        <field name="arch" type="xml">
+            <pivot string="Movimientos diarios por ITEM" disable_linking="0">
+                <field name="warehouse_id" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="movement_date" type="col" interval="day"/>
+                <field name="quantity_in" type="measure"/>
+                <field name="quantity_out" type="measure"/>
+                <field name="net_quantity" type="measure"/>
+                <field name="current_stock" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_ddwm_stock_movement_analysis_graph" model="ir.ui.view">
+        <field name="name">doorandoor.stock.movement.analysis.graph</field>
+        <field name="model">doorandoor.stock.movement.analysis</field>
+        <field name="arch" type="xml">
+            <graph string="Entradas y salidas diarias" type="bar" stacked="1">
+                <field name="movement_date" interval="day"/>
+                <field name="quantity_in" type="measure"/>
+                <field name="quantity_out" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_ddwm_stock_movement_analysis_search" model="ir.ui.view">
+        <field name="name">doorandoor.stock.movement.analysis.search</field>
+        <field name="model">doorandoor.stock.movement.analysis</field>
+        <field name="arch" type="xml">
+            <search string="Analizar existencias y movimientos">
+                <field name="product_id"/>
+                <field name="warehouse_id"/>
+                <field name="aisle"/>
+                <field name="positions"/>
+                <field name="movement_date"/>
+                <field name="picking_id"/>
+                <field name="origin"/>
+                <field name="operator_id"/>
+                <filter string="Entradas" name="movement_in" domain="[('movement_kind','=','in')]"/>
+                <filter string="Salidas" name="movement_out" domain="[('movement_kind','=','out')]"/>
+                <separator/>
+                <filter string="Hoy" name="today"
+                        domain="[('movement_date','=',context_today())]"/>
+                <filter string="Últimos 7 días" name="last_7_days"
+                        domain="[('movement_date','&gt;=',(context_today() - relativedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Últimos 30 días" name="last_30_days"
+                        domain="[('movement_date','&gt;=',(context_today() - relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Almacén" name="group_warehouse" context="{'group_by':'warehouse_id'}"/>
+                <filter string="Pasillo" name="group_aisle" context="{'group_by':'aisle'}"/>
+                <filter string="ITEM" name="group_product" context="{'group_by':'product_id'}"/>
+                <filter string="Día" name="group_day" context="{'group_by':'movement_date:day'}"/>
+                <filter string="Tipo de operación" name="group_operation_type" context="{'group_by':'picking_type_id'}"/>
+                <filter string="Operador" name="group_operator" context="{'group_by':'operator_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ddwm_stock_movement_analysis" model="ir.actions.act_window">
+        <field name="name">Análisis de existencias y movimientos</field>
+        <field name="res_model">doorandoor.stock.movement.analysis</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_ddwm_stock_movement_analysis_search"/>
+        <field name="context">{'search_default_last_30_days': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No existen movimientos terminados para los filtros seleccionados.</p>
+            <p>La existencia actual procede de los labels activos. Los movimientos muestran las operaciones terminadas que generaron entradas y salidas.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_warehouse_map"
+              name="Mapa del almacén"
+              parent="doorandoor_inventory_variant_count.menu_inventory_count_root"
+              action="action_warehouse_map"
+              sequence="45"
+              groups="doorandoor_inventory_variant_count.group_inventory_count_user"/>
+
+    <menuitem id="menu_ddwm_label_locator"
+              name="Localizar labels"
+              parent="doorandoor_inventory_variant_count.menu_inventory_count_root"
+              action="action_ddwm_label_locator"
+              sequence="44"
+              groups="doorandoor_inventory_variant_count.group_inventory_count_user"/>
+
+    <menuitem id="menu_ddwm_stock_movement_analysis"
+              name="Análisis de movimientos"
+              parent="doorandoor_inventory_variant_count.menu_inventory_count_root"
+              action="action_ddwm_stock_movement_analysis"
+              sequence="46"
+              groups="doorandoor_inventory_variant_count.group_inventory_count_manager,doorandoor_mobile_hanger.group_ddmh_supervisor,base.group_system"/>
+
+    <menuitem id="menu_ddwm_batch_document_movement"
+              name="Trazabilidad por lote"
+              parent="doorandoor_inventory_variant_count.menu_inventory_count_root"
+              action="action_ddwm_batch_document_movement"
+              sequence="47"
+              groups="doorandoor_inventory_variant_count.group_inventory_count_user"/>
+
+    <menuitem id="menu_warehouse_map_configuration"
+              name="Configuración física"
+              parent="doorandoor_inventory_variant_count.menu_inventory_count_root"
+              action="action_ddwm_position"
+              sequence="47"
+              groups="doorandoor_inventory_variant_count.group_inventory_count_manager,base.group_system"/>
+
+    <menuitem id="menu_warehouse_map_conditions"
+              name="Condiciones del almacén"
+              parent="doorandoor_inventory_variant_count.menu_inventory_count_root"
+              action="action_ddwm_warehouse_conditions"
+              sequence="48"
+              groups="doorandoor_inventory_variant_count.group_inventory_count_manager,base.group_system"/>
+</odoo>

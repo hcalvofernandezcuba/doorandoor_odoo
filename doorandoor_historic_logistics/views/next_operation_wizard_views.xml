@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_historic_next_operation_wizard_form" model="ir.ui.view">
+        <field name="name">doorandoor.historic.next.operation.wizard.form</field>
+        <field name="model">doorandoor.historic.next.operation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Crear siguiente operación">
+                <div class="alert alert-info" role="alert">
+                    Los productos y cantidades se copian automáticamente desde la factura histórica y su recepción confirmada. No vuelva a agregarlos.
+                </div>
+                <group>
+                    <field name="historical_delivery_id" invisible="not historical_delivery_id"/>
+                    <field name="available_source_operation_ids" invisible="1"/>
+                    <field name="source_operation_id" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="operation_kind" widget="radio"/>
+                    <field name="source_warehouse_id"/>
+                    <field name="destination_warehouse_id"
+                           options="{'no_create': True, 'no_open': True}"
+                           invisible="operation_kind != 'internal'"
+                           required="operation_kind == 'internal'"/>
+                    <field name="destination_location_id"
+                           options="{'no_create': True, 'no_open': True}"
+                           invisible="operation_kind != 'internal'"
+                           required="operation_kind == 'internal'"/>
+                    <field name="partner_id" invisible="operation_kind != 'delivery'"
+                           required="operation_kind == 'delivery'"
+                           options="{'no_create': True}"/>
+                    <field name="line_summary" nolabel="1" readonly="1"/>
+                </group>
+                <footer>
+                    <button name="action_create_operation" type="object"
+                            string="Crear y enlazar" class="btn-primary"
+                            confirm="Se creará la siguiente operación con los mismos productos y cantidades de la factura histórica. ¿Desea continuar?"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

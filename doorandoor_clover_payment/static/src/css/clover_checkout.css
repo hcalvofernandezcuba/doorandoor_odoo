@@ -1,0 +1,13 @@
+.ddcl-checkout { max-width: 620px; margin: 0 auto; padding: 3rem 1rem; font-family: Arial, sans-serif; color: #1f2937; }
+.ddcl-checkout .card { background: #fff; border: 1px solid #d8dee6; border-radius: .5rem; box-shadow: 0 .25rem 1rem rgba(15, 35, 60, .12); }
+.ddcl-checkout .card-body { padding: 2rem; }
+.ddcl-checkout .text-muted { color: #667085; }
+.ddcl-checkout .alert { padding: .8rem 1rem; border-radius: .25rem; background: #e8f4fb; color: #124d68; }
+.ddcl-card-error:empty { display: none; }
+.ddcl-card-error { padding: .85rem 1rem; border: 1px solid #dc3545; border-radius: .25rem; background: #f8d7da; color: #842029; font-weight: 600; }
+.ddcl-checkout .form-label { display: block; margin-top: 1rem; margin-bottom: .35rem; font-weight: 600; }
+.ddcl-card-field { box-sizing: border-box; height: 46px; min-height: 46px; max-height: 46px; padding: 11px 10px; overflow: hidden; border: 1px solid #ced4da; border-radius: .25rem; background: #fff; }
+.ddcl-card-field iframe { display: block; box-sizing: border-box; width: 100% !important; height: 22px !important; min-height: 22px !important; max-height: 22px !important; border: 0; }
+.ddcl-checkout .btn { display: inline-block; padding: .65rem 1rem; border: 1px solid transparent; border-radius: .25rem; font-size: 1rem; text-decoration: none; cursor: pointer; }
+.ddcl-checkout .btn-primary { color: #fff; background: #0e8c55; border-color: #0e8c55; }
+.ddcl-checkout .btn-secondary { color: #fff; background: #667085; border-color: #667085; }

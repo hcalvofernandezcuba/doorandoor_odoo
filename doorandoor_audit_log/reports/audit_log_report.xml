@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_audit_log_letter_landscape" model="report.paperformat">
+        <field name="name">Auditoría DoorAndDoor - Letter horizontal</field>
+        <field name="default" eval="False"/>
+        <field name="format">Letter</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">8</field>
+        <field name="margin_right">8</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">8</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_audit_log" model="ir.actions.report">
+        <field name="name">Reporte de auditoría</field>
+        <field name="model">doorandoor.audit.log</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">doorandoor_audit_log.report_audit_log_document</field>
+        <field name="report_file">doorandoor_audit_log.report_audit_log_document</field>
+        <field name="binding_model_id" ref="model_doorandoor_audit_log"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_audit_log_letter_landscape"/>
+        <field name="print_report_name">'Auditoria_DoorAndDoor_%s' % (time.strftime('%Y%m%d_%H%M'))</field>
+    </record>
+
+    <template id="report_audit_log_document">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2 style="color:#0b3558; margin-bottom:4px;">REPORTE DE AUDITORÍA</h2>
+                    <div style="border-top:4px solid #efbd22; margin-bottom:12px;"/>
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Empresa:</strong> <span t-esc="env.company.display_name"/></div>
+                        <div class="col-6 text-end"><strong>Generado:</strong> <span t-esc="time.strftime('%Y-%m-%d %H:%M')"/></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6"><strong>Generado por:</strong> <span t-esc="env.user.display_name"/></div>
+                        <div class="col-6 text-end"><strong>Total de trazas:</strong> <span t-esc="len(docs)"/></div>
+                    </div>
+                    <table class="table table-sm table-bordered" style="font-size:9px; width:100%;">
+                        <thead style="background:#0b3558; color:white;">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Operación</th>
+                                <th>Modelo / Documento</th>
+                                <th>Campo</th>
+                                <th>Valor anterior</th>
+                                <th>Valor nuevo</th>
+                                <th>Origen / IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="docs" t-as="log">
+                                <td><span t-field="log.event_date"/></td>
+                                <td><span t-esc="log.user_id.display_name"/></td>
+                                <td><span t-esc="dict(log._fields['operation'].selection).get(log.operation)"/></td>
+                                <td>
+                                    <span t-esc="log.model_label or log.model_name"/><br/>
+                                    <span t-esc="log.record_name or ('#%s' % log.record_id)"/>
+                                </td>
+                                <td><span t-esc="log.field_label or log.field_name"/></td>
+                                <td style="word-break:break-word;"><span t-esc="log.old_value"/></td>
+                                <td style="word-break:break-word;"><span t-esc="log.new_value"/></td>
+                                <td>
+                                    <span t-esc="dict(log._fields['source'].selection).get(log.source)"/><br/>
+                                    <span t-esc="log.remote_ip or ''"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size:8px; color:#666; margin-top:10px;">
+                        Documento generado desde trazas inmutables. La ausencia de una traza anterior a la instalación
+                        del módulo no demuestra que el dato nunca haya sido modificado.
+                    </p>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

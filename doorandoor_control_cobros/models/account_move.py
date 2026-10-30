@@ -283,11 +283,24 @@ class AccountMove(models.Model):
         if partner.ddc_advance_account_id:
             return partner.ddc_advance_account_id
         accounts = self.env["account.account"].sudo().with_company(self.company_id).search(
-            [("code", "=like", "1200__"), ("company_ids", "in", self.company_id.id)]
+            [("code", "=like", "120%"), ("company_ids", "in", self.company_id.id)]
         )
         used_codes = {account.code for account in accounts if (account.code or "").isdigit()}
-        next_number = max([int(code) for code in used_codes] + [120000]) + 1
-        while str(next_number) in used_codes:
+        six_digit_numbers = [
+            int(code) for code in used_codes
+            if len(code) == 6 and 120000 < int(code) <= 120999
+        ]
+        if max(six_digit_numbers or [120000]) < 120999:
+            next_number = max(six_digit_numbers or [120000]) + 1
+        else:
+            extended_numbers = [
+                int(code) for code in used_codes
+                if len(code) >= 7 and code.startswith("120")
+            ]
+            next_number = max(extended_numbers or [1200000]) + 1
+        while self.env["account.account"].sudo().with_company(self.company_id).search_count(
+            [("code", "=", str(next_number)), ("company_ids", "in", self.company_id.id)]
+        ):
             next_number += 1
         account = self.env["account.account"].sudo().with_company(self.company_id).create(
             {

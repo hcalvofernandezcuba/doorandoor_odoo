@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_ddhd_summary" model="report.paperformat">
+        <field name="name">Soporte resumido horizontal</field><field name="format">Letter</field>
+        <field name="orientation">Landscape</field><field name="margin_top">12</field><field name="margin_bottom">12</field>
+        <field name="margin_left">8</field><field name="margin_right">8</field><field name="header_line" eval="False"/>
+    </record>
+    <record id="action_report_ddhd_summary" model="ir.actions.report">
+        <field name="name">Reporte resumido de soporte</field><field name="model">doorandoor.helpdesk.summary.report</field>
+        <field name="report_type">qweb-pdf</field><field name="report_name">doorandoor_helpdesk.report_ddhd_summary</field>
+        <field name="report_file">doorandoor_helpdesk.report_ddhd_summary</field><field name="paperformat_id" ref="paperformat_ddhd_summary"/>
+        <field name="print_report_name">'Soporte_%s_%s' % (object.date_from, object.date_to)</field>
+    </record>
+    <template id="report_ddhd_summary">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+            <div class="page">
+                <h2>Resumen de soporte técnico</h2>
+                <p><strong>Período:</strong> <span t-field="o.date_from"/> al <span t-field="o.date_to"/> · <strong>Total:</strong> <span t-esc="o.total_count"/></p>
+                <p class="small">
+                    <strong>Analizado por:</strong> <span t-esc="o._filter_label('date_basis')"/>
+                    · <strong>Estado:</strong> <span t-esc="o._filter_label('state_filter')"/>
+                    · <strong>Área:</strong> <span t-esc="o._filter_label('affected_area_filter')"/>
+                    <t t-if="o.assigned_user_ids"> · <strong>Técnicos:</strong> <span t-esc="', '.join(o.assigned_user_ids.mapped('display_name'))"/></t>
+                    <t t-if="o.requester_ids"> · <strong>Solicitantes:</strong> <span t-esc="', '.join(o.requester_ids.mapped('display_name'))"/></t>
+                </p>
+                <table class="table table-sm table-bordered text-center">
+                    <thead><tr><th>Nuevos</th><th>En análisis</th><th>En espera</th><th>Resueltos</th><th>Cerrados</th><th>Cancelados</th></tr></thead>
+                    <tbody><tr><td><span t-esc="o.new_count"/></td><td><span t-esc="o.analysis_count"/></td><td><span t-esc="o.waiting_count"/></td><td><span t-esc="o.resolved_count"/></td><td><span t-esc="o.closed_count"/></td><td><span t-esc="o.cancelled_count"/></td></tr></tbody>
+                </table>
+                <h3>Tickets</h3>
+                <table class="table table-sm table-striped">
+                    <thead><tr><th>Creado</th><th>Solución</th><th>Ticket</th><th>Incidencia</th><th>Origen</th><th>Área</th><th>Técnico</th><th>Estado</th><th>Horas</th><th>Eficiencia</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="o.ticket_ids" t-as="ticket">
+                            <td><span t-field="ticket.create_date" t-options="{'widget':'datetime','format':'MM/dd/yyyy'}"/></td>
+                            <td><span t-if="ticket.resolved_at" t-field="ticket.resolved_at" t-options="{'widget':'datetime','format':'MM/dd/yyyy HH:mm'}"/><span t-else="">—</span></td>
+                            <td><strong t-field="ticket.name"/></td><td><span t-field="ticket.title"/></td>
+                            <td><span t-field="ticket.requester_id"/></td><td><span t-field="ticket.affected_area"/></td>
+                            <td><span t-field="ticket.assigned_user_id"/></td><td><span t-field="ticket.state"/></td>
+                            <td class="text-end"><span t-if="o._resolution_hours(ticket) is not False" t-esc="'%.1f' % o._resolution_hours(ticket)"/><span t-else="">—</span></td>
+                            <td><span t-if="ticket.solution_efficiency" t-field="ticket.solution_efficiency"/><span t-else="">—</span></td>
+                        </tr>
+                        <tr t-if="not o.ticket_ids"><td colspan="10" class="text-center">No hay tickets en el período.</td></tr>
+                    </tbody>
+                </table>
+                <h3>Soluciones por técnico</h3>
+                <table class="table table-sm table-bordered">
+                    <thead><tr><th>Técnico</th><th>Total asignado</th><th>Resueltos</th><th>Cerrados</th><th>Abiertos</th></tr></thead>
+                    <tbody><tr t-foreach="o._technician_summary()" t-as="row"><td><span t-esc="row['name']"/></td><td><span t-esc="row['total']"/></td><td><span t-esc="row['resolved']"/></td><td><span t-esc="row['closed']"/></td><td><span t-esc="row['open']"/></td></tr></tbody>
+                </table>
+            </div>
+        </t></t></t>
+    </template>
+</odoo>

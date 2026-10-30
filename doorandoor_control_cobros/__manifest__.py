@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Control de Cobros",
-    "version": "18.0.2.8.0",
+    "version": "18.0.2.13.0",
     "category": "Accounting",
-    "summary": "18.0.2.8.0 - Cobra y concilia deudas de crédito autorizado por cliente",
+    "summary": "18.0.2.13.0 - Reporte analítico de ingresos diarios por método y unidad",
     "description": """
 DoorAndDoor Control de Cobros
 =============================
@@ -20,6 +20,97 @@ Reglas iniciales
 
 Historial resumido
 ------------------
+
+- 18.0.2.13.0
+  Agrega el reporte analítico de ingresos diarios basado exclusivamente en
+  controles validados, aunque el asiento aún figure en proceso de pago.
+  Permite agrupar por fecha, método de pago y unidad
+  comercial, consultar cliente y comercial de la venta, y obtener el total
+  general en moneda de la compañía sin mezclar controles pendientes o
+  rechazados.
+
+- 18.0.2.12.3
+  Invalida la caché del residual después de conciliar la factura y antes de
+  evaluar un posible crédito abierto. Impide trasladar a anticipos un importe
+  que ya fue aplicado completamente a la cuenta por cobrar.
+
+- 18.0.2.12.2
+  Reconoce el saldo contable de cobros en la moneda de la compañía aunque la
+  línea no tenga residual de moneda extranjera. Evita trasladar a anticipos un
+  pago en efectivo que debe reducir directamente la factura asociada.
+
+- 18.0.2.12.1
+  Evita crear subcuentas de anticipos cuando un pago no deja crédito sobrante.
+  El consecutivo considera toda la familia 120xxx, continúa después de 120100
+  y puede crecer a siete dígitos sin invadir la serie 121xxx ni duplicar códigos.
+  Los reportes de crédito reconocen tanto la numeración actual como la ampliada.
+
+- 18.0.2.12.0
+  Unifica impresión PDF y envío por correo en RC, estados por cliente, reportes
+  filtrados de pagos, créditos autorizados y controles individuales. Los PDF se
+  adjuntan al compositor para revisar destinatarios y texto antes del envío.
+
+- 18.0.2.11.6
+  Agrega al asistente la acción Generar e imprimir PDF para abrir directamente
+  el estado de pagos o RC imprimible, manteniendo una opción separada para
+  generar y revisar el documento antes de imprimirlo o enviarlo por correo.
+
+- 18.0.2.11.5
+  Separa el RC simple por factura del estado detallado por cliente. El estado
+  relaciona pagos con sus facturas y totales y dispone de una entrada de menú
+  explícita en Reportes para facilitar su localización.
+
+- 18.0.2.11.4
+  Cuando una factura tiene varios pagos, el RC muestra una relación compacta
+  con fecha, pago, referencia e importe de cada uno. Con un solo pago conserva
+  únicamente la factura asociada y el total pagado.
+
+- 18.0.2.11.3
+  Simplifica el PDF del RC como comprobante del proceso de pago: conserva el
+  cliente y la factura asociada y muestra solamente el total pagado. Productos,
+  impuestos, Clover y demás desglose permanecen exclusivamente en la factura.
+
+- 18.0.2.11.2
+  Compacta el PDF del recibo a una sola hoja: elimina el detalle de pagos y
+  aplicaciones y presenta únicamente el total pagado. La trazabilidad completa
+  permanece almacenada y visible internamente en Odoo.
+
+- 18.0.2.11.1
+  Elimina del PDF del recibo la tabla duplicada de productos, cantidades,
+  precios y descuentos. Conserva el resumen fiscal, cada impuesto, el total de
+  factura, el cargo Clover separado y el total contable cobrado.
+
+- 18.0.2.11.0
+  Conserva en el recibo por factura una fotografía inmutable de productos,
+  cantidades, precios, descuentos, impuestos y bases fiscales. El PDF presenta
+  el mismo desglose comercial de la factura y muestra el cargo Clover separado
+  de impuestos y del total facturado.
+
+- 18.0.2.10.3
+  Permite al usuario autorizado crear las líneas exclusivamente durante la
+  emisión controlada del recibo. La validación de servidor continúa bloqueando
+  creaciones manuales, ediciones y eliminaciones posteriores.
+
+- 18.0.2.10.2
+  Restringe la creación al asistente controlado y vuelve inmutables el recibo y
+  sus aplicaciones después de emitirlos. Ningún perfil puede borrar recibos;
+  una corrección requiere generar un nuevo documento trazable.
+
+- 18.0.2.10.1
+  Separa el total comercial de la factura, los cargos o fees y el total
+  contable conciliado. Normaliza los importes a la moneda del recibo para que
+  pagos multimoneda no se sumen como si pertenecieran a una misma divisa.
+
+- 18.0.2.10.0
+  Incorpora recibos numerados por factura y estados de pagos por cliente desde
+  conciliaciones contables reales. Separa pagos, notas de crédito y saldos sin
+  aplicar; conserva una fotografía auditable, permite imprimir PDF o preparar
+  el envío por correo y registra la emisión en el chatter.
+
+- 18.0.2.9.0
+  Los diarios controlados como Zelle muestran y reportan el importe acordado
+  del primer pago parcial. Despues de conciliarlo, los cobros siguientes usan
+  exclusivamente el saldo residual real de la factura.
 
 - 18.0.2.8.0
   Permite seleccionar una deuda abierta de credito autorizado al registrar un
@@ -464,11 +555,13 @@ Historial resumido
         "mail",
         "account",
         "doorandoor_sales_new",
+        "doorandoor_commercial_office_tax",
     ],
     "data": [
         "security/control_cobros_security.xml",
         "security/ir.model.access.csv",
         "views/control_cobros_views.xml",
+        "views/daily_income_report_views.xml",
         "views/account_journal_views.xml",
         "views/account_payment_views.xml",
         "views/account_payment_register_views.xml",
@@ -479,10 +572,12 @@ Historial resumido
         "views/cobro_report_wizard_views.xml",
         "views/cobro_match_wizard_views.xml",
         "views/cobro_report_pdf.xml",
+        "views/payment_receipt_views.xml",
+        "views/payment_receipt_report.xml",
         "views/authorized_credit_report.xml",
         "views/customer_credit_views.xml",
-        "views/menu_views.xml",
         "views/credit_authorization_views.xml",
+        "views/menu_views.xml",
     ],
     "assets": {
         "web.assets_backend": [

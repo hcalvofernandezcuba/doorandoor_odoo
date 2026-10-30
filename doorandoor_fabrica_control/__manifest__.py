@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     "name": "DoorAndDoor Fabrica Control",
-    "version": "18.0.1.5.1",
+    "version": "18.0.1.6.2",
     "category": "Manufacturing",
-    "summary": "18.0.1.5.1 - Instalación limpia segura del control de planificación",
+    "summary": "18.0.1.6.2 - Muestra el Slab en los componentes de la familia Prehung",
     "description": """
 DoorAndDoor Fabrica Control
 ===========================
@@ -20,6 +20,34 @@ y reposicion del stock vendido por cada almacen.
 
 Historial de desarrollo
 -----------------------
+
+18.0.1.6.2 - Slab visible en la familia Prehung
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Muestra el Slab junto a Jamb y bisagras dentro de la pestaña de componentes.
+- Expone cantidad, tipo y política de label del Slab sin convertirlo en una
+  regla fija, porque la variante exacta se resuelve por atributos.
+- Conserva una sola línea Slab en la LdM generada y evita duplicar componentes.
+
+18.0.1.6.1 - Clasificación visible de LdM
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Añade una clasificación única y filtros sobre la vista nativa de LdM para
+  separar productos especiales, Prehung estándar y producción para stock.
+- Reconoce automáticamente las LdM especiales y las generadas por familias
+  Prehung; las recetas normales pueden marcarse explícitamente para stock.
+- No duplica recetas ni altera las LdM especiales existentes.
+
+18.0.1.6.0 - LdM configurables Prehung
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Configura recetas por familia y genera una LdM nativa únicamente cuando se
+  necesita una variante Prehung concreta.
+- Resuelve un Slab único por atributos y selecciona Jamb y bisagras mediante
+  reglas explícitas, bloqueando faltantes y ambigüedades.
+- Exige labels únicos para Slab y Jamb y label compartido para bisagras.
+- Se limita a resolver componentes: reutiliza las solicitudes, transferencias,
+  etapas y entradas de terminados ya controladas por los módulos existentes.
 
 18.0.1.5.1 - Instalación limpia segura
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -224,6 +252,8 @@ Historial de desarrollo
         "doorandoor_control_cobros",
         "doorandoor_produccion_almacen",
         "doorandoor_process_control",
+        "doorandoor_inventory_variant_count",
+        "doorandoor_special_products",
     ],
     "data": [
         "security/ir.model.access.csv",
@@ -232,6 +262,7 @@ Historial de desarrollo
         "views/machining_handoff_views.xml",
         "views/mrp_production_views.xml",
         "views/production_planning_views.xml",
+        "views/configurable_bom_views.xml",
         "report/production_planning_reports.xml",
         "report/machining_handoff_report.xml",
     ],

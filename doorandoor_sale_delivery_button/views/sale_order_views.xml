@@ -17,12 +17,18 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="priority">99</field>
             <field name="arch" type="xml">
+                <!-- The native Odoo button must follow the payment/credit
+                     authorization too; otherwise a pre-existing picking
+                     exposes the delivery operation before it is released. -->
+                <xpath expr="//div[@name='button_box']/button[@name='action_view_delivery']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
                 <xpath expr="//div[@name='button_box']" position="inside">
                     <button name="action_view_delivery"
                             type="object"
                             class="oe_stat_button"
                             icon="fa-truck"
-                            invisible="state not in ('sale', 'done') or not dddb_delivery_enabled"
+                            invisible="1"
                             groups="stock.group_stock_user">
                         <field name="delivery_count" widget="statinfo" string="Entregas"/>
                     </button>
@@ -30,9 +36,9 @@
                             string="Entregas"
                             class="oe_stat_button"
                             icon="fa-truck"
-                            invisible="state not in ('sale', 'done') or dddb_delivery_enabled"
+                            invisible="1"
                             groups="stock.group_stock_user"
-                            help="Disponible solo cuando la factura vinculada este totalmente pagada."
+                            help="Disponible al completar el cobro del PO o validar su crédito; las ventas históricas requieren factura pagada."
                             disabled="1">
                         <div class="o_stat_info">
                             <span class="o_stat_text">Entregas</span>
@@ -59,16 +65,16 @@
                             string="Entregar"
                             class="btn-primary"
                             icon="fa-truck"
-                            invisible="state != 'sale' or not dddb_delivery_enabled"
+                            invisible="1"
                             groups="stock.group_stock_user"
                             help="Navegar al picking de entrega. Si no existe, se creará uno nuevo en el almacén de la compañía."/>
                     <button
                             string="Entregar"
                             class="btn-secondary"
                             icon="fa-truck"
-                            invisible="state != 'sale' or dddb_delivery_enabled"
+                            invisible="1"
                             groups="stock.group_stock_user"
-                            help="Disponible solo cuando la factura vinculada este totalmente pagada."
+                            help="Disponible al completar el cobro del PO o validar su crédito; las ventas históricas requieren factura pagada."
                             disabled="1"/>
                 </xpath>
             </field>

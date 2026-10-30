@@ -162,3 +162,7 @@ class PurchaseOrder(models.Model):
         self.ensure_one()
         picking = self._ddpfw_get_receipt_for_labels()
         return picking.action_open_ddsl_label_wizard()
+
+    def button_confirm(self):
+        self.action_ddpfw_auto_allocate_supply()
+        return super().button_confirm()

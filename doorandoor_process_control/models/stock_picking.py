@@ -12,6 +12,37 @@ _logger = logging.getLogger(__name__)
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    @api.model
+    def default_get(self, fields_list):
+        """Prepare a native internal transfer for an operational decision.
+
+        The Transfers menu must also cover warehouse replenishment decisions
+        that do not originate in sales, manufacturing or another document.
+        Keep the native stock.picking form and only preselect a source when the
+        current user's warehouse scope is unambiguous.
+        """
+        values = super().default_get(fields_list)
+        if not self.env.context.get("ddpc_manual_logistics_transfer"):
+            return values
+        user = self.env.user
+        warehouses = user.ddpc_warehouse_ids
+        source = user.ddpc_default_warehouse_id
+        if source and warehouses and source not in warehouses:
+            source = self.env["stock.warehouse"]
+        if not source and len(warehouses) == 1:
+            source = warehouses
+        if not source:
+            return values
+        if "picking_type_id" in fields_list and source.int_type_id:
+            values["picking_type_id"] = source.int_type_id.id
+        if "location_id" in fields_list and source.lot_stock_id:
+            values["location_id"] = source.lot_stock_id.id
+        if "location_dest_id" in fields_list and source.lot_stock_id:
+            values["location_dest_id"] = source.lot_stock_id.id
+        if "origin" in fields_list:
+            values["origin"] = _("Decisión logística interna")
+        return values
+
     ddpc_process_flow_count = fields.Integer(compute="_compute_ddpc_process_flow_count")
     ddpc_source_warehouse_id = fields.Many2one(
         "stock.warehouse",
@@ -190,6 +221,13 @@ class StockPicking(models.Model):
         result = super().write(vals)
         if {"state", "location_id", "location_dest_id", "picking_type_id"}.intersection(vals):
             self._ddpc_sync_transfer_receipt_alerts(first_notice=False)
+        if "state" in vals and "doorandoor.historical.delivery" in self.env:
+            for picking in self:
+                histories = picking.ddpc_historical_delivery_ids.sudo()
+                if picking.state == "done":
+                    histories.filtered(lambda record: record.state != "done").write({"state": "done"})
+                elif picking.state == "cancel":
+                    histories.filtered(lambda record: record.state != "cancel").write({"state": "cancel"})
         return result
 
     def _ddpc_transfer_alert_users(self):
@@ -538,6 +576,17 @@ class StockPicking(models.Model):
                 'validated_by': self.env.user.display_name,
                 'validation_timestamp': fields.Datetime.now().isoformat()
             })
+            historical = self.env["doorandoor.historical.delivery"].search([
+                ("transfer_dispatch_id", "=", picking.ddpc_transfer_source_picking_id.id),
+                ("state", "=", "transfer_pending"),
+            ])
+            historical._release_after_transfer_receipt(picking)
+
+        for picking in self.filtered(lambda p: p.state == "done"):
+            historical = self.env["doorandoor.historical.delivery"].search([
+                ("picking_id", "=", picking.id), ("state", "=", "ready"),
+            ])
+            historical.write({"state": "done"})
         
         return result
 

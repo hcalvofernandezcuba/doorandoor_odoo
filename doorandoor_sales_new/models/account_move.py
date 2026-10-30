@@ -9,6 +9,110 @@ class AccountMove(models.Model):
     _name = "account.move"
     _inherit = ["account.move", "doorandoor.document.barcode.mixin"]
 
+    ddsn_admin_unrestricted_print = fields.Boolean(
+        string="Impresión administrativa sin restricción",
+        compute="_compute_ddsn_admin_unrestricted_print",
+        help="Permite mostrar e imprimir cualquier documento comercial a "
+             "Administración/Ajustes sin retirar las reglas al resto de usuarios.",
+    )
+
+    @api.depends_context("uid")
+    def _compute_ddsn_admin_unrestricted_print(self):
+        allowed = self.env.user.has_group("base.group_system")
+        for move in self:
+            move.ddsn_admin_unrestricted_print = allowed
+
+    def _ddsn_check_printable_invoice(self):
+        if self.env.user.has_group("base.group_system"):
+            return
+        unconfirmed = self.filtered(
+            lambda move: move.move_type in ("out_invoice", "out_refund")
+            and not move.ddsn_is_preinvoice
+            and move.state != "posted"
+        )
+        if unconfirmed:
+            raise ValidationError(_(
+                "La factura debe estar confirmada antes de imprimirse o enviarse. "
+                "Las prefacturas y borradores no reciben número de factura."
+            ))
+        unpaid = self.filtered(
+            lambda move: move.move_type in ("out_invoice", "out_refund")
+            and not move.ddsn_is_preinvoice
+            and move.state == "posted"
+            and move.payment_state != "paid"
+            and not move._ddsn_has_printable_partial_payment()
+        )
+        if unpaid:
+            move = unpaid[0]
+            validated, _required = move._ddsn_partial_print_amounts()
+            raise ValidationError(_(
+                "La factura solo puede imprimirse o enviarse cuando el pago esté "
+                "completado o exista al menos un cobro real validado. "
+                "Validado: %(validated)s. Puede consultar la "
+                "Vista previa mientras permanezca pendiente."
+            ) % {
+                "validated": move.currency_id.format(validated),
+            })
+
+    def _ddsn_partial_print_amounts(self):
+        """Return validated and former milestone amounts for compatibility.
+
+        The commercial milestone remains useful to payment and fulfillment
+        workflows.  Printing, however, is released by any positive amount
+        validated by Control de Cobros; a merely reported or pending payment
+        never unlocks the official document.
+        """
+        self.ensure_one()
+        validated = getattr(self, "ddc_total_validated", 0.0) or 0.0
+        if self.move_type != "out_invoice":
+            return validated, self.amount_total
+        required = self.currency_id.round(
+            self.amount_untaxed * 0.5 + self.amount_tax
+        )
+        if getattr(self, "ddtp_card_payment_enabled", False):
+            required += getattr(self, "ddtp_card_fee_amount", 0.0) or 0.0
+            required = self.currency_id.round(required)
+        return validated, required
+
+    def _ddsn_has_printable_partial_payment(self):
+        self.ensure_one()
+        validated, _required = self._ddsn_partial_print_amounts()
+        return (
+            self.move_type == "out_invoice"
+            and self.currency_id.compare_amounts(validated, 0.0) > 0
+        )
+
+    def action_ddsn_preview_invoice(self):
+        """Open a non-official HTML preview without generating the PDF output."""
+        self.ensure_one()
+        if self.move_type not in ("out_invoice", "out_refund") or self.state != "posted":
+            raise ValidationError(_("La vista previa está disponible solo para facturas confirmadas."))
+        return {
+            "type": "ir.actions.act_url",
+            "url": "/report/html/account.report_invoice/%s" % self.id,
+            "target": "new",
+        }
+
+    def action_print_pdf(self):
+        self._ddsn_check_printable_invoice()
+        return super().action_print_pdf()
+
+    def action_invoice_sent(self):
+        self._ddsn_check_printable_invoice()
+        return super().action_invoice_sent()
+
+    def action_send_and_print(self):
+        self._ddsn_check_printable_invoice()
+        return super().action_send_and_print()
+
+    def _generate_and_send(self, force_synchronous=True, allow_fallback_pdf=True, **custom_settings):
+        self._ddsn_check_printable_invoice()
+        return super()._generate_and_send(
+            force_synchronous=force_synchronous,
+            allow_fallback_pdf=allow_fallback_pdf,
+            **custom_settings,
+        )
+
     # Explicitly track commercial reassignment on preinvoices and invoices.
     invoice_user_id = fields.Many2one(tracking=True)
 
@@ -57,6 +161,11 @@ class AccountMove(models.Model):
         "account.move",
         string="Factura creada",
         copy=False,
+        readonly=True,
+    )
+    ddsn_po_first_flow = fields.Boolean(
+        string="Flujo PO antes de factura",
+        related="sale_order_id.ddsn_po_first_flow",
         readonly=True,
     )
     ddsn_supply_transfer_ids = fields.One2many(
@@ -380,9 +489,29 @@ class AccountMove(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        return super().create(vals_list)
+        # The fiscal number is a legal, one-way value.  A client-side form may
+        # send ``name`` while the document is still a draft, but that value
+        # must never become the posted invoice number or its sequence prefix.
+        normalized_vals_list = []
+        for vals in vals_list:
+            values = dict(vals)
+            move_type = values.get("move_type") or self.env.context.get("default_move_type")
+            if move_type == "out_invoice":
+                values["name"] = "/"
+                values.pop("sequence_prefix", None)
+                values.pop("sequence_number", None)
+            normalized_vals_list.append(values)
+        return super().create(normalized_vals_list)
 
     def write(self, vals):
+        if (
+            "name" in vals
+            and not self.env.context.get("ddsn_assigning_invoice_sequence")
+            and self.filtered(lambda move: move.move_type == "out_invoice")
+        ):
+            raise ValidationError(_(
+                "El número de una factura es asignado exclusivamente por Odoo al confirmarla y no puede editarse."
+            ))
         previous_salespeople = (
             {move.id: move.invoice_user_id for move in self}
             if "invoice_user_id" in vals
@@ -478,7 +607,9 @@ class AccountMove(models.Model):
                 }
             )
             if move.sale_order_id:
-                move.sale_order_id.write({"ddsn_flow_stage": "preinvoice"})
+                move.sale_order_id.write(
+                    {"ddsn_flow_stage": "preinvoice"}
+                )
         self._ddsn_broadcast_document_update("preinvoice_confirmed")
         return True
 
@@ -507,7 +638,7 @@ class AccountMove(models.Model):
             raise ValidationError(_("La prefactura debe estar confirmada antes de crear la factura."))
         if self.ddsn_created_invoice_id:
             return self.ddsn_created_invoice_id._ddsn_open_as_invoice()
-        invoice = self.copy(
+        invoice = self.with_context(ddsn_automatic_pricing=True).copy(
             default={
                 "name": "/",
                 "state": "draft",
@@ -550,6 +681,22 @@ class AccountMove(models.Model):
         self.ddsn_reservation_expires_at = False
         (self | invoice)._ddsn_broadcast_document_update("invoice_created")
         return invoice._ddsn_open_as_invoice()
+
+    def action_ddsn_print_po(self):
+        self.ensure_one()
+        if not self.ddsn_is_preinvoice or self.ddsn_preinvoice_state != "confirmed":
+            raise ValidationError(_("Confirme la prefactura antes de emitir el PO."))
+        if not self.sale_order_id:
+            raise ValidationError(_("La prefactura no tiene una Orden de Venta vinculada."))
+        return self.sale_order_id.action_ddsn_print_po()
+
+    def action_ddsn_open_po_delivery(self):
+        self.ensure_one()
+        if not self.ddsn_is_preinvoice or not self.ddsn_po_first_flow:
+            raise ValidationError(_("Esta acción corresponde únicamente al flujo PO."))
+        if not self.sale_order_id:
+            raise ValidationError(_("La prefactura no tiene una Orden de Venta vinculada."))
+        return self.sale_order_id.action_open_delivery()
 
     def _ddsn_effective_supply_warehouse(self, line):
         self.ensure_one()
@@ -673,9 +820,13 @@ class AccountMove(models.Model):
                     }
                 )
         if shortages:
-            raise ValidationError(
-                _("No se puede confirmar la prefactura por falta de stock:\n%s")
-                % "\n".join(shortages)
+            self.message_post(
+                body=_(
+                    "La prefactura continúa con faltantes de inventario. "
+                    "Logística deberá abastecer estas cantidades:<br/>%s"
+                )
+                % "<br/>".join(shortages),
+                subtype_xmlid="mail.mt_note",
             )
         return True
 
@@ -704,9 +855,10 @@ class AccountMove(models.Model):
             bucket["lines"].append(line)
             bucket["products"][product] = bucket["products"].get(product, 0.0) + required_qty
 
-        created = self.env["stock.picking"]
+        Picking = self.env["stock.picking"].sudo()
+        created = Picking.browse()
         for source, payload in grouped.items():
-            existing = self.env["stock.picking"].search(
+            existing = Picking.search(
                 [
                     ("ddsn_supply_invoice_id", "=", self.id),
                     ("ddsn_supply_source_warehouse_id", "=", source.id),
@@ -726,13 +878,13 @@ class AccountMove(models.Model):
                     _("El almacén %s no tiene un tipo de operación para traslados internos.")
                     % source.display_name
                 )
-            picking = self.env["stock.picking"].create(
-                {
+            picking_vals = {
                     "picking_type_id": picking_type.id,
                     "location_id": source.lot_stock_id.id,
                     "location_dest_id": target.lot_stock_id.id,
-                    "origin": "%s / %s" % (preinvoice.ddsn_preinvoice_number, self.name or _("Factura borrador")),
+                    "origin": "%s / PO %s" % (preinvoice.ddsn_preinvoice_number, self.sale_order_id.name),
                     "ddsn_supply_invoice_id": self.id,
+                    "ddsn_supply_sale_order_id": self.sale_order_id.id,
                     "ddsn_supply_preinvoice_id": preinvoice.id,
                     "ddsn_supply_source_warehouse_id": source.id,
                     "ddsn_supply_destination_warehouse_id": target.id,
@@ -752,19 +904,20 @@ class AccountMove(models.Model):
                         for product, qty in payload["products"].items()
                     ],
                 }
-            )
+            picking = Picking.create(picking_vals)
             picking.action_confirm()
             picking.action_assign()
             for line in payload["lines"]:
                 line.ddsn_supply_transfer_id = picking.id
             picking.message_post(
                 body=_(
-                    "Traslado solicitado automáticamente por la factura %(invoice)s, "
-                    "originada en la prefactura %(preinvoice)s."
+                    "Traslado solicitado automáticamente por el PO %(po)s desde la "
+                    "prefactura %(preinvoice)s. Usuario solicitante: %(user)s."
                 )
                 % {
-                    "invoice": self.display_name,
+                    "po": self.sale_order_id.name,
                     "preinvoice": preinvoice.ddsn_preinvoice_number,
+                    "user": self.env.user.display_name,
                 },
                 subtype_xmlid="mail.mt_note",
             )
@@ -772,7 +925,12 @@ class AccountMove(models.Model):
         return created
 
     def _ddsn_supply_ready_for_customer_dispatch(self):
-        """Create transfers at full payment and wait for their reception."""
+        """Create transfers at full payment and wait for physical reception.
+
+        A cross-warehouse dispatch being done only means that the merchandise
+        reached transit. The customer delivery must remain blocked until the
+        linked destination receipt is also done.
+        """
         self.ensure_one()
         alternate_lines = self.invoice_line_ids.filtered(
             lambda line: line.product_id
@@ -787,7 +945,23 @@ class AccountMove(models.Model):
         preinvoice = self.ddsn_source_preinvoice_id
         self._ddsn_create_supply_transfers_from_preinvoice(preinvoice)
         transfers = self.ddsn_supply_transfer_ids.filtered(lambda picking: picking.state != "cancel")
-        return bool(transfers) and all(picking.state == "done" for picking in transfers)
+        if not transfers:
+            return False
+        # A receipt validated in this same transaction may still be cached as
+        # ``waiting`` through the dispatch relation.  Refresh both sides before
+        # deciding whether the customer delivery can be released.
+        transfers.invalidate_recordset(["state", "ddpc_transfer_receipt_picking_id"])
+        receipts = transfers.mapped("ddpc_transfer_receipt_picking_id")
+        receipts.invalidate_recordset(["state"])
+        for dispatch in transfers:
+            if dispatch.state != "done":
+                return False
+            if "ddpc_transfer_receipt_picking_id" not in dispatch._fields:
+                continue
+            receipt = dispatch.ddpc_transfer_receipt_picking_id
+            if not receipt or receipt.state != "done":
+                return False
+        return True
 
     def _ddsn_cancel_open_supply_transfers(self):
         open_transfers = self.mapped("ddsn_supply_transfer_ids").filtered(
@@ -926,9 +1100,15 @@ class AccountMove(models.Model):
         # deliberately keeps procurement disabled: delivery is still created
         # only by the fully-paid invoice flow.
         fiscal_invoices.mapped("sale_order_id")._ddsn_confirm_for_fiscal_invoice()
+        # ``create`` and ``write`` already prevent users from injecting an
+        # invoice number in a new draft.  Do not reset ``name`` here: Odoo
+        # intentionally keeps the fiscal number when a posted invoice is
+        # reopened, and that same number must be reused on reposting.  Resetting
+        # every draft to '/' consumed another journal sequence and changed the
+        # identity of corrected, already-paid invoices.
         # Flujo nativo: liberar reserva y confirmar factura de forma estándar
         self.filtered("ddsn_reservation_expires_at").write({"ddsn_reservation_expires_at": False})
-        result = super().action_post()
+        result = super(AccountMove, self.with_context(ddsn_assigning_invoice_sequence=True)).action_post()
         
         # Procesar cumplimiento solo para facturas con orden de venta
         self._ddsn_create_sale_orders_and_fulfillment()
@@ -985,7 +1165,13 @@ class AccountMove(models.Model):
             if pending_qty <= 0:
                 continue
 
-            reservation_warehouse = self.sale_order_id.warehouse_id
+            # This is an aggregate stock calculation over every posted
+            # invoice.  A salesperson restricted to their own quotations must
+            # not fail merely because another seller owns the generated sale
+            # order of one of those invoices.  Read only the warehouse needed
+            # by the calculation with technical privileges; the originating
+            # order itself remains protected by its normal record rules.
+            reservation_warehouse = self.sudo().sale_order_id.warehouse_id
             if warehouse and reservation_warehouse and reservation_warehouse != warehouse:
                 continue
             committed_qty += pending_qty
@@ -1255,6 +1441,18 @@ class AccountMove(models.Model):
 
             total_amount = abs(move.amount_total)
             paid_amount = max(total_amount - abs(move.amount_residual), 0.0)
+            # Operational payment control can validate and release the sale
+            # before the bank/cash entry is finally reconciled in Accounting.
+            # Keep that audited release amount when a later warehouse event
+            # (such as the destination receipt) resumes fulfillment.
+            latest_release = move.payment_release_log_ids.sorted(
+                key=lambda log: log.write_date or log.create_date
+            )[-1:]
+            if latest_release:
+                paid_amount = max(
+                    paid_amount,
+                    min(abs(latest_release.amount_applied), total_amount),
+                )
             currency = move.currency_id
 
             if not total_amount or currency.is_zero(total_amount):
@@ -1270,6 +1468,7 @@ class AccountMove(models.Model):
             if move._ddsn_supply_ready_for_customer_dispatch():
                 move._ddsn_sync_stock_fulfillment_documents()
                 move._ddsn_sync_mrp_fulfillment_documents()
+                move._ddsn_ensure_pickup_orders()
             move._ddsn_set_release_state()
 
     def _ddsn_apply_release_for_amount(self, paid_amount):
@@ -1290,6 +1489,7 @@ class AccountMove(models.Model):
             if move._ddsn_supply_ready_for_customer_dispatch():
                 move._ddsn_sync_stock_fulfillment_documents()
                 move._ddsn_sync_mrp_fulfillment_documents()
+                move._ddsn_ensure_pickup_orders()
             move._ddsn_set_release_state()
 
     def _ddsn_confirm_linked_sales_for_fulfillment(self):
@@ -1455,6 +1655,7 @@ class AccountMove(models.Model):
             picking.action_confirm()
         if picking.state in ("confirmed", "waiting", "assigned"):
             picking.action_assign()
+        self._ddsn_ensure_pickup_orders()
         return picking
 
     def _ddsn_get_or_create_out_picking(self):

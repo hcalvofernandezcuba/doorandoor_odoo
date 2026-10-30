@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ddpa_policy_document_user,Policy document user,model_doorandoor_policy_document,base.group_user,1,0,0,0
+access_ddpa_policy_document_admin,Policy document admin,model_doorandoor_policy_document,base.group_system,1,1,1,0
+access_ddpa_policy_acceptance_sales,Policy acceptance sales,model_doorandoor_policy_acceptance,sales_team.group_sale_salesman,1,0,1,0
+access_ddpa_policy_acceptance_account,Policy acceptance account,model_doorandoor_policy_acceptance,account.group_account_invoice,1,0,1,0
+access_ddpa_policy_acceptance_admin,Policy acceptance admin,model_doorandoor_policy_acceptance,base.group_system,1,1,1,0

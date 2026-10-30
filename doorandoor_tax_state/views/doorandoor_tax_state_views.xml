@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="view_partner_form_doorandoor_tax_exemption" model="ir.ui.view">
+        <field name="name">res.partner.form.doorandoor.tax.exemption</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook/page[1]" position="after">
+                <page string="Impuestos" name="ddts_partner_taxes">
+                    <group>
+                        <group string="Exención fiscal">
+                            <field name="ddts_tax_exempt"
+                                   groups="account.group_account_user,base.group_system"/>
+                            <field name="ddts_tax_exemption_number"
+                                   required="ddts_tax_exempt"
+                                   invisible="not ddts_tax_exempt"
+                                   placeholder="Número oficial del certificado o registro"
+                                   groups="account.group_account_user,base.group_system"/>
+                            <field name="ddts_tax_exemption_document"
+                                   filename="ddts_tax_exemption_document_name"
+                                   required="ddts_tax_exempt"
+                                   invisible="not ddts_tax_exempt"
+                                   groups="account.group_account_user,base.group_system"/>
+                            <field name="ddts_tax_exemption_document_name" invisible="1"/>
+                            <field name="ddts_tax_exempt" readonly="1"
+                                   groups="!account.group_account_user,!base.group_system"/>
+                            <field name="ddts_tax_exemption_number" readonly="1"
+                                   invisible="not ddts_tax_exempt"
+                                   groups="!account.group_account_user,!base.group_system"/>
+                            <field name="ddts_tax_exemption_document" readonly="1"
+                                   filename="ddts_tax_exemption_document_name"
+                                   invisible="not ddts_tax_exempt"
+                                   groups="!account.group_account_user,!base.group_system"/>
+                            <field name="ddts_tax_exemption_uploaded_at"
+                                   invisible="not ddts_tax_exemption_document"/>
+                            <field name="ddts_tax_exemption_uploaded_by"
+                                   invisible="not ddts_tax_exemption_document"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="not ddts_tax_exempt">
+                        Las ventas de este cliente se emitirán sin impuestos y el número
+                        de registro aparecerá en el PO y en la factura.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
     <record id="view_doorandoor_tax_state_rate_tree" model="ir.ui.view">
         <field name="name">doorandoor.tax.state.rate.tree</field>
         <field name="model">doorandoor.tax.state.rate</field>
@@ -197,8 +243,25 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='company_id']" position="after">
-                <field name="ddts_tax_state_id" readonly="1" optional="hide"/>
-                <field name="ddts_tax_rule_id" readonly="1" optional="hide"/>
+                <field name="ddts_tax_state_id" invisible="1"/>
+                <field name="ddts_tax_rule_id" invisible="1"/>
+                <field name="ddts_tax_city_rule_id" string="Ciudad de venta" groups="base.group_system" readonly="state not in ('draft', 'sent')" context="{'ddts_short_city_label': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sale_order_form_tax_city_totals" model="ir.ui.view">
+        <field name="name">sale.order.form.doorandoor.tax.city.totals</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="doorandoor_sales_new.view_order_form_inherit_ddsn_stock_visibility"/>
+        <field name="arch" type="xml">
+            <xpath expr="//table[hasclass('oe_subtotal_footer_table')]/tr[2]/td[1]" position="replace">
+                <td class="text-end">
+                    <span>Impuestos</span>
+                    <span invisible="not ddts_tax_city_rate">
+                        (<field name="ddts_tax_city_rate_display" class="oe_inline" readonly="1"/>%)
+                    </span>
+                </td>
             </xpath>
         </field>
     </record>
@@ -209,15 +272,39 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='company_id']" position="after">
-                <field name="ddts_tax_state_id" readonly="1" optional="hide"/>
-                <field name="ddts_tax_rule_id" readonly="1" optional="hide"/>
+                <field name="ddts_tax_state_id" invisible="1"/>
+                <field name="ddts_tax_rule_id" invisible="1"/>
+                <field name="ddts_tax_city_rule_id" string="Ciudad de venta" groups="base.group_system" readonly="state != 'draft'" context="{'ddts_short_city_label': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_form_tax_city_totals" model="ir.ui.view">
+        <field name="name">account.move.form.doorandoor.tax.city.totals</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="doorandoor_sales_new.view_move_form_inherit_doorandoor_sales_new"/>
+        <field name="arch" type="xml">
+            <xpath expr="//table[hasclass('oe_subtotal_footer_table')]/tr[2]/td[1]" position="replace">
+                <td class="text-end">
+                    <span>Impuestos</span>
+                    <span invisible="not ddts_tax_city_rate">
+                        (<field name="ddts_tax_city_rate_display" class="oe_inline" readonly="1"/>%)
+                    </span>
+                </td>
             </xpath>
         </field>
     </record>
 
     <template id="report_invoice_document_total_tax_label" inherit_id="doorandoor_sales_new.document_tax_totals_invoice_only">
         <xpath expr="//tr[hasclass('o_taxes')]/td[1]" position="replace">
-            <td>Total de impuestos</td>
+            <t t-set="ddts_report_rule" t-value="o.ddts_tax_city_rule_id or o.ddts_tax_rule_id"/>
+            <t t-set="ddts_report_tax" t-value="ddts_report_rule.sale_tax_id or o.invoice_line_ids.filtered(lambda line: not line.display_type).tax_ids[:1]"/>
+            <td>
+                <t t-if="ddts_report_tax">
+                    Impuestos (<t t-esc="o._ddts_format_percent(ddts_report_tax.amount)"/>%)
+                </t>
+                <t t-else="">Total de impuestos</t>
+            </td>
         </xpath>
         <xpath expr="//tr[hasclass('o_taxes')]/td[2]" position="replace">
             <td class="text-end o_price_total">
@@ -226,6 +313,34 @@
                       t-options='{"widget": "monetary", "display_currency": currency}'
                 >0.00</span>
             </td>
+        </xpath>
+        <xpath expr="//tr[hasclass('o_total')]" position="after">
+            <tr t-if="o.ddts_partner_tax_exempt" class="ddts_tax_exemption_reference">
+                <td colspan="2" class="pt-1">
+                    <span style="font-size: 9px;">Cliente exento de impuestos. Registro fiscal de exención:</span>
+                    <span style="font-size: 10px;" t-field="o.ddts_tax_exemption_number"/>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+
+    <template id="report_sale_document_total_tax_label" inherit_id="sale.document_tax_totals">
+        <xpath expr="//span[@t-out=&quot;tax_group['group_name']&quot;]" position="replace">
+            <span t-if="doc.ddts_tax_city_rate">
+                Impuestos (<t t-esc="doc._ddts_format_percent(doc.ddts_tax_city_rate)"/>%)
+            </span>
+            <span t-else="" t-out="tax_group['group_name']">Impuestos</span>
+        </xpath>
+    </template>
+
+    <template id="report_po_document_tax_exemption" inherit_id="doorandoor_sales_new.report_ddsn_po_document">
+        <xpath expr="//tr[hasclass('fw-bold')]" position="after">
+            <tr t-if="doc.ddts_partner_tax_exempt" class="ddts_tax_exemption_reference">
+                <td colspan="2" class="pt-1">
+                    <span style="font-size: 9px;">Cliente exento de impuestos. Registro fiscal de exención:</span>
+                    <span style="font-size: 10px;" t-field="doc.ddts_tax_exemption_number"/>
+                </td>
+            </tr>
         </xpath>
     </template>
 </odoo>

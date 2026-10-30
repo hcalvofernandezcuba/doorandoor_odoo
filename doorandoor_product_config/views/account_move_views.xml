@@ -15,6 +15,7 @@
                         invisible="display_type not in (False, 'product')"/>
                     <field name="ddpc_configurator_token" column_invisible="1" force_save="1"/>
                     <field name="ddpc_selected_option_value_ids" column_invisible="1" force_save="1"/>
+                    <field name="ddpc_configuration_summary" string="Configuración" readonly="1" optional="show"/>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_id']" position="attributes">
                     <attribute name="column_invisible">1</attribute>
@@ -33,6 +34,7 @@
                         options="{'no_open': True}"/>
                     <field name="ddpc_configurator_token" invisible="1" force_save="1"/>
                     <field name="ddpc_selected_option_value_ids" invisible="1" force_save="1"/>
+                    <field name="ddpc_configuration_summary" string="Configuración" readonly="1"/>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='product_id']" position="attributes">
                     <attribute name="invisible">1</attribute>

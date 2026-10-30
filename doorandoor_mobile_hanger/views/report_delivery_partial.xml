@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_delivery_document_hanger_partial"
+              inherit_id="stock.report_delivery_document">
+        <xpath expr="//table[@name='stock_move_line_table']" position="before">
+            <table class="table table-borderless mt48"
+                   t-if="o._ddmh_use_physical_partial_delivery_report()"
+                   name="ddmh_physical_partial_delivery_table">
+                <thead>
+                    <tr>
+                        <th><strong>Producto enviado</strong></th>
+                        <th><strong>Labels controlados</strong></th>
+                        <th class="text-center"><strong>Entregado</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="o._ddmh_physical_delivery_report_rows()" t-as="row">
+                        <td><span t-esc="row['product'].display_name"/></td>
+                        <td><span t-esc="', '.join(row['labels'])"/></td>
+                        <td class="text-center">
+                            <span t-esc="row['quantity']"
+                                  t-options="{'widget': 'float', 'decimal_precision': 'Product Unit of Measure'}"/>
+                            <span t-esc="row['uom'].name" groups="uom.group_uom"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </xpath>
+        <xpath expr="//table[@name='stock_move_line_table']" position="attributes">
+            <attribute name="t-elif">o.move_line_ids and o.state == 'done' and not o._ddmh_use_physical_partial_delivery_report()</attribute>
+        </xpath>
+    </template>
+</odoo>

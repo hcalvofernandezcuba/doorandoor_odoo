@@ -1,0 +1,146 @@
+:root {
+    --ddwb-navy: #0b1f33;
+    --ddwb-gold: #c9a96b;
+    --ddwb-light-gray: #d9d9d9;
+    --ddwb-white: #ffffff;
+}
+
+/*
+ * Portada provisional
+ *
+ * La imagen disponible no tiene todavía la proporción panorámica del bloque
+ * inicial de Odoo. El comportamiento nativo `cover` llena el ancho, pero
+ * recorta el contenido. Mientras Diseño entrega el arte final, conservarla
+ * completa es preferible: se centra, no se repite y las bandas restantes
+ * adoptan el azul corporativo.
+ */
+.homepage #wrap > section.s_big_number:first-child {
+    background-color: var(--ddwb-navy) !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+}
+
+@media (max-width: 767.98px) {
+    .homepage #wrap > section.s_big_number:first-child {
+        /* No usar min() aquí: libsass de Odoo intenta evaluar vw contra px. */
+        min-height: 320px !important;
+    }
+}
+
+.ddwb_header_logo {
+    display: block;
+    width: 230px;
+    max-width: 100%;
+    height: auto;
+    max-height: 68px;
+    object-fit: contain;
+}
+
+.ddwb_wordmark {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    color: var(--ddwb-navy);
+    font-family: "Montserrat", "Arial Narrow", Arial, sans-serif;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.ddwb_wordmark_main {
+    display: flex;
+    align-items: center;
+    gap: 0.16em;
+    font-size: 1.62rem;
+    font-weight: 800;
+    letter-spacing: -0.055em;
+}
+
+.ddwb_wordmark_amp,
+.ddwb_brand_promotion span {
+    color: var(--ddwb-gold);
+}
+
+.ddwb_wordmark_tagline {
+    margin-top: 0.34rem;
+    font-size: 0.49rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+}
+
+#top .navbar {
+    border-bottom: 2px solid rgba(201, 169, 107, 0.65);
+}
+
+#top .nav-link {
+    color: var(--ddwb-navy);
+    font-weight: 600;
+}
+
+#top .nav-link:hover,
+#top .nav-link:focus,
+#top .nav-link.active,
+a:not(.btn):hover {
+    color: var(--ddwb-gold);
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--ddwb-navy);
+    --bs-btn-border-color: var(--ddwb-navy);
+    --bs-btn-hover-bg: #132f4b;
+    --bs-btn-hover-border-color: #132f4b;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--ddwb-navy);
+    --bs-btn-border-color: var(--ddwb-navy);
+    --bs-btn-hover-bg: var(--ddwb-navy);
+    --bs-btn-hover-border-color: var(--ddwb-navy);
+}
+
+#wrap h1,
+#wrap h2,
+#wrap h3 {
+    color: var(--ddwb-navy);
+}
+
+#wrap h1::after,
+#wrap h2::after {
+    display: block;
+    width: 3.2rem;
+    height: 3px;
+    margin-top: 0.55rem;
+    background: var(--ddwb-gold);
+    content: "";
+}
+
+.card {
+    border-color: var(--ddwb-light-gray);
+}
+
+footer#bottom {
+    border-top: 3px solid var(--ddwb-gold);
+    background-color: var(--ddwb-navy);
+    color: var(--ddwb-white);
+}
+
+.ddwb_brand_promotion a,
+.ddwb_portal_brand {
+    color: inherit;
+    text-decoration: none;
+}
+
+@media (max-width: 767.98px) {
+    .ddwb_header_logo {
+        width: 170px;
+        max-height: 52px;
+    }
+
+    .ddwb_wordmark_main {
+        font-size: 1.2rem;
+    }
+
+    .ddwb_wordmark_tagline {
+        font-size: 0.38rem;
+    }
+}

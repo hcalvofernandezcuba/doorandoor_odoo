@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { useEffect } from "@odoo/owl";
 import { x2ManyCommands } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -22,9 +21,7 @@ async function applyInvoiceProduct(record, product) {
         product_id: [product.id, product.display_name],
         quantity: product.quantity,
         price_unit: parseFloat(product.price),
-        ddpc_selected_option_value_ids: [
-            x2ManyCommands.set(noVariantValueIds(product)),
-        ],
+        ddpc_selected_option_value_ids: [x2ManyCommands.set(noVariantValueIds(product))],
     });
 }
 
@@ -33,23 +30,19 @@ export class DdpcProductTemplateAutosaveField extends Many2OneField {
         super.setup();
         this.ddpcDialog = useService("dialog");
         this.ddpcOpeningConfigurator = false;
-        let mounted = false;
-        useEffect(
-            (productTemplateId) => {
-                if (!mounted) {
-                    mounted = true;
-                    return;
-                }
-                if (productTemplateId && !this.ddpcOpeningConfigurator) {
-                    this._ddpcOpenConfigurator(productTemplateId);
-                }
-            },
-            () => [this.props.record.data.ddpc_product_template_id?.[0]]
-        );
     }
 
     async updateRecord(value) {
-        return super.updateRecord(value);
+        // Preserve the selected template before Odoo runs the invoice-line
+        // onchange.  The line has no variant yet, so the computed/inverse
+        // field can be cleared during that onchange.
+        const productTemplateId = Array.isArray(value)
+            ? value[0]
+            : (value?.resId || value?.id || value);
+        await super.updateRecord(value);
+        if (productTemplateId && !this.ddpcOpeningConfigurator) {
+            this._ddpcOpenConfigurator(productTemplateId);
+        }
     }
 
     _ddpcOpenConfigurator(productTemplateId) {
@@ -59,7 +52,7 @@ export class DdpcProductTemplateAutosaveField extends Many2OneField {
         const line = lineRecord.data;
         const root = rootRecord.data;
         this.ddpcDialog.add(ProductConfiguratorDialog, {
-            productTemplateId: productTemplateId,
+            productTemplateId,
             ptavIds: [],
             customPtavs: [],
             quantity: line.quantity || 1,

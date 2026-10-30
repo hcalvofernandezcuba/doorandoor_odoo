@@ -1,0 +1,72 @@
+.oe_website_login_container:has(.ddwr_signup_form),
+.o_database_list:has(.ddwr_signup_form) {
+    width: calc(100vw - 3rem) !important;
+    max-width: 1100px !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+    border-top: 4px solid #c9a96b !important;
+    box-shadow: 0 24px 65px rgba(11, 31, 51, 0.14);
+}
+
+.oe_website_login_container .ddwr_signup_form {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.ddwr_signup_heading {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.ddwr_signup_heading img {
+    width: 360px;
+    max-width: 90%;
+    margin-bottom: 1rem;
+}
+
+.ddwr_signup_heading h1 {
+    color: #0b1f33;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.ddwr_signup_heading p {
+    color: #617080;
+}
+
+.ddwr_extended_fields {
+    margin-top: 1.25rem;
+}
+
+.ddwr_section_title,
+.ddwr_portal_section h3 {
+    margin: 1.5rem 0 0.9rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 2px solid #c9a96b;
+    color: #0b1f33;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.ddwr_signup_form label,
+.o_portal_details label {
+    margin-bottom: 0.35rem;
+    color: #0b1f33;
+    font-weight: 700;
+}
+
+.ddwr_login_footer {
+    color: #0b1f33;
+    font-weight: 700;
+}
+
+@media (max-width: 767.98px) {
+    .oe_website_login_container:has(.ddwr_signup_form),
+    .o_database_list:has(.ddwr_signup_form) {
+        width: calc(100vw - 1.5rem) !important;
+        margin-right: 0.75rem !important;
+        margin-left: 0.75rem !important;
+    }
+}
